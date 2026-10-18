@@ -42,3 +42,8 @@ UI confidence limit: this is a source and responsive-rule review, not an iPhone 
 - API checks cover owner/editor roster creation and entry updates, viewer denial, referential integrity and the original app owner's inability to access a friend's calendar.
 - Shift definitions are calendar-wide; invitations grant access to all shared entries across that calendar's rosters. Private event/note rules remain per author.
 - Physical-device and browser visual verification remain pending; this release was verified through type checking, production build and logic/API integration tests.
+
+
+## 18 October 2026 reliability release
+
+See [release fixes and acceptance limits](docs/RELEASE_76.md) for the Calendar interoperability, connection retry, import identity and iPhone viewport corrections prepared after the GitHub migration.

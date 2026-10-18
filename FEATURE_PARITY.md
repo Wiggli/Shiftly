@@ -1,6 +1,6 @@
 # Shiftly feature parity and acceptance audit
 
-Audit date: 8 October 2026. Source code implements capabilities listed below; integration and device verification are recorded separately. This is an initial working release, not yet a feature-complete replacement for the two competitor applications.
+Historical audit date: 8 October 2026. See docs/RELEASE_76.md and docs/SIMPLIFICATION.md for subsequent implementation and acceptance updates; rows below describe the initial release, not current capability. Source code implements capabilities listed below; integration and device verification are recorded separately. This is an initial working release, not yet a feature-complete replacement for the two competitor applications.
 
 Sources: https://support.ebisu-soft.com/hc/en-us/categories/360000909792-Shift-Work-Calendar-for-iPhone and https://apps.apple.com/ie/app/work-shift-calendar-shifter/id1523513035 . These describe capabilities, not proprietary code or UI assets. No competitor assets were used.
 

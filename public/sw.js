@@ -1,4 +1,4 @@
-const CACHE='shiftly-shell-ffa14b66b63c';
+const CACHE='shiftly-shell-7f4480f61018';
 const CORE=['/favicon.svg','/icons/icon-192.png','/icons/icon-512.png','/icons/maskable-512.png','/icons/apple-touch-icon.png','/icons/badge-96.png','/manifest.json','/share/install-qr.svg','/share/install-guide.html','/offline.html','/offline-assets/app.js','/offline-assets/app.css'];
 const privatePath=path=>path.startsWith('/api/')||path==='/api'||path.startsWith('/auth/')||path==='/auth'||/signin|callback/.test(path);
 function localURL(value){try{const url=new URL(typeof value==='string'?value:'/',self.location.origin);return url.origin===self.location.origin&&!privatePath(url.pathname)?url.href:self.location.origin+'/';}catch{return self.location.origin+'/';}}

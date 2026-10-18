@@ -1,7 +1,7 @@
 export type Shift={rosterId?:string;id:string;name:string;short:string;emoji:string;color:string;textColor:string;start:string;end:string;category:string;breakMinutes:number;paidBreak:boolean;rate:number;location:string;fontSize?:number;durationDays?:number;borderColor?:string;opacity?:number;style?:string;reminder?:number;archived?:boolean};
 export type Pattern={rosterId?:string;id:string;name:string;items:string[];start:string;repeat:number;until?:string;favorite?:boolean};
 export type Occurrence={rosterId?:string;id:string;date:string;shiftId:string;deleted?:boolean;overtime?:number;color?:string};
-export type Event={cellLabel?:string;rosterId?:string;id:string;date:string;title:string;emoji:string;time:string;endTime?:string;notes:string;private:boolean;notesPrivate?:boolean;author?:string;entryType?:'overtime'|'leave'|'appointment'|'custom';recurrence?:string;until?:string;location?:string;url?:string;reminders:number[]};
+export type Event={sourceUID?:string;cellLabel?:string;rosterId?:string;id:string;date:string;title:string;emoji:string;time:string;endTime?:string;notes:string;private:boolean;notesPrivate?:boolean;author?:string;entryType?:'overtime'|'leave'|'appointment'|'custom';recurrence?:string;until?:string;location?:string;url?:string;reminders:number[]};
 export type Snapshot={rosters?:{id:string;name:string;color:string;archived?:boolean}[];activeRosterId?:string;calendar:any;role:string;shifts:Shift[];patterns:Pattern[];occurrences:Occurrence[];events:Event[];members:any[];invites:any[];audit:any[]};
 export const defaults:Shift[]=[
 {id:'day',name:'Day',short:'D',emoji:'☀️',color:'#e66a5e',textColor:'#ffffff',start:'07:00',end:'19:00',category:'Work',breakMinutes:0,paidBreak:true,rate:0,location:''},

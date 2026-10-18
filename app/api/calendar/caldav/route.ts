@@ -19,7 +19,7 @@ export async function POST(request:Request){try{
  const rows=(await db.prepare("SELECT id,data FROM calendar_records WHERE calendar_id=? AND kind='calendar_caldav'").bind(calendar.id).all()).results as any[],existing=rows.find((row:any)=>JSON.parse(String(row.data)).rosterId===body.rosterId);
  const options=calendarDisplayOptions;
  const details=(username:string)=>({username,url:new URL(`/api/caldav/${username}/`,request.url).toString()});
- if(body.action==='status')return json(existing?{connected:true,...details(JSON.parse(String(existing.data)).username),...options(JSON.parse(String(existing.data)))}:{connected:false,...options(null)});
+ if(body.action==='status'||body.action==='create'&&existing)return json(existing?{connected:true,...details(JSON.parse(String(existing.data)).username),...options(JSON.parse(String(existing.data)))}:{connected:false,...options(null)});
  if(body.action==='configure'){
   if(!existing)throw new Error('Create an Apple Calendar account first');
   if(typeof body.includeOff!=='boolean'||typeof body.compactTitles!=='boolean'||body.groupByType!==undefined&&typeof body.groupByType!=='boolean'||body.includeNotes!==undefined&&typeof body.includeNotes!=='boolean')throw new Error('Choose valid display options');
@@ -35,8 +35,11 @@ export async function POST(request:Request){try{
   return json({connected:true,...details(previous.username),...options(previous),password:secret});
  }
  const username='s'+crypto.randomUUID().replaceAll('-','').slice(0,24),secret=password(),recordId='caldav_'+username;
- const batch:any[]=[];if(existing)batch.push(db.prepare("DELETE FROM calendar_records WHERE calendar_id=? AND id=? AND kind='calendar_caldav'").bind(calendar.id,existing.id));
- batch.push(db.prepare('INSERT INTO calendar_records(id,calendar_id,kind,date,author,private,data) VALUES(?,?,?,NULL,?,1,?)').bind(recordId,calendar.id,'calendar_caldav',user.userId,JSON.stringify({username,passwordHash:await digest(secret),rosterId:body.rosterId})));
- await db.batch(batch);
+ const result=await db.prepare("INSERT INTO calendar_records(id,calendar_id,kind,date,author,private,data) SELECT ?,?,?,NULL,?,1,? WHERE NOT EXISTS (SELECT 1 FROM calendar_records WHERE calendar_id=? AND kind='calendar_caldav' AND json_extract(data,'$.rosterId')=?)").bind(recordId,calendar.id,'calendar_caldav',user.userId,JSON.stringify({username,passwordHash:await digest(secret),rosterId:body.rosterId}),calendar.id,body.rosterId).run();
+ if(!result.meta.changes){
+  const concurrent:any=await db.prepare("SELECT data FROM calendar_records WHERE calendar_id=? AND kind='calendar_caldav' AND json_extract(data,'$.rosterId')=? ORDER BY rowid LIMIT 1").bind(calendar.id,body.rosterId).first();
+  if(!concurrent)throw new Error('Could not create the calendar connection; try again');
+  const saved=JSON.parse(String(concurrent.data));return json({connected:true,...details(saved.username),...options(saved)});
+ }
  return json({connected:true,username,password:secret,...options(null),url:new URL(`/api/caldav/${username}/`,request.url).toString()});
 }catch(error){return failure(error);}}

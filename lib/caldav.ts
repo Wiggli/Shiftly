@@ -1,6 +1,6 @@
 import {env} from 'cloudflare:workers';
 import {addDays,dayNumber,calendarDate,resolveShift,Snapshot,zonedInstant} from './engine';
-import {calendarICS,foldCalendarLine} from './ics';
+import {calendarICS,foldCalendarLine,parseCalendarDate} from './ics';
 import {calendarRosters,rosterSnapshot} from './rosters';
 import {validateRecord} from './validation';
 import {calendarGroups,calendarDisplayOptions} from './calendar-appearance';
@@ -48,10 +48,8 @@ function selectedPropstat(properties:string,requested:XMLElement[]|null){
 function unfold(s:string){return s.replace(/\r?\n[ \t]/g,'').split(/\r?\n/);}
 function splitEvents(ics:string){const result:{uid:string;ics:string}[]=[];for(const part of ics.split('BEGIN:VEVENT').slice(1)){const body='BEGIN:VEVENT'+part.split('END:VEVENT')[0]+'END:VEVENT',uid=unfold(body).find(line=>line.startsWith('UID:'))?.slice(4);if(uid)result.push({uid,ics:`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Shiftly//CalDAV//EN\r\n${body.replace(/\r?\n/g,'\r\n')}\r\nEND:VCALENDAR\r\n`});}return result;}
 function getFields(ics:string){const out:Record<string,{value:string;params:string}>={};for(const line of unfold(ics)){const at=line.indexOf(':');if(at<0)continue;const key=line.slice(0,at);out[key.split(';')[0].toUpperCase()]={value:line.slice(at+1),params:key};}return out;}
-function unescapeText(s:string){return s.replace(/\\n/gi,'\n').replace(/\\([,;\\])/g,'$1');}
-const calendarFormatters=new Map<string,Intl.DateTimeFormat>();
-function calendarParts(instant:Date,timezone:string){if(!calendarFormatters.has(timezone))calendarFormatters.set(timezone,new Intl.DateTimeFormat('en-GB',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}));return Object.fromEntries(calendarFormatters.get(timezone)!.formatToParts(instant).map(x=>[x.type,x.value]));}
-function parseDate(f:{value:string;params:string},calendarTZ:string){const value=f.value;if(!/^\d{8}(T\d{6}Z?)?$/.test(value))throw new Error('Unsupported calendar date');let date=`${value.slice(0,4)}-${value.slice(4,6)}-${value.slice(6,8)}`,time=value.includes('T')?`${value.slice(9,11)}:${value.slice(11,13)}`:'';if(value.endsWith('Z')){const instant=new Date(`${date}T${time}:${value.slice(13,15)}Z`),p=calendarParts(instant,calendarTZ);date=`${p.year}-${p.month}-${p.day}`;time=time?`${p.hour}:${p.minute}`:'';}else{const zone=/TZID=([^;:]+)/.exec(f.params)?.[1];if(zone&&zone!==calendarTZ&&time){const instant=zonedInstant(date,time,zone),p=calendarParts(new Date(instant),calendarTZ);date=`${p.year}-${p.month}-${p.day}`;time=`${p.hour}:${p.minute}`;}}return {date,time};}
+function unescapeText(s:string){return s.replace(/\\([nN,;\\])/g,(_,char)=>char.toLowerCase()==='n'?'\n':char);}
+const parseDate=parseCalendarDate;
 function validBody(s:string){if(s.length>128000||!s.includes('BEGIN:VCALENDAR')||!s.includes('END:VCALENDAR')||(s.match(/BEGIN:VEVENT/g)||[]).length!==1||(s.match(/END:VEVENT/g)||[]).length!==1)throw new Error('Invalid or oversized calendar event');if(/BEGIN:VALARM|ATTACH;|ATTACH:|BEGIN:VTODO|BEGIN:VJOURNAL|^(?:RRULE|RDATE|EXDATE|RECURRENCE-ID|DURATION)[;:]/im.test(s))throw new Error('Unsupported calendar event data');}
 
 async function getAccount(request:Request){

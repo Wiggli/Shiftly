@@ -69,3 +69,25 @@ test('Full-cell duty colours preserve the background and choose readable ink wit
 
 test('Copied cycles repeat the captured duties including blanks, and sparse selections remain paste-only',()=>{const {copiedPattern}=require('../lib/roster-edit.ts');const s=base(),block=Edit.copyBlock(s,Edit.dateRange('2026-11-01','2026-11-08'));const expected=[...s.patterns[0].items];s.patterns[0].items=['night'];assert.deepEqual(copiedPattern(block),expected);assert.throws(()=>copiedPattern(Edit.copyBlock(base(),['2026-11-01','2026-11-03'])),/continuous range/);const blanks=base();blanks.patterns=[];blanks.occurrences=[{id:'2026-11-01',date:'2026-11-01',shiftId:'night'}];assert.deepEqual(copiedPattern(Edit.copyBlock(blanks,['2026-11-01','2026-11-02'])),['night','']);});
 test('Placing a saved pattern creates an independent sequence with its own date range and preserves source history',()=>{const {copyPatternAt}=require('../lib/roster-edit.ts');const original={id:'p',name:'Nurse cycle',items:['day','night','off','off'],start:'2026-01-01',repeat:100,until:'2026-03-01'},before=structuredClone(original),copy=copyPatternAt(original,'2026-11-01','new-p');assert.deepEqual(original,before);assert.equal(copy.start,'2026-11-01');assert.equal(copy.until,undefined);assert.equal(copy.repeat,100);copy.items[0]='night';assert.equal(original.items[0],'day');const s=base();s.patterns=[original,copy];assert.equal(E.resolveShift(s,'2026-11-01').id,'night');assert.equal(E.resolveShift(s,'2026-01-01').id,'day');assert.throws(()=>copyPatternAt(original,'2026-11-01','p'));});
+
+test('ICS import preserves overnight end times and type across Malta DST',()=>{
+ const text='BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:overnight-import\r\nDTSTART:20261024T170000Z\r\nDTEND:20261025T060000Z\r\nSUMMARY:Overtime\r\nCATEGORIES:OVERTIME\r\nEND:VEVENT\r\nEND:VCALENDAR';
+ const [event]=ICS.importICS(text,'Europe/Malta');assert.equal(event.date,'2026-10-24');assert.equal(event.time,'19:00');assert.equal(event.endTime,'07:00');assert.equal(event.entryType,'overtime');assert.equal(event.notesPrivate,true);assert.ok(V.validateRecord('event',event));
+ const s=base();s.patterns=[];s.events=[event];const exported=ICS.calendarICS(s,event.date,event.date);assert.match(exported,/DTSTART:20261024T170000Z/);assert.match(exported,/DTEND:20261025T060000Z/);
+});
+test('ICS reimports update the original UID after dates or times change and deduplicate repeated entries',()=>{
+ const wrap=body=>'BEGIN:VCALENDAR\n'+body+'\nEND:VCALENDAR',body='BEGIN:VEVENT\nUID:appointment-uid\nDTSTART:20261117T090000Z\nSUMMARY:Car service\nEND:VEVENT';
+ const [first]=ICS.importICS(wrap(body),'Europe/Malta');const [second]=ICS.importICS(wrap(body.replace('20261117T090000Z','20261118T100000Z')),'Europe/Malta',[first]);assert.equal(second.id,first.id);assert.equal(second.date,'2026-11-18');assert.equal(second.time,'11:00');assert.equal(ICS.importICS(wrap(body+'\n'+body),'Europe/Malta').length,1);
+ const scoped={...first,id:'partner:'+first.id,private:false,notesPrivate:false};const [updated]=ICS.importICS(wrap(body),'Europe/Malta',[scoped]);assert.equal(updated.id,scoped.id);assert.equal(updated.private,false);assert.equal(updated.notesPrivate,false);
+});
+test('ICS imports preserve legacy identifiers while recording their source UID',()=>{
+ const text='BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:car\nDTSTART:20261117T090000Z\nSUMMARY:Car service\nEND:VEVENT\nEND:VCALENDAR';let n=2166136261;for(const ch of 'car20261117T090000Z'){n^=ch.charCodeAt(0);n=Math.imul(n,16777619);}const old={id:'ics-'+(n>>>0).toString(16),date:'2026-11-17',time:'10:00',title:'Car service',emoji:'🚗',notes:'',private:true,reminders:[]};const [event]=ICS.importICS(text,'Europe/Malta',[old]);assert.equal(event.id,old.id);assert.equal(event.sourceUID,'car');
+});
+test('Invalid dates and unsupported calendar spans fail without rolling or truncating events',()=>{
+ const wrap=lines=>'BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:invalid\n'+lines+'\nSUMMARY:Test\nEND:VEVENT\nEND:VCALENDAR';
+ for(const fields of ['DTSTART:20260230T090000Z','DTSTART:20261117T250000Z','DTSTART:20261117T096100Z','DTSTART:20261117T090061Z','DTSTART:20261117\nDTEND:20261120','DTSTART:20261117T090000Z\nDTEND:20261119T100000Z','DTSTART:20261117\nEXDATE:20261118','DTSTART:20261117\nRRULE:FREQ=DAILY;COUNT=5','DTSTART:20261117\nDURATION:PT2H'])assert.throws(()=>ICS.importICS(wrap(fields),'Europe/Malta'),fields);
+ assert.throws(()=>ICS.importICS('BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART:20261117\nEND:VCALENDAR','Europe/Malta'),/Incomplete/);
+});
+test('Quoted TZID and literal escaped backslashes survive calendar import',()=>{
+ const text='BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:quoted-zone\nDTSTART;TZID="Europe/London":20261117T090000\nDTEND;TZID="Europe/London":20261117T100000\nSUMMARY:Notes\nDESCRIPTION:literal \\\\n and real\\nnewline\\,comma\\;semi\\\\slash\nEND:VEVENT\nEND:VCALENDAR';const [event]=ICS.importICS(text,'Europe/Malta');assert.equal(event.time,'10:00');assert.equal(event.endTime,'11:00');assert.equal(event.notes,'literal \\n and real\nnewline,comma;semi\\slash');
+});

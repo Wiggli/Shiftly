@@ -1,4 +1,14 @@
-# vinext-starter
+# Shiftly
+
+Shiftly is a PWA for rotating nurse rosters, quick overtime/leave/notes, private sharing, offline editing and Apple Calendar sync.
+
+Production: https://shiftly-calendar.bartoloandre.chatgpt.site/
+
+This repository contains the full source recovered from the existing Sites project. GitHub stores source; the existing Sites deployment continues to host the app and its D1 database. Keep `.openai/hosting.json` and its project identity unchanged, and never commit credentials or runtime dotenv values.
+
+See [migration and validation](docs/GITHUB_MIGRATION.md), [release fixes](docs/RELEASE_76.md) and the framework setup below. `npm run build` regenerates the ignored offline JS/CSS bundles and fingerprints the service worker. Original image assets, migrations, dependency lockfile, and framework patches are included.
+
+# Framework setup
 
 A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
 
