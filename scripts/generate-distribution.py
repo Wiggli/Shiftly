@@ -1,7 +1,7 @@
 """Generate the original install QR without depending on a third-party image endpoint."""
 from pathlib import Path
 from reportlab.graphics.barcode.qrencoder import QRCode, QRErrorCorrectLevel
-url='https://shiftly-calendar.bartoloandre.chatgpt.site/?install=1'
+url='https://wiggli.github.io/Shiftly/?install=1'
 qr=QRCode(None,QRErrorCorrectLevel.M);qr.addData(url);qr.make()
 size=qr.getModuleCount();border=4
 path=' '.join(f'M{x+border} {y+border}h1v1h-1z' for y in range(size) for x in range(size) if qr.isDark(y,x))

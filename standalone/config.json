@@ -1,0 +1,6 @@
+{
+  "base": "/Shiftly/",
+  "supabaseUrl": "https://mauptvodrrdmnzjcfwgq.supabase.co",
+  "apiUrl": "https://mauptvodrrdmnzjcfwgq.supabase.co/functions/v1/shiftly-api",
+  "publishableKey": "sb_publishable_71jAJUJKnffotpopFMZ0Qw_lRh4EgMK"
+}

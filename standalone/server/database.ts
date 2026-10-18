@@ -1,0 +1,20 @@
+// The database bridge is server-only. The RPC is executable only by service_role.
+function argumentsOf(source:string){const out:string[]=[];let start=0,depth=0,quote=false;for(let i=0;i<source.length;i++){const c=source[i];if(c==="'"){if(quote&&source[i+1]==="'"){i++;continue;}quote=!quote;}if(quote)continue;if(c==='(')depth++;if(c===')')depth--;if(c===','&&depth===0){out.push(source.slice(start,i).trim());start=i+1;}}out.push(source.slice(start).trim());return out;}
+function functions(sql:string,name:string,convert:(args:string[])=>string):string{let out='',last=0;const pattern=new RegExp('\\b'+name+'\\(', 'g');let match:RegExpExecArray|null;while((match=pattern.exec(sql))){let end=pattern.lastIndex,depth=1,quote=false;for(;end<sql.length;end++){const c=sql[end];if(c==="'"){if(quote&&sql[end+1]==="'"){end++;continue;}quote=!quote;}if(quote)continue;if(c==='(')depth++;if(c===')'&&!--depth)break;}if(depth!==0)throw Error('Invalid SQL function');out+=sql.slice(last,match.index)+convert(argumentsOf(sql.slice(pattern.lastIndex,end)));last=end+1;pattern.lastIndex=last;}return out+sql.slice(last);}
+function literal(value:any):string{if(value===null)return 'NULL';if(typeof value==='number'&&Number.isFinite(value))return String(value);if(typeof value==='string'&&!value.includes('\0'))return "'"+value.replaceAll("'","''")+"'";throw Error('Unsupported database parameter');}
+export function postgresSQL(input:string,values:any[]=[]){
+ let sql=functions(input,'json_set',args=>{let result=args[0];for(let i=1;i<args.length;i+=2){const json=/^json\(([\s\S]*)\)$/.exec(args[i+1]);const value=json?`(${json[1]})::jsonb`:/^-?\d+(?:\.\d+)?$/.test(args[i+1])?`to_jsonb(${args[i+1]})`:`to_jsonb((${args[i+1]})::text)`;result=`shiftly_private.json_set_json(${result},${args[i]},${value})`;}return result;});
+ sql=functions(sql,'json_extract',args=>`shiftly_private.json_extract(${args.join(',')})`);
+ const ignore=/^INSERT OR IGNORE /i.test(sql),replace=/^INSERT OR REPLACE /i.test(sql);sql=sql.replace(/^INSERT OR (?:IGNORE|REPLACE) /i,'INSERT ');
+ if(ignore)sql+=' ON CONFLICT DO NOTHING';
+ if(replace){const columns=/^INSERT INTO \w+\(([^)]+)\)/i.exec(sql)?.[1].split(',').map(x=>x.trim());if(!columns)throw Error('Unsupported replacement');sql+=' ON CONFLICT(id) DO UPDATE SET '+columns.filter(x=>x!=='id').map(x=>`${x}=excluded.${x}`).join(',');}
+ // Quote the legacy column named user, without modifying string literals.
+ let index=0,out='',quoted=false;for(let i=0;i<sql.length;i++){const c=sql[i];if(c==="'"){out+=c;if(quoted&&sql[i+1]==="'"){out+="'";i++;continue;}quoted=!quoted;continue;}if(!quoted&&c==='?'){if(index>=values.length)throw Error('Missing parameter');out+=literal(values[index++]);continue;}if(!quoted&&sql.slice(i,i+4).toLowerCase()==='user'&&!/[\w]/.test(sql[i-1]||'')&&!/[\w]/.test(sql[i+4]||'')){out+='"user"';i+=3;continue;}out+=c;}
+ if(index!==values.length)throw Error('Extra database parameter');return out;
+}
+export class Database {
+ constructor(private url:string,private key:string){}
+ prepare(sql:string){return new Statement(this,sql);}
+ async batch(statements:Statement[]):Promise<any[]>{const response=await fetch(this.url+'/rest/v1/rpc/shiftly_exec',{method:'POST',headers:{apikey:this.key,Authorization:'Bearer '+this.key,'Content-Type':'application/json'},body:JSON.stringify({statements:statements.map(statement=>({sql:postgresSQL(statement.sql,statement.values)}))})});if(!response.ok){const data:any=await response.json().catch(()=>null);console.error('Database request failed',{code:data?.code,status:response.status});throw Error('DATABASE_UNAVAILABLE');}return response.json() as Promise<any[]>;}
+}
+class Statement {values:any[]=[];constructor(private db:Database,public sql:string){}bind(...values:any[]){const statement=new Statement(this.db,this.sql);statement.values=values;return statement;}async all(){return (await this.db.batch([this]))[0];}async first<T=any>(column?:string):Promise<T|null>{const row=(await this.all()).results[0]||null;return column?row?.[column]??null:row;}async run(){return this.all();}}

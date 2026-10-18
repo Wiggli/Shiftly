@@ -1,0 +1,5 @@
+project_id = "shiftly"
+
+[functions.shiftly-api]
+verify_jwt = false
+entrypoint = "./functions/shiftly-api/index.js"

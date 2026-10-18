@@ -1,0 +1,10 @@
+import {readFile} from 'node:fs/promises';import assert from 'node:assert/strict';
+const {id,username,password}=JSON.parse(await readFile('/tmp/shiftly-qa-fixture.json','utf8')),config=JSON.parse(await readFile('standalone/config.json','utf8'));
+const headers={Authorization:'Basic '+Buffer.from(username+':'+password).toString('base64')},home=config.apiUrl+'/api/caldav/'+username+'/';
+const discovery=await fetch(home,{method:'PROPFIND',headers:{...headers,Depth:'1'}});assert.equal(discovery.status,207,await discovery.clone().text());const xml=await discovery.text();assert.ok(xml.includes('/functions/v1/shiftly-api/api/caldav/'));
+const collection=home+'calendar/',uid=id+'-2026-10-19-shift@shiftly',url=collection+encodeURIComponent(uid)+'.ics';const night=await fetch(url,{headers});assert.equal(night.status,200,await night.clone().text());const ics=await night.text();assert.match(ics,/SUMMARY:Night/);assert.match(ics,/DTEND:20261020T050000Z/);
+const put=await fetch(url,{method:'PUT',headers:{...headers,'If-Match':night.headers.get('etag')},body:ics.replace('SUMMARY:Night','SUMMARY:Night QA')});assert.equal(put.status,204,await put.text());assert.match(await (await fetch(url,{headers})).text(),/SUMMARY:Night QA/);
+const report=await fetch(collection,{method:'REPORT',headers,body:`<c:calendar-multiget xmlns:c="urn:ietf:params:xml:ns:caldav" xmlns:d="DAV:"><d:prop><d:getetag/><c:calendar-data/></d:prop><d:href>/functions/v1/shiftly-api/api/caldav/${username}/calendar/${encodeURIComponent(uid)}.ics</d:href></c:calendar-multiget>`});assert.equal(report.status,207);assert.match(await report.text(),/Night QA/);
+const wrong=await fetch(url,{headers:{Authorization:'Basic '+Buffer.from(username+':wrong').toString('base64')}});assert.equal(wrong.status,401);
+assert.equal((await fetch(config.apiUrl+'/api/calendar')).status,401);
+console.log('LIVE SUPABASE PASS: discovery, prefixed hrefs, overnight timezone, ETag update, atomic write, multiget and unauthorized denial.');

@@ -1,0 +1,21 @@
+import {build} from 'vite';
+import {readFile,writeFile,cp,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {resolve} from 'node:path';
+const root=process.cwd(),config=JSON.parse(await readFile('standalone/config.json','utf8')),base=config.base;
+if(!config.publishableKey.startsWith('sb_publishable_'))throw Error('Configure the public Supabase publishable key. Never use a service-role key.');
+await build({root:resolve('standalone'),base,configFile:false,publicDir:false,build:{outDir:resolve('standalone-dist'),emptyOutDir:true,target:'es2022',rollupOptions:{input:resolve('standalone/index.html')}}});
+await cp('public/icons','standalone-dist/icons',{recursive:true});await cp('public/share','standalone-dist/share',{recursive:true});await cp('public/favicon.svg','standalone-dist/favicon.svg');
+const manifest=JSON.parse(await readFile('public/manifest.json','utf8'));manifest.id=base;manifest.scope=base;manifest.start_url=base;manifest.icons=manifest.icons.map(icon=>({...icon,src:base+icon.src.replace(/^\//,'').split('?')[0]}));manifest.shortcuts=manifest.shortcuts.map(item=>({...item,url:base+item.url.replace(/^\//,''),icons:item.icons?.map(icon=>({...icon,src:base+icon.src.replace(/^\//,'').split('?')[0]}))}));await writeFile('standalone-dist/manifest.json',JSON.stringify(manifest,null,2));
+const html=await readFile('standalone-dist/index.html','utf8');await writeFile('standalone-dist/offline.html',html);await writeFile('standalone-dist/404.html',html);await writeFile('standalone-dist/.nojekyll','');
+// The install guide must send new users to GitHub Pages, not the retired host.
+const guide=(await readFile('public/share/install-guide.html','utf8')).replaceAll('https://shiftly-calendar.bartoloandre.chatgpt.site/','https://wiggli.github.io'+base);await writeFile('standalone-dist/share/install-guide.html',guide);
+const assets=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(match=>match[1]);const core=[base,base+'index.html',base+'offline.html',base+'manifest.json',base+'favicon.svg',base+'share/install-qr.svg',base+'share/install-guide.html',...manifest.icons.map(icon=>icon.src),base+'icons/apple-touch-icon.png',...assets];
+const hash=createHash('sha256');for(const path of core.filter(path=>path!==base))hash.update(await readFile('standalone-dist/'+path.slice(base.length)));const cache='shiftly-pages-'+hash.digest('hex').slice(0,12);
+await writeFile('standalone-dist/sw.js',`const CACHE=${JSON.stringify(cache)},CORE=${JSON.stringify([...new Set(core)])},BASE=${JSON.stringify(base)};
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE))));
+self.addEventListener('message',event=>{if(event.data?.type==='ACTIVATE_UPDATE')event.waitUntil(self.skipWaiting());if(event.data?.type==='GET_VERSION')event.ports?.[0]?.postMessage({version:CACHE});});
+self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.clients.claim();for(const key of await caches.keys())if(key.startsWith('shiftly-pages-')&&key!==CACHE)await caches.delete(key);})()));
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin||!url.pathname.startsWith(BASE))return;if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.open(CACHE).then(cache=>cache.match(BASE+'offline.html'))));return;}if(CORE.includes(url.pathname))event.respondWith(caches.open(CACHE).then(async cache=>(await cache.match(url.pathname))||fetch(event.request)));});
+`);
+console.log('Standalone PWA built with repository-scoped assets and offline cache:',cache);
