@@ -1,0 +1,124 @@
+/* A viewport-sized calendar with a quiet navigation hierarchy. */
+.phone-calendar-header,.phone-month-bar,.phone-day-peek,.phone-calendar-dock,.phone-edit-bar,.phone-calendar-toolbar{display:none}
+@media screen {
+ html[data-calendar-fit=true],html[data-calendar-fit=true] body{height:100%;min-height:0;overflow:hidden;overscroll-behavior:none;background:var(--bg)}
+ .calendar-screen{height:var(--visible-height,100dvh);min-height:0;width:100%;overflow:hidden;background:var(--bg)}
+ .calendar-screen .workspace{margin:0;display:flex;flex-direction:column;height:100%;min-height:0;min-width:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px);background:var(--bg)}
+ .calendar-screen .content{flex:1;min-height:0;overflow:hidden}
+ .calendar-screen .calendar-main{display:flex;flex-direction:column;min-height:0;width:100%;max-width:none;height:100%;margin:0;padding:0 12px;overflow:hidden}
+ .calendar-screen .sidebar,.calendar-screen .topbar,.calendar-screen .page-heading,.calendar-screen .account-notice,.calendar-screen .schedule-bar,.calendar-screen .calendar-toolbar,.calendar-screen .calendar-bottom,.calendar-screen .first-roster,.calendar-screen .month-insights,.calendar-screen .pwa-notices{display:none!important}
+ .calendar-screen .phone-calendar-header{display:flex;align-items:center;gap:8px;height:54px;min-height:54px;background:var(--bg);filter:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+ .phone-roster{display:flex;align-items:center;flex:1;min-width:0;min-height:48px;padding:0;text-align:left}
+ .phone-roster-copy{display:flex;flex-direction:column;min-width:0;gap:3px;line-height:1.2}
+ .phone-roster strong{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .phone-roster strong>svg{color:var(--muted);flex-shrink:0}
+ .phone-roster-copy small{color:var(--muted);font-size:11px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .phone-calendar-header .icon-button,.phone-profile-button{display:flex;align-items:center;justify-content:center;flex-shrink:0;min-width:44px;width:44px;min-height:44px;height:44px;padding:0;color:var(--accent);border-radius:50%}
+ .phone-profile-button .account-avatar{width:32px;height:32px;font-size:12px}
+ .calendar-screen .phone-month-bar{display:flex;align-items:center;gap:0;height:54px;min-height:54px;background:var(--bg)}
+ .phone-month-bar h1{flex:1;min-width:0;font-size:26px;font-weight:700;letter-spacing:-.035em;line-height:1.2;text-align:left}
+ .phone-month-picker{position:relative;display:flex;align-items:center;min-height:48px}
+ .phone-month-picker>span{display:flex;align-items:baseline;gap:7px;white-space:nowrap;min-width:0;max-width:100%}.phone-month-name{min-width:0;overflow:hidden;text-overflow:ellipsis}.phone-month-picker small,.phone-month-picker svg{flex-shrink:0}
+ .phone-month-picker small{font-size:19px;font-weight:400;letter-spacing:-.03em;color:var(--muted)}
+ .phone-month-picker svg{align-self:center;color:var(--muted)}
+ .phone-month-picker input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+ .phone-month-picker:focus-within{outline:2px solid var(--accent);outline-offset:-2px;border-radius:8px}
+ .phone-month-bar .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;color:var(--accent)}
+ .phone-today{min-width:48px;min-height:44px;padding:0 0 0 6px;font-size:13px;font-weight:500;color:var(--accent)}
+ .calendar-screen .phone-calendar-toolbar{display:flex;align-items:center;gap:10px;flex:0 0 44px;min-height:44px;margin:0 0 8px}
+ .phone-view-switch{display:flex;flex:1;max-width:188px;min-width:0;border-radius:10px;padding:2px;background:var(--control-bg);gap:2px}
+ .phone-view-switch button{flex:1;min-width:0;min-height:32px;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted)}
+ .phone-view-switch button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px #00000012}
+ .phone-calendar-toolbar>button{display:flex;align-items:center;justify-content:center;min-height:44px;gap:5px;padding:0 3px;color:var(--accent);font-size:14px;background:none;border-radius:8px;white-space:nowrap}
+ .phone-calendar-toolbar .phone-summary{margin-left:auto;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;font-weight:400}
+ .phone-calendar-toolbar .phone-edit-toggle{font-weight:500;min-width:56px}
+ .calendar-screen .calendar{display:flex;flex-direction:column;flex:1;min-height:0;max-height:none;width:100%;margin:0;border-radius:14px;border:1px solid var(--line);box-shadow:none;overflow:hidden}
+ .calendar-screen .weekday-row{height:28px;min-height:28px;flex:0 0 28px;align-items:center;padding:0;background:var(--surface)}
+ .calendar-screen .weekday-row span{font-size:11px;font-weight:500;letter-spacing:0}
+ .calendar-screen .month-grid{flex:1;min-height:0;grid-template-rows:repeat(var(--calendar-weeks),minmax(0,1fr));grid-auto-rows:minmax(0,1fr)!important;animation:none}
+ .calendar-screen .calendar-cell{min-height:0;overflow:hidden;padding:5px 4px;justify-content:flex-start;border-radius:0;border-color:color-mix(in srgb,var(--ink) 12%,transparent)}
+ .calendar-screen .date-num{font-size:12px;font-weight:500;line-height:20px;min-height:20px;margin:0;justify-content:flex-end;padding:0;gap:2px}
+ .calendar-screen .date-label{display:inline-flex;align-items:center;justify-content:center;min-width:19px;min-height:20px}
+ .calendar-screen .today .date-label{width:21px;height:21px;border-radius:50%;background:var(--duty-cell-ink,var(--accent));color:var(--duty-cell-bg,var(--surface))}
+ .calendar-screen .today .date-num i{display:none}
+ .calendar-screen .date-entry-icon{margin-left:auto;font-size:10px}
+ .calendar-screen .calendar .calendar-cell .cell-shift{min-height:0;padding:0;gap:4px;justify-content:center;line-height:1.2;font-size:20px;margin:7px 0 4px}
+ .calendar-screen .calendar .calendar-cell .cell-shift strong{font-size:inherit;line-height:inherit;font-weight:600}
+ .calendar-screen .calendar .calendar-cell .cell-shift>span{font-size:13px}
+ .calendar-screen .cell-shift small{display:none}
+ .calendar-screen .calendar .calendar-cell.selected{box-shadow:inset 0 0 0 2px var(--duty-cell-ink,var(--accent))}
+ .calendar-screen .cell-entries{margin-top:2px;gap:3px;min-height:0;overflow:hidden}
+ .calendar-screen .cell-entry,.calendar-screen .has-note-shift .cell-entry{font-size:11px;font-weight:400;line-height:1.3;letter-spacing:0;min-height:0}
+ .calendar-screen .cell-entry-time{font-size:10px;font-weight:500;margin-bottom:1px}
+ .calendar-screen .cell-entry-more{font-size:10px}
+ .calendar-screen .phone-day-peek{display:block;flex:0 0 96px;height:96px;padding:7px 3px 5px;overflow:hidden}
+ .phone-peek-heading{display:flex;align-items:center;gap:8px;height:46px}
+ .phone-peek-heading>button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;flex:1;min-width:0;min-height:44px;padding:0;text-align:left;gap:1px}
+ .phone-peek-heading strong{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:var(--ink)}
+ .phone-peek-duty{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:400;line-height:18px;color:var(--accent)}
+ .phone-peek-actions{display:flex;gap:5px;flex-shrink:0}
+ .phone-peek-actions button{min-width:44px;min-height:44px;padding:0 5px;font-size:14px;font-weight:500;color:var(--accent);border-radius:8px;background:none}
+ .phone-peek-notes,.phone-peek-hint{font-size:13px;line-height:18px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:pre-line;overflow-wrap:anywhere;margin:0;color:var(--ink)}
+ .phone-peek-hint{color:var(--muted)}
+ .calendar-screen .mobile-nav{display:grid!important;position:static;inset:auto;flex:0 0 auto;width:100%;padding:5px 8px max(5px,env(safe-area-inset-bottom,0px));border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;background:var(--bg);grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+ .calendar-screen .mobile-nav button{display:flex;align-items:center;justify-content:center;text-align:center;min-height:49px;padding:2px;gap:2px;flex-direction:column;background:transparent!important}
+ .calendar-screen .mobile-nav .tab-icon{display:flex;align-items:center;justify-content:center;width:44px;min-height:26px;margin:0;background:none!important}
+ .calendar-screen .mobile-nav .tab-label{font-size:10px;font-weight:500}
+ .calendar-screen .mobile-nav button svg{width:22px;height:22px;stroke-width:1.65}
+ .calendar-screen .mobile-nav button.active svg{stroke-width:2.2}
+ .calendar-screen .phone-calendar-dock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex-shrink:0;gap:4px;padding:0;margin:0 0 4px;border:0;background:var(--bg)}
+ .phone-calendar-dock button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:4px;font-size:13px;font-weight:500;border-radius:10px;color:var(--muted)}
+ .phone-calendar-dock button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}
+ .phone-calendar-dock button:last-child{color:var(--accent)}
+ .calendar-screen .editing-calendar .phone-calendar-toolbar{display:none}
+ .calendar-screen .phone-edit-bar{display:flex;align-items:center;gap:4px;flex:0 0 48px;height:48px;min-width:0;padding:2px 0;margin-bottom:4px}
+ .phone-edit-bar>strong{font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .phone-edit-bar button{display:flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:3px 7px;font-size:12px;color:var(--accent);border-radius:8px}
+ .phone-paint-choices{display:flex;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;gap:3px}
+ .phone-paint-choices>button{flex-shrink:0;padding:2px 3px;border:1px solid transparent}
+ .phone-paint-choices>button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+ .phone-paint-choices .shift-chip{font-size:12px;padding:5px 6px;min-height:28px;white-space:nowrap}
+ .phone-edit-done{font-weight:600}
+ .phone-menu-list{display:grid;background:var(--bg);border-radius:14px;overflow:hidden}
+ .phone-menu-list button{min-height:50px;padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:16px}
+ .phone-menu-list button:last-child{border-bottom:0}
+ .phone-quick-form .quick-entry-form{margin:0;border:0;padding:0;background:var(--surface)}
+ .phone-quick-form .quick-form-heading{display:none}
+ .phone-quick-form .quick-form-actions{position:sticky;bottom:-20px;background:var(--surface);padding:12px 0}
+ .phone-day-sheet .selected-day-summary{padding:0;margin:0;border:0;border-radius:0;box-shadow:none;background:none}
+ .phone-day-sheet .selected-day-heading .eyebrow{display:none}
+ .phone-day-sheet .selected-day-heading h2{font-size:21px}
+ @media(max-width:380px){.phone-month-bar h1{font-size:23px}.phone-month-picker small{font-size:16px}.phone-month-bar .icon-button{min-width:30px;width:30px}.phone-roster strong{font-size:14px}.phone-calendar-toolbar{gap:5px}.phone-view-switch button{padding:4px 8px}.calendar-screen .calendar-cell{padding:3px 2px}.calendar-screen .calendar .calendar-cell .cell-shift{font-size:16px;margin:1px 0}.calendar-screen .cell-entry{font-size:10px}}
+ @media(min-width:500px) and (max-height:500px){
+  .calendar-screen .calendar-main{position:relative}
+  .calendar-screen .phone-calendar-header{position:absolute;top:0;left:12px;width:44%;height:44px;min-height:44px}
+  .phone-roster{min-height:44px}.phone-roster-copy{gap:1px}.phone-roster-copy small{font-size:10px}
+  .calendar-screen .phone-month-bar{align-self:flex-end;width:54%;height:44px;min-height:44px;margin-bottom:42px}
+  .phone-month-bar h1{font-size:21px}.phone-month-picker small{font-size:17px}
+  .calendar-screen .phone-calendar-toolbar{position:absolute;top:44px;left:12px;right:12px;height:38px;min-height:38px;margin:0}
+  .phone-view-switch{max-width:188px}.phone-view-switch button{min-height:28px}
+  .phone-calendar-toolbar>button{min-height:36px}
+  .calendar-screen .weekday-row{height:22px;min-height:22px;flex-basis:22px}
+  .calendar-screen .calendar-cell{padding:2px 3px;justify-content:center}
+  .calendar-screen .date-num{position:absolute;right:3px;top:1px;font-size:10px;line-height:14px;min-height:14px}
+  .calendar-screen .date-label{min-width:16px;min-height:16px}
+  .calendar-screen .today .date-label{width:17px;height:17px}
+  .calendar-screen .date-entry-icon{font-size:8px}
+  .calendar-screen .calendar .calendar-cell .cell-shift{margin:0 26px 0 0;font-size:15px;line-height:18px}
+  .calendar-screen .cell-entries{display:none}
+  .calendar-screen .phone-day-peek{height:56px;flex-basis:56px;padding:2px 3px}
+  .phone-peek-heading{height:30px}.phone-peek-heading>button{flex-direction:row;justify-content:flex-start;align-items:center;gap:7px;min-height:30px}
+  .phone-peek-heading strong{font-size:13px}.phone-peek-actions button{min-height:30px;font-size:13px}
+  .phone-peek-notes,.phone-peek-hint{-webkit-line-clamp:1;font-size:12px;line-height:16px}
+  .calendar-screen .mobile-nav{padding:0 8px max(0px,env(safe-area-inset-bottom,0px))}
+  .calendar-screen .mobile-nav button{flex-direction:row;min-height:44px;gap:5px}
+  .calendar-screen .mobile-nav .tab-icon{width:22px;min-height:22px}.calendar-screen .mobile-nav button svg{width:19px;height:19px}
+  .calendar-screen .phone-edit-bar{height:38px;flex-basis:38px;margin:0 0 4px}
+  .calendar-screen .phone-edit-bar button{min-height:36px}
+  .calendar-screen .phone-calendar-dock button{min-height:34px}
+ }
+}
+/* Keep installed iPhone controls below the system's upper edge treatment. */
+@supports(-webkit-touch-callout:none){
+ @media screen and (max-width:800px){html[data-standalone=true] .calendar-screen .workspace{padding-top:calc(env(safe-area-inset-top,0px) + 20px)}}
+}

@@ -1,0 +1,9 @@
+.phone-review{padding:24px;min-height:100dvh;background:#e8e9ee;color:#202126;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
+.phone-review>header{display:flex;justify-content:space-between;gap:24px;align-items:center;max-width:1100px;margin:0 auto 18px}
+.phone-review h1{font-size:24px;letter-spacing:-.04em}.phone-review p{font-size:13px;color:#5a5e69;margin-top:6px;max-width:660px}
+.phone-review>header>a{padding:12px;background:white;border-radius:12px;font-size:14px;white-space:nowrap;color:#0066d6}
+.review-controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.review-controls button{min-height:48px;padding:8px 18px;background:#fff;border:1px solid #cdd0d8;border-radius:14px;color:#404550;font-size:14px}
+.review-controls button[aria-pressed=true]{background:#0066d6;color:#fff;border-color:#0066d6}.review-controls small{display:block;font-size:10px;color:inherit;opacity:.8}
+.review-stage{overflow:auto;padding:6px 6px 28px;max-width:100%}.review-stage iframe{display:block;border:0;border-radius:26px;box-shadow:0 0 0 6px #262931,0 18px 60px #0002;background:#f2f2f7;margin:0 auto;max-width:none;flex-shrink:0}
+@media(max-width:600px){.phone-review{padding:14px 8px}.phone-review>header{padding:0 8px}.phone-review h1{font-size:20px}.phone-review>header>a{display:none}.review-stage iframe{margin-left:auto;margin-right:auto}}

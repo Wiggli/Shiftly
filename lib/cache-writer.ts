@@ -1,0 +1,2 @@
+// Serializes and snapshots writes before IndexedDB opens, so rapid edits cannot reorder or mutate an older payload.
+export function createCacheWriter(write:(key:string,value:any)=>Promise<void>){let chain=Promise.resolve();return {save(key:string,value:any){const payload=structuredClone(value);const operation=chain.catch(()=>{}).then(()=>write(key,payload));chain=operation;return operation;},ready(){return chain;}};}

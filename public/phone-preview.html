@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Shiftly · Phone preview</title>
+<style>
+:root{color-scheme:light dark;--bg:#f2f4f8;--surface:#fff;--ink:#202a3b;--muted:#667085;--line:#dce2ed;--accent:#4564e5;--w:390px;--h:844px;--scale:1;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);min-height:100dvh}header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 24px;border-bottom:1px solid var(--line);background:var(--surface)}h1{font-size:19px;margin:0;letter-spacing:-.5px}h1 span{color:var(--accent)}header p{font-size:12px;margin:3px 0 0;color:var(--muted)}nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}a,button,select{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);padding:9px 12px;min-height:44px;text-decoration:none}a,button{cursor:pointer}.sign-in{color:var(--accent)}a:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}main{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 16px 16px}.device-space{position:relative;flex-shrink:0}.device{width:calc(var(--w) + 24px);height:calc(var(--h) + 24px);padding:12px;background:#171b24;border-radius:42px;box-shadow:0 8px 28px #17223b1c;transform:scale(var(--scale));transform-origin:top left}.screen{width:var(--w);height:var(--h);border-radius:30px;overflow:hidden;background:var(--surface)}iframe{display:block;width:var(--w);height:var(--h);border:0;background:var(--surface)}.caption{text-align:center;max-width:620px;font-size:12px;line-height:1.5;color:var(--muted);margin:0}.caption strong{color:var(--ink)}.size{display:block;font-size:11px;margin-bottom:4px}
+@media(prefers-color-scheme:dark){:root{--bg:#111722;--surface:#1c2533;--ink:#edf2fb;--muted:#a4b0c4;--line:#344054;--accent:#93a7ff}}
+@media(max-width:700px){header{padding:12px 16px;flex-wrap:wrap;gap:10px}nav{width:100%;gap:6px}nav select{flex:1;min-width:140px}main{padding-top:12px}.browser-link{display:none}}
+</style>
+</head>
+<body>
+<header><div><h1>shiftly<span>.</span> Phone preview</h1><p>The live app at mobile screen dimensions</p></div><nav aria-label="Preview controls"><select id="device" aria-label="Phone screen size"><option value="390,844">iPhone · 390 × 844</option><option value="430,932">Large iPhone · 430 × 932</option><option value="412,915">Android · 412 × 915</option><option value="375,812">Small phone · 375 × 812</option></select><button id="reload" type="button">Refresh app</button><a class="sign-in" href="/auth/google?return_to=%2Fphone-preview.html">Sign in with Google</a><a class="browser-link" href="/">Full browser</a></nav></header>
+<main><div class="device-space" id="space"><div class="device"><div class="screen"><iframe id="app" src="/" title="Shiftly live mobile app"></iframe></div></div><p class="caption" id="caption"><span class="size" id="size">390 × 844 CSS pixels</span><strong>This is your live Shiftly app, so edits change the selected roster.</strong> Sign in with Google above to use your own account. This preview shows the mobile layout; it does not emulate iOS or Android system features.</p></main>
+<script>
+const device=document.getElementById('device'),space=document.getElementById('space'),caption=document.getElementById('caption'),size=document.getElementById('size'),frame=document.getElementById('app');
+function fit(){const [w,h]=device.value.split(',').map(Number),border=24,header=document.querySelector('header').getBoundingClientRect().height,availableW=Math.max(200,innerWidth-32),availableH=Math.max(300,innerHeight-header-caption.getBoundingClientRect().height-52),scale=Math.min(1,availableW/(w+border),availableH/(h+border));document.documentElement.style.setProperty('--w',w+'px');document.documentElement.style.setProperty('--h',h+'px');document.documentElement.style.setProperty('--scale',String(scale));space.style.width=(w+border)*scale+'px';space.style.height=(h+border)*scale+'px';size.textContent=w+' × '+h+' CSS pixels';}
+device.addEventListener('change',fit);addEventListener('resize',fit);document.getElementById('reload').addEventListener('click',()=>{frame.src='/';});fit();
+</script>
+</body>
+</html>

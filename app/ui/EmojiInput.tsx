@@ -1,0 +1,3 @@
+'use client';
+import React,{useId} from 'react';
+export default function EmojiInput({value,onChange,label='Emoji',disabled=false}: {value:string;onChange:(value:string)=>void;label?:string;disabled?:boolean}){const id=useId();return <label className="field"><span>{label}</span><input className="system-emoji-input" type="text" inputMode="text" value={value} onChange={e=>onChange(e.target.value)} onFocus={e=>e.currentTarget.select()} maxLength={64} autoComplete="off" autoCorrect="off" spellCheck={false} disabled={disabled} aria-describedby={id}/><small id={id} className="emoji-help">Tap here, then use your keyboard’s emoji key 🌐 or 😊 to choose any emoji.</small></label>;}

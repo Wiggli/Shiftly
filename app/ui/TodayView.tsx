@@ -1,0 +1,13 @@
+'use client';
+import UpcomingRoster from './UpcomingRoster';
+import {useState,useEffect} from 'react';
+import {MapPin} from 'lucide-react';
+import {Event,addDays,resolveShift,eventsOn,calendarDate,nextWorkingShift} from '../../lib/engine';
+import {ShiftChip,fmt} from './primitives';
+export default function TodayView({s,open}:any){
+ const [instant,setInstant]=useState(Date.now());useEffect(()=>{const timer=setInterval(()=>setInstant(Date.now()),60000);return()=>clearInterval(timer);},[]);
+ const today=calendarDate(instant,s.calendar.timezone),next=nextWorkingShift(s,instant),todayShift=next?.active?next.shift:resolveShift(s,today),todayDate=next?.active?next.date:today;
+ const todayEntries=eventsOn(s.events,today);
+ const upcoming=Array.from({length:365},(_,i)=>addDays(today,i+1)).flatMap(date=>eventsOn(s.events,date).map((event:Event)=>({...event,date}))).slice(0,5);
+ return <div className="today-view"><div className="today-feature"><span className="eyebrow">{next?.active?'ON SHIFT':'TODAY'}</span>{todayShift?<><div className="today-duty-heading"><span className="today-emoji">{todayShift.emoji}</span><div><h2>{todayShift.name}</h2>{todayShift.start?<p className="today-time">{todayShift.start} → {todayShift.end}</p>:<p>No working hours scheduled</p>}</div></div>{todayShift.location&&<span><MapPin size={16}/>{todayShift.location}</span>}</>:<><h2>No shift planned today</h2><p>Your calendar is ready when you are.</p></>}<p>{fmt(today,{weekday:'long',month:'long',day:'numeric'})}</p>{todayEntries.map((e:Event)=><button className="event-row" key={e.id} onClick={()=>open(today)}><span>{e.emoji}</span><div><strong>{e.title==='Daily note'?e.cellLabel||e.notes||e.title:e.title}</strong><small>{e.time||'All day'}{e.private?' · Private':''}</small></div></button>)}<button className="primary" onClick={()=>open(todayDate)}>View day</button></div><div className="today-side"><UpcomingRoster s={s} today={today} onOpen={open}/><article><span className="eyebrow">NEXT WORKING SHIFT</span>{next?<button className="event-row" onClick={()=>open(next.date)}><ShiftChip shift={next.shift}/><div><strong>{fmt(next.date)}</strong><small>{next.active?'In progress':next.shift?.start+' → '+next.shift?.end}</small></div></button>:<p>No upcoming working shift scheduled.</p>}</article>{upcoming.length>0&&<article><span className="eyebrow">UPCOMING ENTRIES</span>{upcoming.map((e:Event)=><button className="event-row" key={e.id+'-'+e.date} onClick={()=>open(e.date)}><span>{e.emoji}</span><div><strong>{e.title==='Daily note'?e.cellLabel||e.notes||e.title:e.title}</strong><small>{fmt(e.date)} · {e.time||'All day'}</small></div></button>)}</article>}</div></div>;
+}

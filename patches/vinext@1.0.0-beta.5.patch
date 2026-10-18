@@ -1,0 +1,26 @@
+diff --git a/dist/server/app-route-handler-runtime.d.ts b/dist/server/app-route-handler-runtime.d.ts
+index 25d63ca875922e9cefeacbf52ad9fced130ffb6c..af37e3c8d99fe7ca9a461d854b0c3131c23fdd48 100644
+--- a/dist/server/app-route-handler-runtime.d.ts
++++ b/dist/server/app-route-handler-runtime.d.ts
+@@ -1,7 +1,7 @@
+ import { NextI18nConfig } from "../config/next-config.js";
+ import { NextRequest } from "../shims/server.js";
+ //#region src/server/app-route-handler-runtime.d.ts
+-declare const ROUTE_HANDLER_HTTP_METHODS: readonly ["GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"];
++declare const ROUTE_HANDLER_HTTP_METHODS: readonly ["GET", "HEAD", "POST", "PROPFIND", "REPORT", "PUT", "DELETE", "PATCH", "OPTIONS"];
+ type RouteHandlerHttpMethod = (typeof ROUTE_HANDLER_HTTP_METHODS)[number];
+ type RouteHandlerModule = Partial<Record<RouteHandlerHttpMethod | "default", unknown>>;
+ /**
+diff --git a/dist/server/app-route-handler-runtime.js b/dist/server/app-route-handler-runtime.js
+index 5db8605e4c529ba08a270af6e22a2b0c2f6627bc..f2691f7b6c6a068fc484da89f95c9bc8998fb05c 100644
+--- a/dist/server/app-route-handler-runtime.js
++++ b/dist/server/app-route-handler-runtime.js
+@@ -6,6 +6,8 @@ const ROUTE_HANDLER_HTTP_METHODS = [
+ 	"GET",
+ 	"HEAD",
+ 	"POST",
++	"PROPFIND",
++	"REPORT",
+ 	"PUT",
+ 	"DELETE",
+ 	"PATCH",
