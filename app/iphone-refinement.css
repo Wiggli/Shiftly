@@ -1,0 +1,53 @@
+/* Final iPhone refinement layer. Keep desktop and the compact month grid stable. */
+@media screen and (max-width:800px){
+  /* PWA viewport and home-indicator area belong to the app surface, not a black page gutter. */
+  html,body,#__next,.app-shell{min-height:100%;background:var(--bg)}
+  body{min-height:100dvh;padding:0;margin:0;overscroll-behavior-y:none}
+  .workspace{min-height:100dvh;background:var(--bg)}
+  .full-main{padding-bottom:calc(86px + var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
+  .mobile-nav{padding-bottom:max(7px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));background:var(--surface)}
+
+  /* Calm the page hierarchy and keep the same rhythm across Today, Patterns and More. */
+  .full-main>.page-heading{margin-bottom:16px}
+  .full-main>.page-heading h1{font-size:30px;line-height:1.08}
+  .grouped-menu{gap:18px}
+  .more-menu{border-radius:20px}
+  .more-row{min-height:70px;padding-top:12px;padding-bottom:12px}
+
+  /* Today: preserve the hero but stop it consuming half the phone. */
+  .today-view{gap:16px}
+  .today-feature{padding:20px!important;gap:11px!important;border-radius:22px}
+  .today-duty-heading{gap:13px}
+  .today-duty-heading>.today-emoji{font-size:38px}
+  .today-duty-heading h2{font-size:27px;line-height:1.08}
+  .today-duty-heading .today-time{font-size:21px;line-height:1.2}
+  .today-feature>p{font-size:13px!important;line-height:1.35}
+  .today-entry-heading{font-size:14px;margin-top:4px}
+  .today-feature .event-row{min-height:54px;padding:9px 0}
+  .today-feature>.primary{min-height:48px;margin-top:3px!important}
+  .today-side{gap:16px}
+  .today-side article,.upcoming-roster{padding:17px!important;border-radius:20px}
+  .week-glance{gap:5px}
+  .glance-duty{min-height:68px}
+
+  /* Patterns: current-roster status is context, not the main feature. */
+  .pattern-empty{padding:18px!important;border-radius:20px!important;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:12px;row-gap:6px;align-items:start}
+  .pattern-empty>svg{grid-column:1;grid-row:1/span 2;color:var(--accent);margin-top:1px}
+  .pattern-empty>h2{grid-column:2;font-size:19px;line-height:1.2;margin:0}
+  .pattern-empty>p{grid-column:2;font-size:13px;line-height:1.45;margin:0}
+  .pattern-empty>.pattern-explanation{display:none}
+  .pattern-status-actions{grid-column:1/-1;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:7px!important}
+  .pattern-status-actions button{min-height:44px;padding:8px 10px;font-size:13px}
+  .pattern-empty>small{grid-column:1/-1;font-size:11px;line-height:1.4;color:var(--muted);margin-top:1px}
+
+  /* Calendar selection should read as selection, not an error/focus rectangle. */
+  .calendar-screen .calendar .calendar-cell.selected{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 78%,transparent)}
+}
+
+/* Installed calendar owns the complete viewport, including the iPhone bottom inset. */
+@media screen and (max-width:800px){
+  html[data-calendar-fit=true],html[data-calendar-fit=true] body{height:100dvh;min-height:100dvh;background:var(--bg)}
+  .calendar-screen{height:100dvh;background:var(--bg)}
+  .calendar-screen .workspace{height:100dvh;padding-bottom:0;background:var(--bg)}
+  .calendar-screen .mobile-nav{background:var(--surface);padding-bottom:max(6px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
+}
