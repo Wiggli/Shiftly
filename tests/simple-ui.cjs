@@ -104,3 +104,11 @@ test('Patterns distinguishes dated duties from an empty roster without guessing 
  const empty=renderToStaticMarkup(React.createElement(Status,{snapshot:{...snapshot,occurrences:[]},writable:true,onCreate:noop,onUseDates:noop}));assert.ok(empty.includes('Start a repeating rotation'));
  const linked=renderToStaticMarkup(React.createElement(Status,{snapshot:{...snapshot,patterns:[{id:'p'}]},writable:true,onCreate:noop,onUseDates:noop}));assert.equal(linked,'');
 });
+
+const {appViewportHeight}=require('../lib/app-viewport.ts');
+test('Installed frame keeps the full layout height when WebKit visual viewport excludes safe areas',()=>{
+ assert.equal(appViewportHeight(true,956,894),956);
+ assert.equal(appViewportHeight(true,440,419),440);
+ assert.equal(appViewportHeight(false,956,810),810);
+ assert.equal(appViewportHeight(false,956),956);
+});
