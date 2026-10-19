@@ -17,7 +17,8 @@
     "build:pages": "node scripts/build-pages.mjs",
     "build:backend": "node scripts/build-backend.mjs",
     "test": "node --test tests/engine.cjs tests/setup.cjs tests/security.cjs tests/auth.cjs tests/sharing.cjs tests/navigation.cjs tests/simple-ui.cjs tests/standalone/database.cjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:pages": "node --test tests/standalone/pwa.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

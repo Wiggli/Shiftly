@@ -10,16 +10,21 @@ Target: GitHub Pages frontend and Supabase backend. No Sites build or deployment
 - Live CalDAV discovery, prefixed resource URLs, stable overnight event UID, ETag update and multiget passed against an isolated fixture. Wrong credentials and unauthenticated app requests were denied.
 - Frontend builds with repository-scoped assets, install QR, manifest and offline service worker. Cached API responses remain in the existing account-partitioned client store.
 
-## Required before final cutover
+## Production verification, 19 October 2026
 
-1. Verify Supabase authentication allows the exact Pages redirect and complete Google sign-in on the new app.
-2. Export the original production database using a read-only backup. It contains private data and must never enter this public repository.
-3. Transfer calendars, members, records, invites and audit operations transactionally, preserving IDs, authors, privacy flags, revisions and hashed calendar credentials. Establish verified Google identity links rather than assigning ownership based on a browser-supplied email.
-4. Compare source/destination counts and canonical hashes, then verify each owner's and shared user's access. Resolve pending offline writes before stopping writes on the original app.
-5. Verify both iPhone layouts, offline reload and reconnect conflicts on the new frontend, plus actual iPhone Calendar discovery and edits.
-6. Keep the original live deployment available until these checks pass. No decommission is authorized by publishing the replacement source.
+The production transfer reported in the previous session is now present in Supabase: 2 calendars, 127 records and 31 audit operations, with no members or pending invitations. The verified Google principal owns one calendar containing 119 records. The separate legacy principal retains its own calendar and 8 records; it has not been reassigned by email or silently merged. No identity-link rows are required for the calendar already owned by the verified Google principal.
 
-No production data has been claimed as copied by these code changes. Database initialization alone does not migrate existing accounts or schedules.
+Read-only checks found no orphaned records. RLS is enabled on all six private tables, and neither anon nor authenticated can execute the transaction bridge. The backend health endpoint responds successfully and the deployed Edge Function is active. The existing GitHub Pages workflow completed successfully.
+
+The restored working tree had a dependency symlink into the removed Sites workspace. Dependencies were reinstalled directly in the GitHub checkout, after which all 105 unit tests, TypeScript checks and both production bundles passed. Standalone PWA regressions now check offline application/guide access, notification badge caching, private API bypass and isolation from other apps on the same GitHub Pages origin. These checks run after the Pages build in CI.
+
+## Still required before final cutover
+
+1. Complete a real Google sign-in on the Pages app and confirm that the existing calendar opens. The browser review in this session used the signed-out personal calendar.
+2. Compare the final source/destination records and canonical hashes against a fresh source snapshot. Current counts and ownership checks alone do not prove byte-for-byte parity or include subsequent writes on the old app.
+3. Resolve any pending offline writes on the original app before adopting the replacement as the only editing location.
+4. Verify actual iPhone Calendar discovery and edits using the new backend address, as well as offline reload/reconnect and the iPhone keyboard and safe areas. Browser layout previews do not reproduce iOS behavior.
+5. Keep the original live deployment available until these checks pass. No decommission is authorized by publishing the replacement source.
 
 ## Backend releases
 

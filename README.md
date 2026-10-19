@@ -18,4 +18,4 @@ Allow https://wiggli.github.io/Shiftly/ as an authentication redirect in Supabas
 
 ## Migration status
 
-The standalone backend and PWA are implemented. Existing production data must be exported and transferred with verified identity links, calendar IDs, record authors, memberships and audit history before declaring cutover complete. New hosting does not copy the old database automatically. Preserve the original deployment until that verification is complete. See `MIGRATION.md` for details.
+The standalone backend and PWA are deployed. Read-only verification found 2 calendars, 127 records and 31 audit operations in Supabase, including 119 records owned by the verified Google principal. Real Google sign-in, final source parity and actual iPhone Calendar testing remain open, so the original deployment is preserved. See `MIGRATION.md` for the verified status and remaining cutover checks.
