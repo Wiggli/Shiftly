@@ -112,3 +112,12 @@ test('Installed frame keeps the full layout height when WebKit visual viewport e
  assert.equal(appViewportHeight(false,956,810),810);
  assert.equal(appViewportHeight(false,956),956);
 });
+
+const WeekDuty=require('../app/ui/WeekDuty.tsx').default;
+test('Week duty names and times distinguish overnight work from nonworking dates',()=>{
+ const night=renderToStaticMarkup(React.createElement(WeekDuty,{shift:defaults[1]}));
+ assert.ok(night.includes('Night'));assert.ok(night.includes('19:00–07:00'));assert.ok(night.includes('+1 day'));
+ const off=renderToStaticMarkup(React.createElement(WeekDuty,{shift:defaults[2]}));
+ assert.ok(off.includes('Off'));assert.ok(!off.includes('week-duty-time'));
+ const empty=renderToStaticMarkup(React.createElement(WeekDuty,{}));assert.ok(empty.includes('Unplanned'));
+});

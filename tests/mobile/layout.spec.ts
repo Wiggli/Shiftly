@@ -54,3 +54,33 @@ test('review monitor detects an introduced bottom gap',async({page})=>{
  await expect(page.locator('#layout-status')).toContainText('LAYOUT ERROR');
  await expect(page.locator('#layout-status')).toContainText('bottom gap 62px');
 });
+
+for(const theme of ['light','dark']){
+ test(theme+' week uses readable rows, weekly hours and seven-day navigation',async({page},info)=>{
+  await page.goto('./?preview=demo&date=2026-10-19&layout=installed&theme='+theme);
+  await page.getByRole('button',{name:'Week',exact:true}).click();
+  await expect(page.locator('.week-calendar .calendar-cell')).toHaveCount(7);
+  await expect(page.locator('.phone-month-name')).toHaveText('19–25 Oct');
+  await expect(page.getByRole('button',{name:'Weekly summary and scheduled hours'})).toContainText('60h');
+  await expectPhoneFrame(page);
+  const rows=await page.locator('.week-calendar .calendar-cell').all();
+  const first=await rows[0].boundingBox(),second=await rows[1].boundingBox();
+  expect(second!.y).toBeGreaterThan(first!.y);
+  expect(Math.abs(second!.x-first!.x)).toBeLessThan(1);
+  expect(first!.height).toBeLessThan(130);
+  await expect(rows[0]).toContainText('07:00–19:00');
+  await expect(rows[1]).toContainText('19:00–07:00');
+  await expect(rows[1]).toContainText('+1 day');
+  await rows[2].click();
+  await expect(page.locator('.phone-day-peek')).toContainText('Wed 21 Oct');
+  await page.getByRole('button',{name:'Next week',exact:true}).click();
+  await expect(page.locator('.phone-month-name')).toHaveText('26 Oct–1 Nov');
+  await page.getByRole('button',{name:'Previous week',exact:true}).click();
+  await expect(page.locator('.phone-month-name')).toHaveText('19–25 Oct');
+  if(page.viewportSize()!.height>600){
+   const last=await rows[6].boundingBox(),calendar=await page.locator('.week-calendar').boundingBox();
+   expect(last!.y+last!.height).toBeLessThanOrEqual(calendar!.y+calendar!.height+1);
+  }
+  await info.attach('week-'+theme,{body:await page.screenshot(),contentType:'image/png'});
+ });
+}

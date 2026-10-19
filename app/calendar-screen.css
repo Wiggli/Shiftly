@@ -232,3 +232,29 @@
  .app-shell .mobile-nav{padding-top:2px}
  .app-shell .mobile-nav button{min-height:38px;flex-direction:row}
 }
+
+/* A week is a readable agenda, rather than seven stretched month cells. */
+@media screen{
+ .calendar-screen .week-calendar .weekday-row{display:none}
+ .calendar-screen .week-calendar .month-grid{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;touch-action:pan-y}
+ .calendar-screen .week-calendar .calendar-cell{flex:1 0 64px;min-height:64px;display:grid;grid-template-columns:42px minmax(0,1fr);grid-template-rows:auto auto;align-content:center;align-items:center;column-gap:12px;row-gap:3px;padding:8px 12px 8px 8px;background:var(--surface)!important;color:var(--ink)!important;border:0;border-left:5px solid var(--duty-cell-bg,var(--line));border-bottom:1px solid var(--line);text-align:left}
+ .calendar-screen .week-calendar .calendar-cell:last-child{border-bottom:0}
+ .calendar-screen .week-calendar .calendar-cell.outside{opacity:1}
+ .calendar-screen .week-calendar .calendar-cell.selected{background:var(--accent-soft)!important;box-shadow:inset 0 0 0 2px var(--accent)}
+ .calendar-screen .week-calendar .date-num{grid-column:1;grid-row:1/span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1.2;min-height:40px;margin:0;padding:0;color:var(--ink)}
+ .calendar-screen .week-calendar .week-weekday{font-size:11px;font-weight:500;color:var(--muted)}
+ .calendar-screen .week-calendar .date-label{font-size:21px;font-weight:700;min-width:28px;min-height:28px}
+ .calendar-screen .week-calendar .today .date-label{background:var(--accent);color:var(--surface);width:28px;height:28px}
+ .calendar-screen .week-calendar .date-entry-icon{display:none}
+ .week-duty{grid-column:2;display:flex;align-items:center;gap:9px;min-width:0}
+ .week-duty-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--duty-cell-bg,var(--bg));font-size:20px;flex-shrink:0}
+ .week-duty>strong{font-size:15px;line-height:20px;font-weight:650;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .week-duty-time{margin-left:auto;flex-shrink:0;text-align:right;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums;color:var(--muted)}
+ .week-duty-time>small{display:block;font-size:10px;line-height:12px}
+ .calendar-screen .week-calendar .cell-entries,.calendar-screen .week-calendar .cell-events{grid-column:2;display:flex;align-items:center;flex-wrap:nowrap;gap:10px;margin:0;padding:0;min-width:0;max-height:16px;overflow:hidden;text-align:left}
+ .calendar-screen .week-calendar .cell-entry{flex:0 1 auto;min-width:0;font-size:11px;line-height:15px}
+ .calendar-screen .week-calendar .cell-entry-text{display:block;font-size:11px;line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .calendar-screen .week-calendar .cell-entry-time{display:inline;font-size:11px;margin-right:4px}
+ .calendar-screen .week-calendar .cell-entry-more{flex-shrink:0;font-size:11px}
+ .calendar-screen .week-calendar .roster-cell-line,.calendar-screen .week-calendar .overlay-shift,.calendar-screen .week-calendar .roster-more{grid-column:2}
+}
