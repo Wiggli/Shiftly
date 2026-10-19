@@ -10,3 +10,13 @@ test('Repeated opens do not add duplicate steps and browser Forward restores a s
 test('Foreign or malformed history never restores an arbitrary sheet',()=>{const {nav}=harness();nav.open('day');nav.pop({shiftlySheetNavigation:{session:'other',stack:['event']}});assert.deepEqual(nav.stack,[]);nav.pop({shiftlySheetNavigation:{session:'session',stack:[{privateNote:'secret'}]}});assert.deepEqual(nav.stack,[]);});
 
 test('Completing the pattern chooser exits both creation steps without reopening the chooser',()=>{const {nav}=harness();nav.open('pattern-choice');nav.open('pattern');nav.closeAll();assert.deepEqual(nav.stack,[]);});
+
+test('Month navigation keeps quick-entry dates inside the visible month and clamps short months',()=>{
+ const {dateInMonth}=require('../lib/calendar-navigation.ts');
+ assert.equal(dateInMonth('2026-10-19','2026-11'),'2026-11-19');
+ assert.equal(dateInMonth('2026-10-31','2026-11'),'2026-11-30');
+ assert.equal(dateInMonth('2028-01-31','2028-02'),'2028-02-29');
+ assert.equal(dateInMonth('2026-01-31','2026-02'),'2026-02-28');
+ assert.equal(dateInMonth('2026-12-31','2027-01'),'2027-01-31');
+ assert.equal(dateInMonth('2026-10-19','invalid'),'2026-10-19');
+});
