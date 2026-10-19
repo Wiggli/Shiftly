@@ -66,3 +66,23 @@ test('Calendar view controls retain all views and only offer comparison when a s
 test('Week overview preserves DNRO dates across the clock change and never changes duties or entries',()=>{const Overview=require('../app/ui/UpcomingRoster.tsx').default;const s={shifts:[...defaults,{...defaults[2],id:'rest',short:'R',name:'Rest'}],patterns:[{id:'plain-dnro',items:['day','night','rest','off'],start:'2026-10-24',repeat:0}],occurrences:[],events:[{id:'note',date:'2026-10-26',title:'Daily note',notes:'Keep this private',time:'',private:true,reminders:[]}]};const before=JSON.stringify(s);const html=renderToStaticMarkup(React.createElement(Overview,{s,today:'2026-10-24',onOpen:noop}));assert.equal((html.match(/<button /g)||[]).length,7);for(const name of ['Day','Night','Rest','Off'])assert.ok(html.includes(', '+name));assert.ok(html.includes('1 entries'));assert.ok(!html.includes('Keep this private'));assert.ok(html.includes('--duty-cell-bg'));assert.equal(JSON.stringify(s),before);});
 
 test('Compact overtime labels preserve the full title and explicit labels without splitting long words',()=>{const value={id:'o',date:'2026-10-19',title:'Overtime night',time:'',notes:'',reminders:[]};const html=renderToStaticMarkup(React.createElement(CellEntries,{events:[value]}));assert.ok(html.includes('>OT night</span>'));assert.ok(html.includes('title="Overtime night"'));const custom=renderToStaticMarkup(React.createElement(CellEntries,{events:[{...value,entryType:'overtime',cellLabel:'Extra duty'}]}));assert.ok(custom.includes('>Extra duty</span>'));assert.equal(value.title,'Overtime night');});
+
+
+test('Today labels an overnight duty by its start date, keeps current-day entries separate and shows the following shift',()=>{
+ const Today=require('../app/ui/TodayView.tsx').default;
+ const state={calendar:{timezone:'Europe/Malta'},shifts:defaults,patterns:[],occurrences:[{date:'2026-11-03',shiftId:'night'},{date:'2026-11-04',shiftId:'off'},{date:'2026-11-05',shiftId:'day'}],events:[{id:'previous',date:'2026-11-03',title:'Previous-day entry'},{id:'current',date:'2026-11-04',title:'Current-day entry',time:'10:00'}]};
+ const original=Date.now;
+ try{
+  Date.now=()=>Date.parse('2026-11-04T03:00:00Z');
+  const html=renderToStaticMarkup(React.createElement(Today,{s:state,open:noop}));
+  assert.ok(html.includes('Started '+new Date('2026-11-03T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})));
+  assert.ok(html.includes('Ends today at 07:00'));
+  assert.ok(html.includes('Current-day entry'));assert.ok(!html.includes('Previous-day entry'));
+  const following=html.split('NEXT WORKING SHIFT')[1];
+  assert.ok(following.includes(new Date('2026-11-05T12:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric'})));
+  assert.ok(!following.includes('In progress'));
+  Date.now=()=>Date.parse('2026-11-04T07:00:00Z');
+  const ended=renderToStaticMarkup(React.createElement(Today,{s:state,open:noop}));
+  assert.ok(!ended.includes('ON SHIFT'));assert.ok(!ended.includes('Started '));
+ }finally{Date.now=original;}
+});
