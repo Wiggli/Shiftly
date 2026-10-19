@@ -4,12 +4,12 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const source=fs.readFileSync('standalone-dist/sw.js','utf8');
 function worker(){
- const handlers={},stored=new Map(),navigated=[],opened=[];
+ const handlers={},stored=new Map(),navigated=[],opened=[],requests=[];
  const cache={addAll:async paths=>{for(const path of paths){assert.ok(fs.existsSync('standalone-dist/'+path.replace(/^\/Shiftly\//,''))||path==='/Shiftly/');stored.set(path,new Response('cached:'+path));}},match:async path=>stored.get(path)?.clone()};
  const self={location:{origin:'https://wiggli.github.io'},addEventListener:(name,fn)=>handlers[name]=fn,clients:{claim:async()=>{},matchAll:async()=>[{url:'https://wiggli.github.io/AnotherApp/',navigate:async url=>navigated.push(url),focus:async()=>{}}],openWindow:async url=>opened.push(url)},registration:{showNotification:async()=>{}},skipWaiting:async()=>{}};
- vm.runInNewContext(source,{self,URL,Response,caches:{open:async()=>cache,keys:async()=>[],delete:async()=>{}},fetch:async()=>{throw Error('offline');}});
+ vm.runInNewContext(source,{self,URL,Response,caches:{open:async()=>cache,keys:async()=>[],delete:async()=>{}},fetch:async(...args)=>{requests.push(args);throw Error('offline');}});
  async function run(name,event={}){let pending;handlers[name]({...event,waitUntil:p=>pending=p,respondWith:p=>pending=p});return await pending;}
- return {run,navigated,opened};
+ return {run,navigated,opened,requests};
 }
 test('Pages PWA precaches every required file and restores the app and installation guide offline',async()=>{
  const w=worker();await w.run('install');
@@ -36,4 +36,8 @@ test('Published Pages metadata and installation guide point to the standalone ap
 });
 test('Offline cache includes lazy-loaded application chunks',()=>{
  for(const file of fs.readdirSync('standalone-dist/assets').filter(file=>/\.(js|css|woff2)$/.test(file)))assert.ok(source.includes('/Shiftly/assets/'+file),file+' must be available offline');
+});
+
+test('Online navigation asks for a fresh entry document instead of an old cached asset manifest',async()=>{
+ const w=worker();await w.run('install');await w.run('fetch',{request:{url:'https://wiggli.github.io/Shiftly/',method:'GET',mode:'navigate'}});assert.equal(w.requests[0][1].cache,'no-store');
 });
