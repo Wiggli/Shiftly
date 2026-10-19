@@ -11,3 +11,6 @@
 - Run `pnpm build`, `pnpm typecheck`, and relevant tests before publishing. Keep credentials and generated output out of git.
 
 - Review both Installed and Browser layouts using the shipped ui-review.html. Installed insets are illustrative, not measured device specifications. Check Today and Patterns as well as the calendar, including long roster names and timed entries. Compare the preview build identifier with More → App details on the device before attributing a mismatch to rendering.
+
+- Run `pnpm test:mobile` after building UI changes and fix failures before publishing. The suite exercises Chromium and WebKit in both iPhone orientations, records sample screenshots, and tests detection of a deliberately introduced 62px bottom gap. WebKit automation is still not a physical iPhone check.
+- Use the live iPhone review window throughout UI work and inspect the saved screenshots. Do not wait for Andre to point out visible errors. Never use a real account or real roster for automated mutations.

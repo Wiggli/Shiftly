@@ -26,6 +26,18 @@ jobs:
       - run: node tests/run-api.mjs
       - run: pnpm build
       - run: pnpm test:pages
+      - name: Install mobile test browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Check iPhone layouts before publishing
+        run: pnpm test:mobile
+      - uses: actions/upload-artifact@v5
+        if: ${{ !cancelled() }}
+        with:
+          name: iphone-layout-review
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
           path: standalone-dist

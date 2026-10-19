@@ -18,7 +18,8 @@
     "build:backend": "node scripts/build-backend.mjs",
     "test": "node --test tests/engine.cjs tests/setup.cjs tests/security.cjs tests/auth.cjs tests/sharing.cjs tests/navigation.cjs tests/simple-ui.cjs tests/standalone/database.cjs tests/standalone/auth.cjs",
     "typecheck": "tsc --noEmit",
-    "test:pages": "node --test tests/standalone/pwa.cjs"
+    "test:pages": "node --test tests/standalone/pwa.cjs",
+    "test:mobile": "playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
     "@cloudflare/workers-types": "4.20260515.1",
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
