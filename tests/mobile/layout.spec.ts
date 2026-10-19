@@ -61,7 +61,8 @@ for(const theme of ['light','dark']){
   await page.getByRole('button',{name:'Week',exact:true}).click();
   await expect(page.locator('.week-calendar .calendar-cell')).toHaveCount(7);
   await expect(page.locator('.phone-month-name')).toHaveText('19–25 Oct');
-  await expect(page.getByRole('button',{name:'Weekly summary and scheduled hours'})).toContainText('60h');
+  // The 24 Oct night duty spans Malta's 2026 autumn clock change and lasts 13 elapsed hours.
+  await expect(page.getByRole('button',{name:'Weekly summary and scheduled hours'})).toContainText('61h');
   await expectPhoneFrame(page);
   const rows=await page.locator('.week-calendar .calendar-cell').all();
   const first=await rows[0].boundingBox(),second=await rows[1].boundingBox();
