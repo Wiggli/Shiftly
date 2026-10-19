@@ -50,9 +50,13 @@ test('review monitor detects an introduced bottom gap',async({page})=>{
  await expect(page.locator('#layout-status')).toContainText('bottom gap 0px');
  // Deliberately reproduce the original failure in this isolated sample only.
  const app=page.frames().find(f=>f.url().includes('preview=demo'))!;
- await app.addStyleTag({content:'.app-shell{height:calc(100% - 62px)!important}'});
+ const fault=await app.addStyleTag({content:'.app-shell{height:calc(100% - 62px)!important;min-height:0!important}.app-shell>.workspace{height:100%!important;min-height:0!important}'});
+ // Verify the fault really took effect even when the app gains new viewport safeguards.
+ await expect.poll(()=>app.evaluate(()=>Math.round(innerHeight-document.querySelector(".mobile-nav")!.getBoundingClientRect().bottom))).toBe(62);
  await expect(page.locator('#layout-status')).toContainText('LAYOUT ERROR');
  await expect(page.locator('#layout-status')).toContainText('bottom gap 62px');
+ await fault.evaluate(el=>(el as Element).remove());
+ await expect(page.locator('#layout-status')).toContainText('Layout check passed');
 });
 
 for(const theme of ['light','dark']){
