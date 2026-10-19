@@ -155,9 +155,9 @@
  .toast {border-radius:16px;padding:14px 20px;box-shadow:0 8px 28px #0002;font-size:14px;line-height:1.5}
  @media (max-width:800px) {
   :root {--app-header-height:58px;--app-nav-height:76px}
-  .topbar {height:calc(58px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));background:var(--bg)}
+  .topbar {height:calc(58px + var(--safe-top,env(safe-area-inset-top,0px)));padding-top:var(--safe-top,env(safe-area-inset-top,0px));padding-left:max(18px,var(--safe-left,env(safe-area-inset-left,0px)));padding-right:max(18px,var(--safe-right,env(safe-area-inset-right,0px)));background:var(--bg)}
   .mobile-brand {font-size:26px;letter-spacing:-1px;font-weight:750}
-  .calendar-main,.full-main {padding:20px 16px calc(104px + env(safe-area-inset-bottom,0px));max-width:100%;min-width:0}
+  .calendar-main,.full-main {padding:20px 16px calc(104px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));max-width:100%;min-width:0}
   .page-heading {margin:0 2px 22px;gap:14px;align-items:center}
   .page-heading h1 {font-size:34px}
   .page-heading .eyebrow {font-size:10px;margin-bottom:6px}
@@ -173,7 +173,7 @@
   .calendar-cell {padding:7px 3px 5px}
   .cell-shift {font-size:11px;min-height:28px;border-radius:6px}
   .date-num {font-size:12px;margin-bottom:7px}
-  .mobile-nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;left:12px;right:12px;bottom:max(10px,env(safe-area-inset-bottom,0px));padding:6px;border-radius:27px;border:1px solid var(--line);background:var(--surface);box-shadow:0 8px 30px #00000014}
+  .mobile-nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;left:12px;right:12px;bottom:max(10px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));padding:6px;border-radius:27px;border:1px solid var(--line);background:var(--surface);box-shadow:0 8px 30px #00000014}
   .mobile-nav button {width:100%;min-width:0;min-height:56px;border-radius:21px;gap:4px;flex-direction:column;font-size:11px}
   .mobile-nav button.active {color:var(--accent);background:var(--accent-soft)}
   .mobile-nav button span {font-size:11px;font-weight:500;line-height:1.2}
@@ -185,9 +185,9 @@
   .today-feature {padding:26px}
   .today-side article {padding:22px}
   .backdrop {padding:12px 0 0;align-items:flex-end}
-  .sheet {width:100%;border-radius:28px 28px 0 0;max-height:calc(var(--visible-height,100dvh) - max(12px,env(safe-area-inset-top,0px)));border-bottom:0}
+  .sheet {width:100%;border-radius:28px 28px 0 0;max-height:calc(var(--visible-height,100dvh) - max(12px,var(--safe-top,env(safe-area-inset-top,0px))));border-bottom:0}
   .sheet>header {padding:13px 16px;min-height:72px}
-  .sheet-body {padding:22px 20px max(24px,env(safe-area-inset-bottom,0px));scroll-padding-bottom:24px}
+  .sheet-body {padding:22px 20px max(24px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));scroll-padding-bottom:24px}
   .sheet-body .two-col {gap:12px}
   .insight-panel {padding:18px;border-radius:17px}
  }
@@ -354,14 +354,14 @@
  .calendar-cell[aria-pressed=true]{outline:2px solid currentColor;outline-offset:-4px}
 }
 @media screen and (max-width:800px){
- .editing-calendar{padding-bottom:calc(220px + env(safe-area-inset-bottom,0px))}
- .edit-mode-dock{bottom:calc(92px + env(safe-area-inset-bottom,0px));padding:10px 12px;gap:8px;border-radius:18px}
+ .editing-calendar{padding-bottom:calc(220px + var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
+ .edit-mode-dock{bottom:calc(92px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));padding:10px 12px;gap:8px;border-radius:18px}
  .edit-dock-status strong{font-size:14px}
  .edit-dock-status span{font-size:11px;max-width:150px}
  .edit-dock-actions button{padding:9px 10px;font-size:13px;min-height:46px}
  .edit-workspace{padding:15px}
 }
-@media screen and (hover:none) and (pointer:coarse) and (min-width:801px) and (max-width:1100px) and (max-height:600px){.edit-mode-dock{bottom:calc(68px + env(safe-area-inset-bottom,0px))}.editing-calendar{padding-bottom:200px}}
+@media screen and (hover:none) and (pointer:coarse) and (min-width:801px) and (max-width:1100px) and (max-height:600px){.edit-mode-dock{bottom:calc(68px + var(--safe-bottom,env(safe-area-inset-bottom,0px)))}.editing-calendar{padding-bottom:200px}}
 
 /* Installed-app layout: restrained headers, anchored tabs and touch-first controls. */
 @media screen {
@@ -394,13 +394,13 @@
  .week-glance>button:active{transform:scale(.97)}
  .sheet>header>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px}
  .sheet-body{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
- .sheet .form-actions{position:sticky;bottom:-24px;z-index:2;background:var(--surface);padding:14px 0 max(14px,env(safe-area-inset-bottom,0px));margin-bottom:-10px}
+ .sheet .form-actions{position:sticky;bottom:-24px;z-index:2;background:var(--surface);padding:14px 0 max(14px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));margin-bottom:-10px}
  @media(max-width:800px), (min-width:801px) and (max-width:1100px) and (max-height:600px){
   :root{--app-header-height:54px;--app-nav-height:72px}
-  .topbar{height:calc(54px + env(safe-area-inset-top,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .topbar{height:calc(54px + var(--safe-top,env(safe-area-inset-top,0px)));padding-left:max(16px,var(--safe-left,env(safe-area-inset-left,0px)));padding-right:max(16px,var(--safe-right,env(safe-area-inset-right,0px)))}
   .mobile-brand{font-size:23px;letter-spacing:-.8px}
   .topbar .icon-button{color:var(--accent)}
-  .calendar-main,.full-main{padding:14px max(12px,env(safe-area-inset-right,0px)) calc(100px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+  .calendar-main,.full-main{padding:14px max(12px,var(--safe-right,env(safe-area-inset-right,0px))) calc(100px + var(--safe-bottom,env(safe-area-inset-bottom,0px))) max(12px,var(--safe-left,env(safe-area-inset-left,0px)))}
   .page-heading{margin:0 4px 16px;gap:10px}
   .page-heading h1{font-size:32px}
   .page-heading .heading-actions{gap:5px;flex-shrink:0}
@@ -417,7 +417,7 @@
   .calendar-toolbar .calendar-options-button{min-width:44px;width:44px;height:48px}
   .calendar-view-control button{font-size:14px;padding:8px 9px}
   .calendar{border-radius:20px}
-  .mobile-nav{position:fixed;left:0;right:0;bottom:0;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:6px max(12px,env(safe-area-inset-right,0px)) max(7px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));border:0;border-top:1px solid var(--line);border-radius:0;background:var(--surface);box-shadow:none;transform:none;z-index:55}
+  .mobile-nav{position:fixed;left:0;right:0;bottom:0;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:6px max(12px,var(--safe-right,env(safe-area-inset-right,0px))) max(7px,var(--safe-bottom,env(safe-area-inset-bottom,0px))) max(12px,var(--safe-left,env(safe-area-inset-left,0px)));border:0;border-top:1px solid var(--line);border-radius:0;background:var(--surface);box-shadow:none;transform:none;z-index:55}
   .mobile-nav button{padding:3px 2px;min-height:55px;gap:3px;background:transparent!important;border-radius:14px;color:var(--muted);font-weight:500}
   .mobile-nav button.active{color:var(--accent)}
   .mobile-nav .tab-icon{display:flex;align-items:center;justify-content:center;width:58px;min-height:29px;border-radius:18px;margin:0 auto}
@@ -425,11 +425,11 @@
   .mobile-nav .tab-label{font-size:11px;line-height:1.3;font-weight:600}
   .mobile-nav button svg{width:22px;height:22px;stroke-width:1.9}
   .mobile-nav button.active svg{stroke-width:2.2}
-  .backdrop{top:var(--visible-top,0px);height:var(--visible-height,100dvh);bottom:auto;padding-top:max(10px,env(safe-area-inset-top,0px))}
+  .backdrop{top:var(--visible-top,0px);height:var(--visible-height,100dvh);bottom:auto;padding-top:max(10px,var(--safe-top,env(safe-area-inset-top,0px)))}
   .sheet{max-height:100%;border-radius:28px 28px 0 0}
   .sheet>header{position:relative;padding:23px 14px 10px;min-height:82px}
   .sheet>header::before{content:'';position:absolute;width:34px;height:4px;top:9px;left:50%;transform:translateX(-50%);background:var(--muted);opacity:.4;border-radius:4px;pointer-events:none}
-  .sheet-body{padding:20px 18px max(24px,env(safe-area-inset-bottom,0px))}
+  .sheet-body{padding:20px 18px max(24px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
   .selected-day-summary{border:0!important;border-radius:24px;padding:18px!important}
   .selected-day-heading{align-items:center;gap:8px}
   .selected-day-heading h2{font-size:18px}
@@ -466,7 +466,7 @@
  .today-duty-heading .today-time{font-size:23px}
  .today-duty-heading h2{font-size:30px}
  .shift-management-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
- .quick-entry-form{scroll-margin-top:calc(var(--app-header-height) + env(safe-area-inset-top,0px) + 12px)}
+ .quick-entry-form{scroll-margin-top:calc(var(--app-header-height) + var(--safe-top,env(safe-area-inset-top,0px)) + 12px)}
  .calendar .cell-entry-text{overflow-wrap:normal;word-break:normal}
  :root[data-phone-preview=true]{scrollbar-width:none}
  :root[data-phone-preview=true]::-webkit-scrollbar{display:none}
@@ -488,5 +488,5 @@
 @media screen{.full-main:has(>.settings-focused)>.page-heading{display:none}}
 @media screen{.settings-focused .insight-panel{display:block;padding:16px 0;border:0;border-top:1px solid var(--line);border-radius:0}.settings-focused .insight-panel h3{margin:0 0 12px}.settings-focused .insight-panel .hint{margin-top:12px}}
 
-@media screen and (min-width:801px) and (max-width:1100px) and (max-height:600px){.sidebar,.breadcrumb{display:none}.workspace{margin-left:0}.mobile-brand{display:block}.edit-mode-dock{bottom:calc(84px + env(safe-area-inset-bottom,0px))}.editing-calendar{padding-bottom:200px}}
+@media screen and (min-width:801px) and (max-width:1100px) and (max-height:600px){.sidebar,.breadcrumb{display:none}.workspace{margin-left:0}.mobile-brand{display:block}.edit-mode-dock{bottom:calc(84px + var(--safe-bottom,env(safe-area-inset-bottom,0px)))}.editing-calendar{padding-bottom:200px}}
 @media screen and (max-width:540px){.daily-duty-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}

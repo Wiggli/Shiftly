@@ -7,6 +7,7 @@ import '../../app/apple-ui.css';
 import '../../app/calendar-screen.css';
 const root=createRoot(document.getElementById('root')!);
 const preview=new URLSearchParams(location.search);
+if(preview.get("preview")==="demo"&&preview.get("layout")==="installed"){for(const [edge,value] of Object.entries({top:62,bottom:34,left:0,right:0}))document.documentElement.style.setProperty("--safe-"+edge,value+"px");}
 if(preview.get("preview")==="demo"){document.addEventListener("click",event=>{if((event.target as HTMLElement).closest?.('a[href^="/auth/"]')){event.preventDefault();window.open(new URL(".",location.href).href,"_blank","noopener");}});const date=preview.get("date")||"2026-10-19";root.render(<CalendarApp identity={null} previewState={demoCalendar(date)} previewTheme={preview.get("theme")==="dark"?"dark":"light"}/>);}
 else void start();
 async function start(){

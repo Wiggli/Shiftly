@@ -9,3 +9,5 @@
 
 - GitHub Pages and Supabase are the only active platform. Do not modify or decommission the previous deployment.
 - Run `pnpm build`, `pnpm typecheck`, and relevant tests before publishing. Keep credentials and generated output out of git.
+
+- Review both Installed and Browser layouts using the shipped ui-review.html. Installed insets are illustrative, not measured device specifications. Check Today and Patterns as well as the calendar, including long roster names and timed entries. Compare the preview build identifier with More → App details on the device before attributing a mismatch to rendering.
