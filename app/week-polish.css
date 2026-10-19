@@ -1,167 +1,64 @@
 /* iPhone Week view polish. Keep the Month grid untouched. */
 @media screen and (max-width:800px){
   .calendar-screen .week-calendar{border-radius:18px;border-color:color-mix(in srgb,var(--ink) 10%,transparent);background:var(--surface)}
-  .calendar-screen .week-calendar .month-grid{padding:2px 0;scrollbar-width:none;background:var(--surface)}
+  .calendar-screen .week-calendar .month-grid{padding:0;scrollbar-width:none;background:var(--surface)}
   .calendar-screen .week-calendar .month-grid::-webkit-scrollbar{display:none}
 
   .calendar-screen .week-calendar .calendar-cell{
     position:relative;
-    flex:1 0 66px;
-    min-height:66px;
-    grid-template-columns:48px minmax(0,1fr);
+    flex:1 1 0;
+    min-height:52px;
+    grid-template-columns:46px minmax(0,1fr);
     grid-template-rows:auto auto;
     align-content:center;
-    column-gap:10px;
-    row-gap:3px;
-    padding:7px 12px 7px 7px;
+    column-gap:9px;
+    row-gap:1px;
+    padding:5px 11px 5px 7px;
     border-left:0;
     border-bottom:1px solid color-mix(in srgb,var(--ink) 9%,transparent);
     background:var(--surface)!important;
   }
   .calendar-screen .week-calendar .calendar-cell::before{
-    content:"";
-    position:absolute;
-    left:0;
-    top:9px;
-    bottom:9px;
-    width:3px;
-    border-radius:0 3px 3px 0;
-    background:var(--duty-cell-bg,var(--line));
-    opacity:.9;
+    content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;border-radius:0 2px 2px 0;
+    background:var(--duty-cell-bg,var(--line));opacity:.75;
   }
   .calendar-screen .week-calendar .calendar-cell:last-child{border-bottom:0}
   .calendar-screen .week-calendar .calendar-cell.selected{
-    background:color-mix(in srgb,var(--accent) 8%,var(--surface))!important;
-    box-shadow:inset 0 0 0 1.5px var(--accent);
+    background:color-mix(in srgb,var(--accent) 11%,var(--surface))!important;
+    box-shadow:none!important;
   }
-  .calendar-screen .week-calendar .calendar-cell.selected::before{width:4px;background:var(--accent);opacity:1}
+  .calendar-screen .week-calendar .calendar-cell.selected::before{width:3px;background:var(--accent);opacity:1}
 
-  .calendar-screen .week-calendar .date-num{
-    grid-column:1;
-    grid-row:1/span 2;
-    min-height:48px;
-    align-items:center;
-    justify-content:center;
-    gap:1px;
-  }
-  .calendar-screen .week-calendar .week-weekday{
-    font-size:10px;
-    line-height:13px;
-    font-weight:650;
-    text-transform:uppercase;
-    letter-spacing:.035em;
-    color:var(--muted);
-  }
-  .calendar-screen .week-calendar .date-label{
-    min-width:30px;
-    min-height:30px;
-    font-size:22px;
-    line-height:30px;
-    font-weight:720;
-    letter-spacing:-.035em;
-  }
-  .calendar-screen .week-calendar .today .date-label{
-    width:30px;
-    height:30px;
-    border-radius:50%;
-    background:var(--accent);
-    color:#fff;
-  }
+  .calendar-screen .week-calendar .date-num{grid-column:1;grid-row:1/span 2;min-height:42px;align-items:center;justify-content:center;gap:0}
+  .calendar-screen .week-calendar .week-weekday{font-size:9px;line-height:11px;font-weight:650;text-transform:uppercase;letter-spacing:.045em;color:var(--muted)}
+  .calendar-screen .week-calendar .date-label{min-width:28px;min-height:27px;font-size:19px;line-height:27px;font-weight:700;letter-spacing:-.035em}
+  .calendar-screen .week-calendar .today .date-label{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff}
 
-  .week-duty{
-    grid-column:2;
-    min-width:0;
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-  .week-duty-icon{
-    display:grid;
-    place-items:center;
-    flex:0 0 32px;
-    width:32px;
-    height:32px;
-    border-radius:10px;
-    background:color-mix(in srgb,var(--duty-cell-bg,var(--control-bg)) 22%,var(--surface));
-    font-size:18px;
-    line-height:1;
-  }
-  .week-duty-copy{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    min-width:0;
-    gap:1px;
-  }
-  .week-duty-copy>strong{
-    min-width:0;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    font-size:15px;
-    line-height:18px;
-    font-weight:650;
-    color:var(--ink);
-  }
-  .week-duty-time{
-    display:flex;
-    align-items:baseline;
-    gap:5px;
-    min-width:0;
-    font-size:12px;
-    line-height:15px;
-    font-variant-numeric:tabular-nums;
-    color:var(--muted);
-    white-space:nowrap;
-  }
-  .week-duty-time>small{
-    display:inline;
-    font-size:10px;
-    line-height:12px;
-    font-weight:600;
-    color:var(--accent);
-  }
+  .week-duty{grid-column:2;min-width:0;display:flex;align-items:center;gap:9px}
+  .week-duty-icon{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;border-radius:9px;background:color-mix(in srgb,var(--duty-cell-bg,var(--control-bg)) 22%,var(--surface));font-size:17px;line-height:1}
+  .week-duty-copy{display:flex;flex-direction:column;justify-content:center;min-width:0;gap:0}
+  .week-duty-copy>strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;line-height:17px;font-weight:650;color:var(--ink)}
+  .week-duty-time{display:flex;align-items:baseline;gap:5px;min-width:0;font-size:11px;line-height:14px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+  .week-duty-time>small{display:inline;font-size:9px;line-height:11px;font-weight:600;color:var(--accent)}
   .week-duty-unplanned .week-duty-icon{background:var(--control-bg);color:var(--muted)}
   .week-duty-unplanned .week-duty-copy>strong{font-weight:500;color:var(--muted)}
 
-  .calendar-screen .week-calendar .cell-entries,
-  .calendar-screen .week-calendar .cell-events{
-    grid-column:2;
-    min-width:0;
-    max-height:17px;
-    margin-left:42px;
-    gap:7px;
-  }
-  .calendar-screen .week-calendar .cell-entry,
-  .calendar-screen .week-calendar .cell-entry-text,
-  .calendar-screen .week-calendar .cell-entry-time,
-  .calendar-screen .week-calendar .cell-entry-more{
-    font-size:10.5px;
-    line-height:15px;
-  }
+  .calendar-screen .week-calendar .cell-entries,.calendar-screen .week-calendar .cell-events{grid-column:2;min-width:0;max-height:14px;margin-left:38px;gap:6px}
+  .calendar-screen .week-calendar .cell-entry,.calendar-screen .week-calendar .cell-entry-text,.calendar-screen .week-calendar .cell-entry-time,.calendar-screen .week-calendar .cell-entry-more{font-size:9.5px;line-height:13px}
   .calendar-screen .week-calendar .cell-entry-text{color:var(--muted)}
 
-  .calendar-main:has(.week-calendar) .phone-day-peek{
-    flex-basis:78px;
-    height:78px;
-    padding-top:4px;
-    padding-bottom:3px;
-    border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent);
-  }
-  .calendar-main:has(.week-calendar) .phone-peek-heading{height:39px}
-  .calendar-main:has(.week-calendar) .phone-peek-heading>button{min-height:38px}
-  .calendar-main:has(.week-calendar) .phone-peek-actions button{min-height:38px;min-width:40px;font-size:13px}
-  .calendar-main:has(.week-calendar) .phone-peek-notes-button{min-height:28px}
-  .calendar-main:has(.week-calendar) .phone-peek-notes,
-  .calendar-main:has(.week-calendar) .phone-peek-hint{-webkit-line-clamp:1;font-size:12px;line-height:16px}
+  .calendar-main:has(.week-calendar) .phone-day-peek{flex-basis:72px;height:72px;padding-top:2px;padding-bottom:2px;border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
+  .calendar-main:has(.week-calendar) .phone-peek-heading{height:36px}
+  .calendar-main:has(.week-calendar) .phone-peek-heading>button{min-height:35px}
+  .calendar-main:has(.week-calendar) .phone-peek-actions button{min-height:35px;min-width:39px;font-size:12px}
+  .calendar-main:has(.week-calendar) .phone-peek-notes-button{min-height:26px}
+  .calendar-main:has(.week-calendar) .phone-peek-notes,.calendar-main:has(.week-calendar) .phone-peek-hint{-webkit-line-clamp:1;font-size:11px;line-height:14px}
 }
 
 @media screen and (max-width:380px){
-  .calendar-screen .week-calendar .calendar-cell{grid-template-columns:43px minmax(0,1fr);column-gap:8px;padding-right:8px}
-  .calendar-screen .week-calendar .date-label{font-size:20px}
-  .week-duty{gap:8px}
-  .week-duty-icon{flex-basis:29px;width:29px;height:29px;border-radius:9px;font-size:17px}
-  .week-duty-copy>strong{font-size:14px}
-  .week-duty-time{font-size:11px}
-  .calendar-screen .week-calendar .cell-entries,.calendar-screen .week-calendar .cell-events{margin-left:37px}
+  .calendar-screen .week-calendar .calendar-cell{grid-template-columns:41px minmax(0,1fr);column-gap:7px;padding-right:7px;min-height:49px}
+  .calendar-screen .week-calendar .date-label{font-size:18px}
+  .week-duty{gap:7px}.week-duty-icon{flex-basis:27px;width:27px;height:27px;border-radius:8px;font-size:16px}
+  .week-duty-copy>strong{font-size:13px}.week-duty-time{font-size:10px}
+  .calendar-screen .week-calendar .cell-entries,.calendar-screen .week-calendar .cell-events{margin-left:34px}
 }
