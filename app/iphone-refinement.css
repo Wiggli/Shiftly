@@ -1,11 +1,13 @@
 /* Final iPhone refinement layer. Keep desktop and the compact month grid stable. */
 @media screen and (max-width:800px){
-  /* PWA viewport and home-indicator area belong to the app surface, not a black page gutter. */
-  html,body,#__next,.app-shell{min-height:100%;background:var(--bg)}
-  body{min-height:100dvh;padding:0;margin:0;overscroll-behavior-y:none}
-  .workspace{min-height:100dvh;background:var(--bg)}
+  /* Use the stable standalone viewport height so iOS does not leave a bottom chin. */
+  html,body,#__next,.app-shell{min-height:100vh;background:var(--bg)}
+  body{min-height:100vh;padding:0;margin:0;overscroll-behavior-y:contain}
+  .workspace{min-height:100vh;background:var(--bg)}
   .full-main{padding-bottom:calc(86px + var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
   .mobile-nav{padding-bottom:max(7px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));background:var(--surface)}
+
+  button,a,label,[role="button"],.calendar-cell{-webkit-tap-highlight-color:transparent}
 
   /* Calm the page hierarchy and keep the same rhythm across Today, Patterns and More. */
   .full-main>.page-heading{margin-bottom:16px}
@@ -40,14 +42,12 @@
   .pattern-status-actions button{min-height:44px;padding:8px 10px;font-size:13px}
   .pattern-empty>small{grid-column:1/-1;font-size:11px;line-height:1.4;color:var(--muted);margin-top:1px}
 
-  /* Calendar selection should read as selection, not an error/focus rectangle. */
   .calendar-screen .calendar .calendar-cell.selected{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 78%,transparent)}
 }
 
-/* Installed calendar owns the complete viewport, including the iPhone bottom inset. */
 @media screen and (max-width:800px){
-  html[data-calendar-fit=true],html[data-calendar-fit=true] body{height:100dvh;min-height:100dvh;background:var(--bg)}
-  .calendar-screen{height:100dvh;background:var(--bg)}
-  .calendar-screen .workspace{height:100dvh;padding-bottom:0;background:var(--bg)}
+  html[data-calendar-fit=true],html[data-calendar-fit=true] body{height:100vh;min-height:100vh;background:var(--bg)}
+  .calendar-screen{height:100vh;background:var(--bg)}
+  .calendar-screen .workspace{height:100vh;padding-bottom:0;background:var(--bg)}
   .calendar-screen .mobile-nav{background:var(--surface);padding-bottom:max(6px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
 }
