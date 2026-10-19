@@ -41,3 +41,12 @@ test('Offline cache includes lazy-loaded application chunks',()=>{
 test('Online navigation asks for a fresh entry document instead of an old cached asset manifest',async()=>{
  const w=worker();await w.run('install');await w.run('fetch',{request:{url:'https://wiggli.github.io/Shiftly/',method:'GET',mode:'navigate'}});assert.equal(w.requests[0][1].cache,'no-store');
 });
+
+
+test('Update version is published separately from the offline cache so manual checks reach the server',async()=>{
+ const version=JSON.parse(fs.readFileSync('standalone-dist/version.json','utf8'));
+ assert.match(version.build,/^[a-f0-9]{10}$/);
+ assert.ok(fs.readFileSync('standalone-dist/index.html','utf8').includes('content="'+version.build+'"'));
+ const w=worker();await w.run('install');
+ assert.equal(await w.run('fetch',{request:{url:'https://wiggli.github.io/Shiftly/version.json',method:'GET',mode:'cors'}}),undefined);
+});

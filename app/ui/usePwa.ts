@@ -1,9 +1,11 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {canActivateUpdate} from '../../lib/pwa-update';
+import {canActivateUpdate,inspectAppUpdate} from '../../lib/pwa-update';
 type InstallPrompt=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>};
 export function usePwa(preview=false){
  const [installed,setInstalled]=useState(false),[ios,setIos]=useState(false),[mobile,setMobile]=useState(false),[prompt,setPrompt]=useState<InstallPrompt|null>(null),[ready,setReady]=useState(false),[update,setUpdate]=useState(false),[online,setOnline]=useState(true),[error,setError]=useState(''),[dismissed,setDismissed]=useState(true),[persistent,setPersistent]=useState<boolean|null>(null),[updating,setUpdating]=useState(false);
+ const [checking,setChecking]=useState(false),[updateMessage,setUpdateMessage]=useState('');
+ const checkInProgress=useRef(false);
  const registration=useRef<ServiceWorkerRegistration|null>(null),refreshRequested=useRef(false),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
  useEffect(()=>{
   let alive=true;const standalone=matchMedia('(display-mode: standalone)'),platformIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -16,7 +18,7 @@ export function usePwa(preview=false){
   (preview?undefined:navigator.storage?.persisted?.())?.then(value=>{if(alive)setPersistent(value);}).catch(()=>{});
   let controlled=!!navigator.serviceWorker?.controller;let lastCheck=0;const check=()=>{if(document.visibilityState!=='visible'||!navigator.onLine||Date.now()-lastCheck<60000)return;lastCheck=Date.now();registration.current?.update().catch(()=>{});};
   const changed=()=>{if(refreshRequested.current){location.reload();return;}if(alive){setReady(true);if(controlled)setUpdate(true);controlled=true;}};
-  if(!preview&&'serviceWorker' in navigator){navigator.serviceWorker.addEventListener('controllerchange',changed);navigator.serviceWorker.register(((window as any).__SHIFTLY_STANDALONE__?.base||'/')+'sw.js',{scope:(window as any).__SHIFTLY_STANDALONE__?.base||'/',updateViaCache:'none'}).then(reg=>{if(!alive)return;registration.current=reg;if(reg.active)setReady(true);if(reg.waiting)setUpdate(true);const watch=(worker:ServiceWorker|null)=>{if(!worker)return;worker.addEventListener('statechange',()=>{if(!alive)return;if(worker.state==='installed'&&navigator.serviceWorker.controller)setUpdate(true);if(worker.state==='activated')setReady(true);});};watch(reg.installing);reg.addEventListener('updatefound',()=>watch(reg.installing));check();}).catch(()=>{if(alive)setError('Offline preparation failed. Reconnect and reopen the app to try again.');});}
+  if(!preview&&'serviceWorker' in navigator){navigator.serviceWorker.addEventListener('controllerchange',changed);navigator.serviceWorker.register(((window as any).__SHIFTLY_STANDALONE__?.base||'/')+'sw.js',{scope:(window as any).__SHIFTLY_STANDALONE__?.base||'/',updateViaCache:'none'}).then(reg=>{if(!alive)return;registration.current=reg;if(reg.active)setReady(true);if(reg.waiting)setUpdate(true);const watch=(worker:ServiceWorker|null)=>{if(!worker)return;worker.addEventListener('statechange',()=>{if(!alive)return;if(worker.state==='installed'&&navigator.serviceWorker.controller){setUpdate(true);setUpdateMessage('An update is ready. Tap Update app when your edits are saved.');}if(worker.state==='activated')setReady(true);});};watch(reg.installing);reg.addEventListener('updatefound',()=>watch(reg.installing));check();}).catch(()=>{if(alive)setError('Offline preparation failed. Reconnect and reopen the app to try again.');});}
   document.addEventListener('visibilitychange',check);window.addEventListener('online',check);window.addEventListener('pageshow',check);const interval=setInterval(check,5*60*1000);
   return()=>{alive=false;standalone.removeEventListener('change',display);window.removeEventListener('online',connection);window.removeEventListener('offline',connection);window.removeEventListener('beforeinstallprompt',before);window.removeEventListener('appinstalled',complete);window.visualViewport?.removeEventListener('resize',viewport);window.visualViewport?.removeEventListener('scroll',viewport);window.removeEventListener('resize',viewport);document.removeEventListener('focusin',viewport);document.removeEventListener('focusout',viewport);document.removeEventListener('visibilitychange',check);window.removeEventListener('online',check);window.removeEventListener('pageshow',check);clearInterval(interval);if(timer.current)clearTimeout(timer.current);navigator.serviceWorker?.removeEventListener('controllerchange',changed);};
  },[]);
@@ -24,8 +26,21 @@ export function usePwa(preview=false){
  function dismiss(){setDismissed(true);try{localStorage.setItem('shiftly-install-dismissed',String(Date.now()));}catch{}}
  async function protect(){try{const value=await navigator.storage?.persist?.();setPersistent(!!value);if(!value)setError('Your browser manages storage automatically. Keep a backup of important rosters.');}catch{setError('Your browser manages storage automatically. Keep a backup of important rosters.');}}
  async function applyUpdate(){if(!online||refreshRequested.current)return;setUpdating(true);setError('');refreshRequested.current=true;const waiting=registration.current?.waiting;if(waiting){waiting.postMessage({type:'ACTIVATE_UPDATE'});timer.current=setTimeout(()=>{refreshRequested.current=false;setUpdating(false);setError('The update is still preparing. Close other Shiftly windows, then try again.');},10000);}else location.reload();}
- async function checkUpdate(){try{await registration.current?.update();if(registration.current?.waiting)setUpdate(true);}catch{setError('Reconnect to check for an update.');}}
- return {installed,ios,mobile,canPrompt:!!prompt,install,ready,update,online,error,dismissed,dismiss,persistent,protect,applyUpdate,updating,checkUpdate};
+ async function checkUpdate(){
+  if(checkInProgress.current)return;
+  checkInProgress.current=true;setChecking(true);setError('');setUpdateMessage('Checking the published version…');
+  try{
+   const result=await inspectAppUpdate({online:navigator.onLine,preview,currentBuild:document.querySelector('meta[name="shiftly-build"]')?.getAttribute('content')||'',registration:registration.current,loadVersion:async()=>{
+    const base=(window as any).__SHIFTLY_STANDALONE__?.base||new URL('.',location.href).pathname;
+    const response=await fetch(new URL(base+'version.json',location.origin),{cache:'no-store',signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw Error('The update server could not be reached. Please try again.');
+    return response.text();
+   }});
+   if(result.update)setUpdate(true);setUpdateMessage(result.message);
+  }catch(error){setUpdateMessage('');setError(error instanceof Error&&error.name!=='TimeoutError'?error.message:'The update check timed out. Please try again.');}
+  finally{checkInProgress.current=false;setChecking(false);}
+ }
+ return {installed,ios,mobile,canPrompt:!!prompt,install,ready,update,online,error,dismissed,dismiss,persistent,protect,applyUpdate,updating,checkUpdate,checking,updateMessage};
 }
 
 export function useAutomaticUpdate(pwa:ReturnType<typeof usePwa>,safe:boolean){

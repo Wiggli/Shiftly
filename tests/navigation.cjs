@@ -20,3 +20,30 @@ test('Month navigation keeps quick-entry dates inside the visible month and clam
  assert.equal(dateInMonth('2026-12-31','2027-01'),'2027-01-31');
  assert.equal(dateInMonth('2026-10-19','invalid'),'2026-10-19');
 });
+
+test('Manual update checks compare the published build even before the offline updater is ready',async()=>{
+ const {inspectAppUpdate}=require('../lib/pwa-update.ts');
+ const base={online:true,preview:false,currentBuild:'abc123',registration:null,loadVersion:async()=>'{"build":"def456"}'};
+ const changed=await inspectAppUpdate(base);assert.equal(changed.update,true);assert.match(changed.message,/newer version/);
+ const current=await inspectAppUpdate({...base,loadVersion:async()=>'{"build":"abc123"}'});assert.equal(current.update,false);assert.match(current.message,/up to date.*abc123/);
+});
+test('Manual update checks distinguish waiting and downloading workers from the current version',async()=>{
+ const {inspectAppUpdate}=require('../lib/pwa-update.ts');let checked=0;
+ const base={online:true,preview:false,currentBuild:'abc123',loadVersion:async()=>'{"build":"abc123"}'};
+ const waiting=await inspectAppUpdate({...base,registration:{waiting:{},update:async()=>{checked++;}}});assert.equal(waiting.update,true);
+ const downloading=await inspectAppUpdate({...base,registration:{installing:{},update:async()=>{checked++;}}});assert.equal(downloading.update,false);assert.match(downloading.message,/downloading/);assert.equal(checked,2);
+});
+test('Manual update checks report offline, invalid responses and updater errors without claiming success',async()=>{
+ const {inspectAppUpdate}=require('../lib/pwa-update.ts');let fetched=0;
+ const base={online:true,preview:false,currentBuild:'abc123',loadVersion:async()=>{fetched++;return 'error page';}};
+ await assert.rejects(inspectAppUpdate({...base,online:false}),/offline/);assert.equal(fetched,0);
+ await assert.rejects(inspectAppUpdate(base),/Could not verify/);
+ await assert.rejects(inspectAppUpdate({...base,loadVersion:async()=>'{"build":"abc123"}',registration:{update:async()=>{throw Error('Network unavailable');}}}),/Network unavailable/);
+ const preview=await inspectAppUpdate({...base,preview:true,loadVersion:async()=>{throw Error('Preview must not fetch');}});assert.match(preview.message,/sample preview/);
+});
+
+
+test('An unresponsive offline updater cannot leave the manual check pending indefinitely',async()=>{
+ const {inspectAppUpdate}=require('../lib/pwa-update.ts');
+ await assert.rejects(inspectAppUpdate({online:true,preview:false,currentBuild:'abc123',loadVersion:async()=>'{"build":"abc123"}',registration:{update:()=>new Promise(()=>{})},workerTimeoutMs:5}),/timed out/);
+});
