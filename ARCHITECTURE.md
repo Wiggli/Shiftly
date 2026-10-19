@@ -6,7 +6,7 @@ Navigation: Calendar (month/week/agenda/year), Today, Patterns, Insights, Settin
 
 Data: calendars own normalized shift types, occurrences, events and patterns. Each record has a stable UUID and calendar foreign key. Membership and invitations are separate, with roles owner/editor/viewer; notes have author ownership and explicit visibility. Preferences, pay and leave configuration are calendar settings. Audit records capture operations. Calendar revisions and operation identifiers support atomic optimistic locking and idempotent retry.
 
-Auth: server-provided ChatGPT identity, checked on every API request. Browser-supplied identity is never authoritative. Private deployment starts owner-only; invitation redemption additionally requires authenticated email matching the invite. External sharing requires opening the hosting audience and testing a second account. No public bearer link reveals calendar content. Revocation removes membership and every subsequent request fails authorization.
+Auth: verified Google sessions through Supabase, checked on every API request. Ownership and membership authorize calendar access; private records and notes retain per-author restrictions. The frontend uses PKCE and the backend rejects unverified tokens.
 
 Offline: IndexedDB cached snapshot and mutation outbox partitioned by calendar and authenticated user. Mutation retries use stable operation IDs. A revision mismatch preserves the queued changes and asks the user to resolve before overwriting. Offline app-shell service worker caches static application assets, never authenticated API responses. Reconnection flushes the outbox sequentially.
 

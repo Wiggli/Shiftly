@@ -1,6 +1,6 @@
 # Standalone migration
 
-Target: GitHub Pages frontend and Supabase backend. No Sites build or deployment is needed.
+Target: GitHub Pages frontend and Supabase backend. The application builds independently.
 
 ## Verified
 
@@ -16,7 +16,7 @@ The production transfer reported in the previous session is now present in Supab
 
 Read-only checks found no orphaned records. RLS is enabled on all six private tables, and neither anon nor authenticated can execute the transaction bridge. The backend health endpoint responds successfully and the deployed Edge Function is active. The existing GitHub Pages workflow completed successfully.
 
-The restored working tree had a dependency symlink into the removed Sites workspace. Dependencies were reinstalled directly in the GitHub checkout, after which all 105 unit tests, TypeScript checks and both production bundles passed. Standalone PWA regressions now check offline application/guide access, notification badge caching, private API bypass and isolation from other apps on the same GitHub Pages origin. These checks run after the Pages build in CI.
+The restored working tree had a dependency symlink into the previous workspace. Dependencies were reinstalled directly in the GitHub checkout, after which all 105 unit tests, TypeScript checks and both production bundles passed. Standalone PWA regressions now check offline application/guide access, notification badge caching, private API bypass and isolation from other apps on the same GitHub Pages origin. These checks run after the Pages build in CI.
 
 ## Still required before final cutover
 
@@ -29,3 +29,9 @@ The restored working tree had a dependency symlink into the removed Sites worksp
 ## Backend releases
 
 `pnpm build:backend` generates the Edge Function bundle. Deploy it through Supabase under `shiftly-api` with `verify_jwt=false`; its own session and CalDAV authentication must remain enabled. Supabase supplies the private server environment. The generated bundle is excluded from git.
+
+## Standalone source cleanup
+
+Unused hosting adapters and the previous authentication entry points have been removed from the current source. Shared API handlers now import the Supabase runtime directly. The installation guide and current documentation refer to the standalone application.
+
+The local integration runner uses a disposable in-memory SQLite fixture and test-only identities. Production authentication is checked separately against mocked verification responses, and fixture headers never authorize production requests. Calendar protocol, edit/sync and sharing/security integration checks now run in CI without the previous platform tooling.

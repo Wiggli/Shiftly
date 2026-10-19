@@ -33,7 +33,7 @@ UI confidence limit: this is a source and responsive-rule review, not an iPhone 
 - Users independently create private calendars and invite their own viewers/editors, without the original app owner's involvement.
 - Invitation sign-in preserves its return URL, shared calendars display the user's permission, and sign-out clears the current account's cached calendars.
 - Integration checks verify original owner/friend isolation, friend-to-spouse invitations, spouse edits, and anonymous API denial.
-- Authentication remains dispatch-owned ChatGPT sign-in. Standalone email, Apple and Google identity providers are not configured on this hosting platform.
+- Authentication uses verified Supabase Google sessions. Real device sign-in remains part of final acceptance.
 
 ## Multiple rosters in one calendar
 - Added named roster management, identity colours, active roster switching, monthly comparison markers and a Together comparison view with per-person daily detail.

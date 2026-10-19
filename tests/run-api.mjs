@@ -1,3 +1,2 @@
-import {spawn} from 'node:child_process';
-const port=process.env.TEST_API_PORT||'8788';
-const server=spawn('npm',['run','start','--','--port',port],{stdio:['ignore','pipe','pipe'],detached:true});let ready=false;const timeout=setTimeout(()=>{server.kill();process.exit(1);},45000);let output='';for(const stream of [server.stdout,server.stderr])stream.on('data',async chunk=>{output+=chunk;if(!ready&&output.includes(`Ready on http://127.0.0.1:${port}`)){ready=true;try{const test=spawn('node',['tests/api.mjs'],{env:{...process.env,TEST_API_PORT:port},stdio:'inherit'});test.on('exit',code=>{clearTimeout(timeout);process.kill(-server.pid,'SIGTERM');process.exit(code||0);});}catch(e){console.error(e);server.kill();}}});server.on('exit',code=>{if(!ready){console.error(output.slice(-3000));clearTimeout(timeout);process.exitCode=code||1;}});
+process.argv[2]='tests/api.mjs';
+await import('./run-caldav.mjs');

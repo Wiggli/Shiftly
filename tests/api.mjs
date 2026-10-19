@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const root='http://127.0.0.1:'+(process.env.TEST_API_PORT||'8787');const owner={id:'test-owner-'+Date.now(),email:'owner@example.invalid'},viewer={id:'test-viewer-'+Date.now(),email:'viewer@example.invalid'},stranger={id:'stranger',email:'stranger@example.invalid'};
-async function req(user,path='',body){const headers=user?{'oai-authenticated-user-id':user.id,'oai-authenticated-user-email':user.email}:{};if(body)headers['Content-Type']='application/json';const r=await fetch(root+'/api/calendar'+path,{headers,method:body?'POST':'GET',body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json(),headers:r.headers};}
-async function feedReq(user,body){const headers={...(user?{'oai-authenticated-user-id':user.id,'oai-authenticated-user-email':user.email}:{}),'Content-Type':'application/json'};const r=await fetch(root+'/api/calendar/feed',{headers,method:'POST',body:JSON.stringify(body)});return {status:r.status,data:await r.json()};}
+async function req(user,path='',body){const headers=user?{'x-test-user-id':user.id,'x-test-user-email':user.email}:{};if(body)headers['Content-Type']='application/json';const r=await fetch(root+'/api/calendar'+path,{headers,method:body?'POST':'GET',body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json(),headers:r.headers};}
+async function feedReq(user,body){const headers={...(user?{'x-test-user-id':user.id,'x-test-user-email':user.email}:{}),'Content-Type':'application/json'};const r=await fetch(root+'/api/calendar/feed',{headers,method:'POST',body:JSON.stringify(body)});return {status:r.status,data:await r.json()};}
 assert.equal((await req(null)).status,401);let {data:s,status}=await req(owner);assert.equal(status,200);const id=s.calendar.id;assert.equal(s.shifts.length,4);assert.equal((await req(stranger,'?id='+id)).status,403);
 const op={action:'mutate',calendarId:id,revision:0,operationId:crypto.randomUUID(),summary:'private event title',changes:[{kind:'event',id:'secret',data:{id:'secret',date:'2026-11-20',time:'10:00',title:'SECRET',notes:'PRIVATE',emoji:'🏥',private:true,reminders:[]}}]};assert.equal((await req(owner,'',op)).status,200);assert.equal((await req(owner,'',op)).status,200);assert.equal((await req(owner,'',{...op,operationId:crypto.randomUUID()})).status,409);
 const extra=(await req(owner,'',{action:'invite',calendarId:id,email:viewer.email,role:'viewer'})).data.token;let result=await req(owner,'',{action:'invite',calendarId:id,email:viewer.email,role:'viewer'});assert.equal(result.status,200);const token=result.data.token;assert.equal((await req(viewer,'',{action:'accept',token:extra})).status,400);assert.equal((await req(stranger,'',{action:'accept',token})).status,400);assert.equal((await req(viewer,'',{action:'accept',token})).status,200);let shared=await req(viewer,'?id='+id);assert.equal(shared.status,200);assert.equal(shared.data.events.length,0);assert.ok(!JSON.stringify(shared.data).includes('private event title'));assert.equal(shared.data.role,'viewer');assert.equal((await req(viewer,'',{...op,operationId:crypto.randomUUID(),revision:1})).status,403);
@@ -41,7 +41,7 @@ assert.equal((await edit([{kind:'occurrence',id:'2026-11-21',data:{id:'2026-11-2
 assert.equal((await req(editor,'',{action:'accept',token:staleInvite})).status,400);
 assert.equal((await req(owner,'',{action:'memberRole',calendarId:sharedId,id:editorMember.id,role:'editor'})).status,200);
 const controller=new AbortController();
-const live=await fetch(root+'/api/live?id='+sharedId,{headers:{'oai-authenticated-user-id':editor.id,'oai-authenticated-user-email':editor.email},signal:controller.signal});
+const live=await fetch(root+'/api/live?id='+sharedId,{headers:{'x-test-user-id':editor.id,'x-test-user-email':editor.email},signal:controller.signal});
 assert.equal(live.status,200);const reader=live.body.getReader();const decoder=new TextDecoder();
 const first=decoder.decode((await reader.read()).value);const before=JSON.parse(first.match(/data: (.+)/)[1]).revision;
 assert.equal((await edit([{kind:'occurrence',id:'2026-11-21',data:{id:'2026-11-21',date:'2026-11-21',shiftId:'day'}}])).status,200);
@@ -89,12 +89,6 @@ assert.equal((await req(friend,'',{action:'memberRole',calendarId:familyId,id:ow
 assert.equal((await familyWrite(wife,[{kind:'roster',id:'extra',data:{id:'extra',name:'Unauthorized',color:'#1570ef'}}])).status,403);
 console.log('API PASS: multiple rosters per calendar, independent same-date shifts and patterns, editor access, viewer denial and original-owner isolation.');
 
-assert.equal((await fetch(root+'/auth/google?return_to=https://evil.test',{redirect:'manual'})).status,503);
-assert.equal((await fetch(root+'/auth/callback?code=forged',{redirect:'manual'})).status,400);
-assert.equal((await fetch(root+'/auth/signout',{method:'POST',headers:{Origin:'https://evil.test'}})).status,403);
-assert.equal((await fetch(root+'/auth/google',{method:'POST',headers:{Origin:'https://evil.test'}})).status,403);
-console.log('API PASS: unconfigured Google sign-in fails safely, unsolicited callback rejected, cross-origin linking and logout rejected.');
-
 const emojiShift=(await req(owner,'?id='+created.data.id)).data.shifts.find(s=>s.id==='night');
 assert.equal((await send([{kind:'shift',id:'night',data:{...emojiShift,emoji:'👨‍👩‍👧‍👦',fontSize:18}}])).status,200);
 assert.equal((await send([{kind:'event',id:'native-family',data:{id:'native-family',date:'2026-11-01',title:'Family',emoji:'👩🏽‍⚕️',time:'',notes:'',private:false,reminders:[]}}])).status,200);
@@ -113,13 +107,6 @@ assert.deepEqual(afterArchive.patterns,beforeArchive.patterns);assert.deepEqual(
 assert.equal((await send([{kind:'shift',id:shiftForArchive.id,data:{...shiftForArchive,archived:false}}])).status,200);
 assert.equal((await req(owner,'?id='+created.data.id)).data.shifts.find(shift=>shift.id==='night').archived,false);
 console.log('API PASS: deleting and restoring shift choices persists without rewriting dates, patterns or private notes.');
-
-for(const path of ['/manifest.json','/sw.js','/share/install-qr.svg','/share/install-guide.html','/offline.html','/offline-assets/app.js','/offline-assets/app.css','/icons/icon-192.png','/icons/icon-512.png','/icons/maskable-512.png','/icons/apple-touch-icon.png']){const asset=await fetch(root+path);assert.equal(asset.status,200,path);assert.ok((await asset.arrayBuffer()).byteLength>0,path);}
-const qrResponse=await fetch(root+'/share/install-qr.svg');assert.ok(qrResponse.headers.get('content-type').includes('svg'));const qrText=await qrResponse.text();assert.ok(qrText.includes('viewBox'));const guideResponse=await fetch(root+'/share/install-guide.html');const guideText=await guideResponse.text();assert.ok(guideText.includes('People &amp; access')||guideText.includes('People & access'));assert.ok(guideText.includes('/?install=1'));
-const manifestResponse=await fetch(root+'/manifest.json');assert.ok(manifestResponse.headers.get('content-type').includes('json'));
-const workerResponse=await fetch(root+'/sw.js');assert.ok(/javascript/.test(workerResponse.headers.get('content-type')));
-const pageResponse=await fetch(root+'/');const pageHtml=await pageResponse.text();assert.ok(pageHtml.includes('apple-touch-icon'));assert.ok(pageHtml.includes('viewport-fit=cover'));assert.ok(pageHtml.includes('manifest.json'));
-console.log('PWA HTTP PASS: complete offline shell, correctly served worker/manifest/icons, and iPhone launch metadata.');
 
 // Single-roster access is enforced for payloads, guessed IDs, definitions,
 // exports, invitation replacement, permission narrowing and revoked streams.
@@ -153,7 +140,7 @@ assert.equal((await scopedWrite([{kind:'occurrence',id:'wife:2026-11-13',data:{i
 assert.equal((await req(friend,'',{action:'revoke',calendarId:familyId,id:scopeMember.id})).status,200);
 assert.equal((await req(scopedUser,'?id='+familyId)).status,403);
 assert.equal((await req(scopedUser,'',{action:'accept',token:scopedToken})).status,400);
-const revokedLive=await fetch(root+'/api/live?id='+familyId,{headers:{'oai-authenticated-user-id':scopedUser.id,'oai-authenticated-user-email':scopedUser.email}});assert.equal(revokedLive.status,403);
+const revokedLive=await fetch(root+'/api/live?id='+familyId,{headers:{'x-test-user-id':scopedUser.id,'x-test-user-email':scopedUser.email}});assert.equal(revokedLive.status,403);
 console.log('API PASS: single-roster payload isolation, invitation scope preview, superseded links, foreign-ID denial, safe custom types, private notes, viewer downgrade and revoked live access.');
 
 const implicit=await req(friend,'',{action:'newCalendar',name:'Implicit main scope test'});const implicitId=implicit.data.id;
@@ -174,6 +161,6 @@ const protectedState=(await req(owner,'?id='+created.data.id)).data;
 assert.equal((await req(editor,'',{action:'mutate',calendarId:created.data.id,revision:protectedState.calendar.revision,operationId:crypto.randomUUID(),changes:[{kind:'event',id:'public-private-notes',remove:true}]})).status,400);
 assert.equal((await req(owner,'?id='+created.data.id)).data.events.find(e=>e.id==='public-private-notes').notes,'OWNER SECRET');
 for(const path of ['/', '/api/calendar', '/api/calendar?id=missing', '/auth/callback?code=forged']){const r=await fetch(root+path);assert.equal(r.headers.get('cache-control'),'private, no-store',path);assert.equal(r.headers.get('referrer-policy'),'no-referrer',path);assert.equal(r.headers.get('x-content-type-options'),'nosniff',path);}
-const malformed=await fetch(root+'/api/calendar',{method:'POST',headers:{'oai-authenticated-user-id':owner.id,'oai-authenticated-user-email':owner.email,'Content-Type':'application/json'},body:'null'});assert.equal(malformed.status,400);assert.equal((await malformed.json()).error,'Invalid request');
-const oversize=await fetch(root+'/api/calendar',{method:'POST',headers:{'oai-authenticated-user-id':owner.id,'oai-authenticated-user-email':owner.email,'Content-Type':'application/json'},body:JSON.stringify({value:'x'.repeat(200001)})});assert.equal(oversize.status,400);assert.equal((await oversize.json()).error,'Request too large');
+const malformed=await fetch(root+'/api/calendar',{method:'POST',headers:{'x-test-user-id':owner.id,'x-test-user-email':owner.email,'Content-Type':'application/json'},body:'null'});assert.equal(malformed.status,400);assert.equal((await malformed.json()).error,'Invalid request');
+const oversize=await fetch(root+'/api/calendar',{method:'POST',headers:{'x-test-user-id':owner.id,'x-test-user-email':owner.email,'Content-Type':'application/json'},body:JSON.stringify({value:'x'.repeat(200001)})});assert.equal(oversize.status,400);assert.equal((await oversize.json()).error,'Request too large');
 console.log('SECURITY HTTP PASS: private-note deletion protected, sensitive responses never cached, referrer suppression and bounded malformed requests.');

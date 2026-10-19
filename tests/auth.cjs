@@ -4,7 +4,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const {safeReturnPath,verifiedGoogleUser,googlePrincipal}=require('../lib/auth-policy.ts');
 test('OAuth redirects preserve invitations while rejecting external and authentication URLs',()=>{
   assert.equal(safeReturnPath('/?invite=abc&date=2026-11-20'),'/?invite=abc&date=2026-11-20');
-  for(const bad of ['https://evil.test','//evil.test','/\\evil.test','/auth/google','/callback','/signin-with-chatgpt','/signout-with-chatgpt','/\nLocation:evil',null])assert.equal(safeReturnPath(bad),'/');
+  for(const bad of ['https://evil.test','//evil.test','/\\evil.test','/auth/google','/callback','/signin-with-provider','/signout-with-provider','/\nLocation:evil',null])assert.equal(safeReturnPath(bad),'/');
 });
 test('Google authorization requires a verified Google identity, never editable metadata',()=>{
   const valid={id:'uuid',email:'person@example.invalid',email_confirmed_at:'2026-10-09',identities:[{provider:'google'}]};

@@ -1,6 +1,6 @@
 # Shiftly reliability and iPhone release
 
-Prepared on 18 October 2026 for the existing Sites project and production URL. No database reset, identity replacement or audience change is part of this release.
+Prepared on 18 October 2026 for the previous deployment. No database reset, identity replacement or audience change is part of this release.
 
 ## Fixed behavior
 

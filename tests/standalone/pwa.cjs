@@ -27,3 +27,10 @@ test('Notification clicks cannot navigate a different GitHub Pages application o
  await w.run('notificationclick',{notification:{close(){},data:{url:'https://untrusted.invalid/'}}});
  assert.deepEqual(w.navigated,[]);assert.deepEqual(w.opened,['https://wiggli.github.io/Shiftly/']);
 });
+test('Published Pages metadata and installation guide point to the standalone application',()=>{
+ const html=fs.readFileSync('standalone-dist/index.html','utf8'),guide=fs.readFileSync('standalone-dist/share/install-guide.html','utf8'),manifest=JSON.parse(fs.readFileSync('standalone-dist/manifest.json','utf8'));
+ assert.match(html,/apple-touch-icon/);assert.match(html,/viewport-fit=cover/);assert.match(html,/manifest.json/);
+ assert.equal(manifest.start_url,'/Shiftly/');assert.equal(manifest.scope,'/Shiftly/');
+ assert.match(guide,/https:\/\/wiggli.github.io\/Shiftly\/\?install=1/);
+ assert.match(guide,/People (?:&amp;|&) access/);
+});

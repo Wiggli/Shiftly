@@ -1,4 +1,4 @@
-import {env} from 'cloudflare:workers';
+import {env} from '../standalone/server/runtime';
 import {addDays,dayNumber,calendarDate,resolveShift,Snapshot,zonedInstant} from './engine';
 import {calendarICS,foldCalendarLine,parseCalendarDate} from './ics';
 import {calendarRosters,rosterSnapshot} from './rosters';

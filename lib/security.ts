@@ -18,9 +18,9 @@ export function secureResponse(request:Request,response:Response){
  if(new URL(request.url).protocol==='https:')result.headers.set('Strict-Transport-Security','max-age=31536000');
  if(path==='/'||path.startsWith('/api/')||path.startsWith('/auth/')){
   result.headers.set('Cache-Control','private, no-store');result.headers.set('Pragma','no-cache');
-  result.headers.set('Vary',[result.headers.get('Vary'),'Cookie','oai-authenticated-user-id'].filter(Boolean).join(', '));
+  result.headers.set('Vary',[result.headers.get('Vary'),'Cookie','Authorization'].filter(Boolean).join(', '));
  }
- if(!result.headers.has('Content-Security-Policy'))result.headers.set('Content-Security-Policy',"base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'self' https://chatgpt.com https://*.chatgpt.com");
+ if(!result.headers.has('Content-Security-Policy'))result.headers.set('Content-Security-Policy',"base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'self'");
  return result;
 }
 /** Never restore an optimistic copy with broader permissions than the fresh server grant. */

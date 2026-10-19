@@ -4,7 +4,7 @@ const {fastEntryDraft}=require('../lib/quick-entries.ts');
 const {shiftAssignmentChanges}=require('../lib/shift-assignment.ts');
 const {resolveShift}=require('../lib/engine.ts');
 const {copyBlock,pasteBlock,copyPatternAt}=require('../lib/roster-edit.ts');
-const root='http://127.0.0.1:'+(process.env.TEST_API_PORT||'8789'),owner='edit-sync-'+Date.now(),headers={'oai-authenticated-user-id':owner,'oai-authenticated-user-email':'edit-sync@example.invalid','Content-Type':'application/json'};
+const root='http://127.0.0.1:'+(process.env.TEST_API_PORT||'8789'),owner='edit-sync-'+Date.now(),headers={'x-test-user-id':owner,'x-test-user-email':'edit-sync@example.invalid','Content-Type':'application/json'};
 async function api(path='',body){const response=await fetch(root+'/api/calendar'+path,{headers,method:body?'POST':'GET',body:body?JSON.stringify(body):undefined});const text=await response.text();assert.equal(response.status,200,text);return JSON.parse(text);}
 (async()=>{
  const created=await api('',{action:'newCalendar',name:'Edit sync check'}),id=created.id;

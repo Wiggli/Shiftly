@@ -32,7 +32,7 @@ Sources: https://support.ebisu-soft.com/hc/en-us/categories/360000909792-Shift-W
 | Undo / redo | Session inverse operations, cloud audit | Shifter copy/cut/paste | Implemented | Persistent restore-history UI pending |
 | Offline | IndexedDB snapshots/outbox, standalone cached shell | Competitor local storage | Implemented | Network reconnection and device QA pending |
 | Cloud persistence | D1 records with indexed calendar/record keys | Both backups / sync features | Implemented | Server-side auth and revision guards |
-| Authentication | ChatGPT-hosted auth; guest calendar locally | Platform accounts | Partial | Apple/Google/email providers not configured |
+| Authentication | Google sign-in through Supabase; personal calendar locally | Platform accounts | Implemented | Real iPhone sign-in acceptance remains open |
 | Biometric lock | Not present | Platform-dependent | Pending | Native LocalAuthentication target |
 | Backup / restore | JSON export and record import | Both backup / restore | Implemented | Restore is merge by ID, not exact deletion replacement |
 | Public holidays | Manual event calendar possible | Both holiday display | Partial | Regional providers not integrated |

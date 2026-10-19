@@ -10,7 +10,7 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-EXCLUDED_DIRS = {'node_modules', 'dist', '.next', '.vinext', '.wrangler', '.sites-runtime', '.git', '.agents', '.codex', 'coverage', 'outputs', 'work', '__pycache__'}
+EXCLUDED_DIRS = {'node_modules', 'dist', '.next', '.vinext', '.wrangler', '.runtime', '.git', 'tool-state', 'coverage', 'outputs', 'work', '__pycache__'}
 SECRET_PATTERNS = [
     rb'gh[pousr]_[A-Za-z0-9]{30,}',
     rb'github_pat_[A-Za-z0-9_]{30,}',

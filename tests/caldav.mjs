@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 assert.equal(calendarDisplayOptions(null).groupByType,false);assert.equal(calendarDisplayOptions({groupByType:true}).groupByType,false);assert.equal(calendarDisplayOptions({layoutVersion:2,groupByType:true}).groupByType,true);
 const root='http://127.0.0.1:'+(process.env.TEST_API_PORT||'8788');
 const owner={id:'caldav-owner-'+Date.now(),email:'caldav-owner@example.invalid'};
-async function app(path='',body){const headers={'oai-authenticated-user-id':owner.id,'oai-authenticated-user-email':owner.email};if(body)headers['Content-Type']='application/json';const r=await fetch(root+'/api/calendar'+path,{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json()};}
+async function app(path='',body){const headers={'x-test-user-id':owner.id,'x-test-user-email':owner.email};if(body)headers['Content-Type']='application/json';const r=await fetch(root+'/api/calendar'+path,{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json()};}
 async function mutate(calendarId,changes){const state=(await app('?id='+calendarId)).data;return app('',{action:'mutate',calendarId,revision:state.calendar.revision,operationId:crypto.randomUUID(),changes});}
 
 const created=await app('',{action:'newCalendar',name:'CalDAV test'});assert.equal(created.status,200);const calendarId=created.data.id;

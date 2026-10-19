@@ -7,5 +7,5 @@
 - Preserve planned duties when adding leave, overtime, or notes. Do not change real roster data while visually testing controls.
 - Use the existing mutation, offline, sync, authorization and audit paths. Build the offline bundle and service worker before publishing UI changes.
 
-- GitHub Pages and Supabase are the only active platform. Do not use Sites, redeploy it, or change its live deployment.
+- GitHub Pages and Supabase are the only active platform. Do not modify or decommission the previous deployment.
 - Run `pnpm build`, `pnpm typecheck`, and relevant tests before publishing. Keep credentials and generated output out of git.
