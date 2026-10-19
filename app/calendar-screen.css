@@ -156,3 +156,10 @@
  .calendar-screen .calendar .calendar-cell .cell-shift>strong{min-width:0;overflow:hidden;text-overflow:ellipsis}
  .calendar-screen .calendar .calendar-cell .cell-shift.long-duty>strong{font-size:18px}
 }
+@media screen {
+ .calendar-screen .calendar .calendar-cell.outside{--duty-cell-ink:var(--ink)!important}
+ .calendar-screen .calendar-cell.outside .cell-shift{opacity:.75}
+}
+@media screen and (max-width:800px) and (min-height:601px){
+ .calendar-screen .calendar .calendar-cell .cell-shift.long-duty{flex-direction:column;flex-wrap:nowrap;gap:1px}
+}
