@@ -7,7 +7,7 @@ import '../../app/apple-ui.css';
 import '../../app/calendar-screen.css';
 const root=createRoot(document.getElementById('root')!);
 const preview=new URLSearchParams(location.search);
-if(preview.get("preview")==="demo"){const date=preview.get("date")||"2026-10-19";root.render(<CalendarApp identity={null} previewState={demoCalendar(date)} previewTheme={preview.get("theme")==="dark"?"dark":"light"}/>);}
+if(preview.get("preview")==="demo"){document.addEventListener("click",event=>{if((event.target as HTMLElement).closest?.('a[href^="/auth/"]')){event.preventDefault();window.open(new URL(".",location.href).href,"_blank","noopener");}});const date=preview.get("date")||"2026-10-19";root.render(<CalendarApp identity={null} previewState={demoCalendar(date)} previewTheme={preview.get("theme")==="dark"?"dark":"light"}/>);}
 else void start();
 async function start(){
 const {client,installTransport}=await import("./runtime");installTransport();

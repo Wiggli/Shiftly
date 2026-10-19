@@ -122,3 +122,37 @@
 @supports(-webkit-touch-callout:none){
  @media screen and (max-width:800px){html[data-standalone=true] .calendar-screen .workspace{padding-top:calc(env(safe-area-inset-top,0px) + 20px)}}
 }
+/* Readable month summaries and a clear, compact selected-date panel. */
+@media screen {
+ .calendar-screen .weekday-row span{color:var(--muted)}
+ .calendar-screen .calendar .calendar-cell.outside{background:color-mix(in srgb,var(--duty-cell-bg,var(--surface)) 28%,var(--bg))}
+ .calendar-screen .calendar-cell.outside .cell-shift{opacity:.6}
+ .calendar-screen .cell-entry-text{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:unset}
+ .calendar-screen .cell-entry-time{display:inline;margin:0 3px 0 0;font-size:inherit;font-weight:500}
+ .calendar-screen .calendar-cell:focus-visible{outline:0;box-shadow:inset 0 0 0 3px var(--duty-cell-ink,var(--accent))}
+}
+@media screen and (max-width:800px) and (min-height:601px){
+ .phone-roster strong{font-size:17px;letter-spacing:-.02em}
+ .phone-roster-copy small{font-size:12px}
+ .phone-profile-button .account-avatar{width:35px;height:35px;font-size:13px}
+ .phone-month-bar h1{font-size:28px}
+ .calendar-screen .calendar{border-radius:18px}
+ .calendar-screen .date-num{font-weight:600}
+ .calendar-screen .calendar .calendar-cell .cell-shift{margin:auto 0;font-size:24px;letter-spacing:-.025em}
+ .calendar-screen .calendar .calendar-cell .cell-shift>span{font-size:15px}
+ .calendar-screen .cell-entries{flex-shrink:0;margin:3px 0 2px;gap:3px;text-align:center}
+ .calendar-screen .cell-entry,.calendar-screen .has-note-shift .cell-entry{font-size:11px;line-height:15px}
+ .calendar-screen .phone-day-peek{flex:0 0 96px;height:96px;margin:8px 0;padding:7px 10px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+ .phone-peek-heading{height:44px;gap:6px}
+ .phone-peek-heading strong{font-size:15px;letter-spacing:-.01em}
+ .phone-peek-actions{gap:5px}
+ .phone-peek-actions button{min-width:44px;min-height:44px;padding:0 9px;font-size:12px;font-weight:600;background:var(--accent-soft);border-radius:10px}
+ .phone-peek-notes,.phone-peek-hint{font-size:13px;line-height:17px}
+ .calendar-screen .mobile-nav .tab-label{font-size:11px}
+}
+@media screen and (max-width:800px) and (min-height:601px){
+ .calendar-screen .calendar .calendar-cell .cell-shift{gap:3px}
+ .calendar-screen .calendar .calendar-cell .cell-shift>span{font-size:13px;flex-shrink:0}
+ .calendar-screen .calendar .calendar-cell .cell-shift>strong{min-width:0;overflow:hidden;text-overflow:ellipsis}
+ .calendar-screen .calendar .calendar-cell .cell-shift.long-duty>strong{font-size:18px}
+}
