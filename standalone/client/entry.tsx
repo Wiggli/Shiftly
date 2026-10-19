@@ -5,6 +5,7 @@ import {demoCalendar} from './demo';
 import '../../app/globals.css';
 import '../../app/apple-ui.css';
 import '../../app/calendar-screen.css';
+import '../../app/week-polish.css';
 import '../../app/iphone-refinement.css';
 const root=createRoot(document.getElementById('root')!);
 const preview=new URLSearchParams(location.search);
