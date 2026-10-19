@@ -196,3 +196,8 @@
  .phone-sync-status span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  .phone-sync-status.attention{color:var(--accent);font-weight:600}
 }
+@media screen and (min-width:500px) and (max-height:500px){
+ .phone-roster-group .phone-roster{min-height:24px}
+ .phone-sync-status{min-height:18px;font-size:11px}
+ .phone-peek-notes-button{min-height:18px}
+}
