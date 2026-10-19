@@ -1,4 +1,5 @@
 'use client';
+import '../week-polish.css';
 import {ChevronDown,ChevronLeft,ChevronRight,MoreHorizontal,Paintbrush,Pencil,Layers,Check,Copy,ClipboardPaste,Undo2,Trash2,ChartNoAxesColumn,Heart} from 'lucide-react';
 import type {Event,Shift} from '../../lib/engine';
 import {fmt,ShiftChip,Sheet} from './primitives';
