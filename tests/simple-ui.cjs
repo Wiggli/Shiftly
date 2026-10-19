@@ -86,3 +86,11 @@ test('Today labels an overnight duty by its start date, keeps current-day entrie
   assert.ok(!ended.includes('ON SHIFT'));assert.ok(!ended.includes('Started '));
  }finally{Date.now=original;}
 });
+
+
+test('Compact cells reserve the second line for a visible count when three or more entries share a date',()=>{
+ const events=[{id:'a',title:'Overtime',entryType:'overtime',time:'19:00'},{id:'b',title:'Daily note',notes:'Bring folder'},{id:'c',title:'Clinic',time:'08:30'}];
+ const html=renderToStaticMarkup(React.createElement(CellEntries,{events,compact:true}));
+ assert.ok(html.includes('+2 more'));assert.equal((html.match(/class="cell-entry"/g)||[]).length,1);
+ assert.ok(!html.includes('Bring folder'));assert.ok(!html.includes('Clinic'));
+});

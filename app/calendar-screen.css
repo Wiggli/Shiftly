@@ -201,3 +201,6 @@
  .phone-sync-status{min-height:18px;font-size:11px}
  .phone-peek-notes-button{min-height:18px}
 }
+
+/* Saved messages must not block the calendar controls beneath them. */
+.toast{pointer-events:none}
