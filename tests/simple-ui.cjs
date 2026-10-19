@@ -94,3 +94,13 @@ test('Compact cells reserve the second line for a visible count when three or mo
  assert.ok(html.includes('+2 more'));assert.equal((html.match(/class="cell-entry"/g)||[]).length,1);
  assert.ok(!html.includes('Bring folder'));assert.ok(!html.includes('Clinic'));
 });
+
+test('Patterns distinguishes dated duties from an empty roster without guessing a rotation from its name',()=>{
+ const Status=require('../app/ui/RosterPatternStatus.tsx').default;
+ const snapshot={shifts:defaults,patterns:[],occurrences:[{date:'2026-10-01',shiftId:'day'},{date:'2026-10-02',shiftId:'night'},{date:'2026-10-03',shiftId:'off',deleted:true},{date:'2026-10-04',shiftId:'missing'}]};
+ const html=renderToStaticMarkup(React.createElement(Status,{snapshot,writable:true,onCreate:noop,onUseDates:noop}));
+ assert.ok(html.includes('Your roster is already planned'));assert.ok(html.includes('2 duties are saved by date'));assert.ok(html.includes('Use existing dates'));assert.ok(!html.includes('No repeating patterns yet'));
+ const viewer=renderToStaticMarkup(React.createElement(Status,{snapshot,writable:false,onCreate:noop,onUseDates:noop}));assert.ok(!viewer.includes('<button'));
+ const empty=renderToStaticMarkup(React.createElement(Status,{snapshot:{...snapshot,occurrences:[]},writable:true,onCreate:noop,onUseDates:noop}));assert.ok(empty.includes('Start a repeating rotation'));
+ const linked=renderToStaticMarkup(React.createElement(Status,{snapshot:{...snapshot,patterns:[{id:'p'}]},writable:true,onCreate:noop,onUseDates:noop}));assert.equal(linked,'');
+});
