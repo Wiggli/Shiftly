@@ -73,7 +73,8 @@ for(const theme of ['light','dark']){
   await expect(rows[1]).toContainText('19:00–07:00');
   await expect(rows[1]).toContainText('+1 day');
   await rows[2].click();
-  await expect(page.locator('.phone-day-peek')).toContainText('Wed 21 Oct');
+  // WebKit includes locale punctuation here while Chromium may not. Check the date parts, not punctuation.
+  await expect(page.locator('.phone-day-peek')).toContainText(/Wed,?\s+21 Oct/);
   await page.getByRole('button',{name:'Next week',exact:true}).click();
   await expect(page.locator('.phone-month-name')).toHaveText('26 Oct–1 Nov');
   await page.getByRole('button',{name:'Previous week',exact:true}).click();
