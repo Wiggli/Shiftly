@@ -1,5 +1,5 @@
 import {build} from 'vite';
-import {readFile,writeFile,cp,mkdir} from 'node:fs/promises';
+import {readFile,writeFile,cp,mkdir,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 const root=process.cwd(),config=JSON.parse(await readFile('standalone/config.json','utf8')),base=config.base;
@@ -11,7 +11,7 @@ const manifest=JSON.parse(await readFile('public/manifest.json','utf8'));manifes
 const html=await readFile('standalone-dist/index.html','utf8');await writeFile('standalone-dist/offline.html',html);await writeFile('standalone-dist/404.html',html);await writeFile('standalone-dist/.nojekyll','');
 // Publish the installation guide with the application.
 const guide=(await readFile('public/share/install-guide.html','utf8'));await writeFile('standalone-dist/share/install-guide.html',guide);
-const assets=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(match=>match[1]);const core=[base,base+'index.html',base+'offline.html',base+'manifest.json',base+'favicon.svg',base+'share/install-qr.svg',base+'share/install-guide.html',...manifest.icons.map(icon=>icon.src),base+'icons/apple-touch-icon.png',base+'icons/badge-96.png',...assets];
+const assets=(await readdir('standalone-dist/assets')).filter(file=>/\.(?:js|css|woff2)$/.test(file)).map(file=>base+'assets/'+file);const core=[base,base+'index.html',base+'offline.html',base+'manifest.json',base+'favicon.svg',base+'share/install-qr.svg',base+'share/install-guide.html',...manifest.icons.map(icon=>icon.src),base+'icons/apple-touch-icon.png',base+'icons/badge-96.png',...assets];
 const hash=createHash('sha256');hash.update(await readFile('scripts/build-pages.mjs'));for(const path of core.filter(path=>path!==base))hash.update(await readFile('standalone-dist/'+path.slice(base.length)));const cache='shiftly-pages-'+hash.digest('hex').slice(0,12);
 await writeFile('standalone-dist/sw.js',`const CACHE=${JSON.stringify(cache)},CORE=${JSON.stringify([...new Set(core)])},BASE=${JSON.stringify(base)};
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE))));

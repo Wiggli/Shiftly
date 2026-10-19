@@ -34,3 +34,6 @@ test('Published Pages metadata and installation guide point to the standalone ap
  assert.match(guide,/https:\/\/wiggli.github.io\/Shiftly\/\?install=1/);
  assert.match(guide,/People (?:&amp;|&) access/);
 });
+test('Offline cache includes lazy-loaded application chunks',()=>{
+ for(const file of fs.readdirSync('standalone-dist/assets').filter(file=>/\.(js|css|woff2)$/.test(file)))assert.ok(source.includes('/Shiftly/assets/'+file),file+' must be available offline');
+});

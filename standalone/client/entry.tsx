@@ -1,12 +1,16 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import CalendarApp from '../../app/ui/CalendarApp';
-import {client,installTransport} from './runtime';
+import {demoCalendar} from './demo';
 import '../../app/globals.css';
 import '../../app/apple-ui.css';
 import '../../app/calendar-screen.css';
-installTransport();
 const root=createRoot(document.getElementById('root')!);
+const preview=new URLSearchParams(location.search);
+if(preview.get("preview")==="demo"){const date=preview.get("date")||"2026-10-19";root.render(<CalendarApp identity={null} previewState={demoCalendar(date)} previewTheme={preview.get("theme")==="dark"?"dark":"light"}/>);}
+else void start();
+async function start(){
+const {client,installTransport}=await import("./runtime");installTransport();
 let generation=0;
 async function render(){
  const current=++generation;let identity=null;
@@ -21,3 +25,5 @@ async function render(){
  if(current===generation)root.render(<CalendarApp key={identity?.id||'guest'} identity={identity}/>);
 }
 void render();client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')localStorage.removeItem('shiftly-last-identity');setTimeout(()=>void render(),0);});
+
+}
