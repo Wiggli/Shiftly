@@ -263,3 +263,8 @@
  .phone-roster strong{width:100%}
  .phone-roster strong>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
+@media screen{
+ .phone-peek-duty{max-width:100%;min-width:0}
+ .phone-peek-duty>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .phone-peek-duty>svg{flex-shrink:0}
+}

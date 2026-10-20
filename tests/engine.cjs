@@ -91,3 +91,5 @@ test('Invalid dates and unsupported calendar spans fail without rolling or trunc
 test('Quoted TZID and literal escaped backslashes survive calendar import',()=>{
  const text='BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:quoted-zone\nDTSTART;TZID="Europe/London":20261117T090000\nDTEND;TZID="Europe/London":20261117T100000\nSUMMARY:Notes\nDESCRIPTION:literal \\\\n and real\\nnewline\\,comma\\;semi\\\\slash\nEND:VEVENT\nEND:VCALENDAR';const [event]=ICS.importICS(text,'Europe/Malta');assert.equal(event.time,'10:00');assert.equal(event.endTime,'11:00');assert.equal(event.notes,'literal \\n and real\nnewline,comma;semi\\slash');
 });
+
+test('Year overview aligns weekdays, leap days and Sunday-start calendars',()=>{const {miniMonthDates}=require('../lib/calendar-layout.ts');for(const [month,start,first,days] of [['2026-01',1,3,31],['2026-02',1,6,28],['2024-02',1,3,29],['2026-02',0,0,28]]){const dates=miniMonthDates(month,start);assert.equal(dates.length,42);assert.equal(dates.indexOf(month+'-01'),first);assert.equal(dates.filter(Boolean).length,days);assert.equal(new Set(dates.filter(Boolean)).size,days);assert.ok(dates.includes(month+'-'+String(days)));}});

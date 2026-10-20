@@ -11,7 +11,7 @@ export default function PatternEditor({value,s,date,onClose,onBack,onSave,onShif
  const [step,setStep]=useState(1),[mode,setMode]=useState(value?.until?'until':!value||value?.repeat===0?'forever':'times'),[error,setError]=useState(''),[replace,setReplace]=useState(false),[busy,setBusy]=useState(false),[drag,setDrag]=useState(-1);
  const [editingShift,setEditingShift]=useState<Shift|null|undefined>(undefined),[selectedDay,setSelectedDay]=useState<number|null>(null);
  const available=shiftChoices(s),writable=s.role!=='viewer';
- function pick(id:string){if(selectedDay!==null){const items=[...p.items];items[selectedDay]=id;setP({...p,items});setSelectedDay(null);}else if(p.items.length<366)setP({...p,items:[...p.items,id]});}
+ function pick(id:string){setError('');if(selectedDay!==null){const items=[...p.items];items[selectedDay]=id;setP({...p,items});setSelectedDay(null);}else if(p.items.length<366)setP({...p,items:[...p.items,id]});}
  const effective={...p,repeat:mode==='forever'||mode==='until'?0:mode==='once'?1:p.repeat,until:mode==='until'?p.until:undefined};
  let last='',rangeError='';try{if(effective.repeat&&p.items.length){last=addDays(p.start,p.items.length*effective.repeat-1);if(!isDate(last))rangeError='Choose fewer repetitions, within the supported calendar years.';}}catch{rangeError='Choose a valid start date and repetition count.';}
  let overrides=0;try{if(!rangeError&&p.items.length)overrides=patternOverrides(s,effective).length;}catch{}

@@ -576,3 +576,14 @@
  .shift-chip>.shift-chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:inherit!important}
  .event-row>.shift-chip{max-width:52%;flex-shrink:1}
 }
+@media screen{
+ .mini-month{display:flex;flex-direction:column;justify-content:flex-start;min-width:0}
+ .mini-month h3{margin:0 0 12px;line-height:1.4}
+ .mini-month>.mini-weekdays,.mini-month>.mini-date-grid{width:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+ .mini-weekdays{margin-bottom:6px}
+ .mini-weekdays small{font-size:9px;line-height:1.4;color:var(--muted);text-align:center}
+ .mini-month .mini-date-grid>span{height:20px;font-variant-numeric:tabular-nums}
+ .intro-actions{position:sticky;bottom:calc(-1 * max(24px,var(--safe-bottom,env(safe-area-inset-bottom,0px))));z-index:2;background:var(--surface);padding:14px 0 max(16px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));border-top:1px solid var(--line)}
+ .sheet-body>.primary.full+.field{margin-top:20px}
+ .sheet>header>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px}
+}

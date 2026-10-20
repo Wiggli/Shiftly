@@ -78,7 +78,10 @@ for(const theme of ['light','dark']){
   await inspectSurface(page,info,'app-qr-'+theme);
  });
  test(theme+' long roster names and three entries do not escape the frame',async({page},info)=>{
-  await openSample(page,theme,'stress');await inspectSurface(page,info,'long-calendar-'+theme);
+  await openSample(page,theme,'stress');
+  const duty=page.locator('.phone-peek-duty');
+  expect(await duty.evaluate(el=>el.getBoundingClientRect().bottom<=el.closest('.phone-peek-heading')!.getBoundingClientRect().bottom+1)).toBe(true);
+  await inspectSurface(page,info,'long-calendar-'+theme);
   await page.getByRole('button',{name:'Open selected date details',exact:true}).click();
   await inspectSurface(page,info,'long-day-'+theme);
   await expect(page.getByRole('dialog')).toContainText('updated handover notes');
@@ -103,7 +106,7 @@ test('pattern builder, event editor, shift editor and onboarding work through co
  await page.getByRole('button',{name:'New pattern',exact:true}).click();await page.getByRole('button',{name:'Build my own pattern',exact:true}).click();
  await page.getByRole('button',{name:'Continue',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Add at least one day');
  for(const name of ['Day','Night','Rest','Off'])await page.locator('.shift-palette').first().getByRole('button').filter({hasText:name}).first().click();
- await expect(page.locator('.sequence-day')).toHaveCount(4);await inspectSurface(page,info,'pattern-sequence');
+ await expect(page.locator('.sequence-day')).toHaveCount(4);await expect(page.getByRole('alert')).toHaveCount(0);await inspectSurface(page,info,'pattern-sequence');
  await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByLabel('Pattern name').fill('Sample four-day rotation');
  await inspectSurface(page,info,'pattern-dates');await page.getByRole('button',{name:'Apply pattern',exact:true}).click();
  await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByText('Sample four-day rotation',{exact:true})).toBeVisible();
@@ -124,7 +127,14 @@ test('Agenda, Year and edit tools remain usable from the calendar menu',async({p
   await page.getByRole('button',{name:'Calendar views',exact:true}).click();
   await page.getByRole('button',{name:view+' '+description,exact:true}).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.locator(selector).first()).toBeVisible();await inspectSurface(page,info,'calendar-'+view);
+  await expect(page.locator(selector).first()).toBeVisible();
+  if(view==='Year'){
+   const january=page.getByRole('button',{name:'Open January 2026',exact:true});
+   await expect(january.locator('.mini-date-grid>span').nth(3)).toHaveAttribute('data-mini-date','2026-01-01');
+   await page.getByRole('button',{name:'Next year',exact:true}).click();await expect(page.getByRole('button',{name:'Open January 2027',exact:true})).toBeVisible();
+   await page.getByRole('button',{name:'Previous year',exact:true}).click();
+  }
+  await inspectSurface(page,info,'calendar-'+view);
  }
  await openSample(page);await page.getByRole('button',{name:'Edit',exact:true}).click();
  await page.locator('[data-roster-date="2026-10-19"]').click();await page.locator('[data-roster-date="2026-10-20"]').click();
