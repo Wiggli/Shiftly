@@ -258,3 +258,8 @@
  .calendar-screen .week-calendar .cell-entry-more{flex-shrink:0;font-size:11px}
  .calendar-screen .week-calendar .roster-cell-line,.calendar-screen .week-calendar .overlay-shift,.calendar-screen .week-calendar .roster-more{grid-column:2}
 }
+@media screen{
+ .phone-roster-copy{width:100%}
+ .phone-roster strong{width:100%}
+ .phone-roster strong>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}

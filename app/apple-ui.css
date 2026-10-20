@@ -570,3 +570,9 @@
  .sheet{animation:sheet-fade-in .16s ease-out}
  @keyframes sheet-fade-in{from{opacity:0}to{opacity:1}}
 }
+@media screen{
+ .shift-chip{min-width:0;max-width:100%}
+ .shift-chip>span:first-child{flex-shrink:0}
+ .shift-chip>.shift-chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:inherit!important}
+ .event-row>.shift-chip{max-width:52%;flex-shrink:1}
+}

@@ -16,3 +16,5 @@
 - Use the live iPhone review window throughout UI work and inspect the saved screenshots. Do not wait for Andre to point out visible errors. Never use a real account or real roster for automated mutations.
 
 - A push is not a completed release: inspect Publish Shiftly through its terminal result, then verify the live version and assets. The deploy job runs scripts/verify-live.mjs against GITHUB_SHA and must pass before claiming success. Investigate failed checks rather than bypassing them. The deliberate-gap mobile test must verify its injected fault takes effect, including overriding minimum-height safeguards.
+
+- Include tests/mobile/surfaces.spec.ts in phone UI validation. Review its saved screenshots for forms, settings, search, patterns, account/help, comparison, and empty, long-text and read-only samples. These sample fixtures must stay in memory and must never make real account or roster mutations.

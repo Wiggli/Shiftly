@@ -123,6 +123,7 @@ test('Agenda, Year and edit tools remain usable from the calendar menu',async({p
   await openSample(page,'dark','stress');await page.getByRole('button',{name:'Calendar menu',exact:true}).click();
   await page.getByRole('button',{name:'Calendar views',exact:true}).click();
   await page.getByRole('button',{name:view+' '+description,exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator(selector).first()).toBeVisible();await inspectSurface(page,info,'calendar-'+view);
  }
  await openSample(page);await page.getByRole('button',{name:'Edit',exact:true}).click();

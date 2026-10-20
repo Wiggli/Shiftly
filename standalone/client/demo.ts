@@ -14,6 +14,8 @@ export function demoCalendar(date='2026-10-19',kind='dates'){
  if(['dates','stress','viewer'].includes(kind)){snapshot.occurrences=Array.from({length:120},(_,i)=>{const date=addDays(first,i);return {id:date,date,shiftId:resolveShift(snapshot,date)!.id};});snapshot.patterns=[];}
  if(kind==='empty'){snapshot.patterns=[];snapshot.occurrences=[];snapshot.events=[];}
  if(kind==='stress'){
+  snapshot.shifts.find(shift=>shift.id==='day')!.name='Day · Operating theatre and recovery';
+  snapshot.shifts.find(shift=>shift.id==='night')!.name='Night · Emergency theatre and labour ward';
   snapshot.rosters![0].name='Sample nurse · Main operating theatres and recovery';
   snapshot.calendar.name='Operating theatres and recovery · Sample calendar';
   snapshot.events[1].notes='Remember the training folder, the afternoon appointment and the updated handover notes.\nThis longer note checks wrapping without hiding the planned duty.';
