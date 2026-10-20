@@ -141,3 +141,12 @@ test('Pattern cards explain active, finished and read-only states without claimi
  const ended=renderToStaticMarkup(React.createElement(PatternCard,{...props,date:'2026-10-27',writable:false}));
  assert.ok(ended.includes('Finished'));assert.ok(ended.includes('View pattern'));assert.ok(!ended.includes('Remove pattern'));assert.ok(!ended.includes('Next cycle'));
 });
+
+test('Form controls have explicit text labels independent of selected option text',()=>{
+ const {Field}=require('../app/ui/primitives.tsx');
+ const html=renderToStaticMarkup(React.createElement(Field,{label:'Repeat'},React.createElement('select',null,React.createElement('option',null,'Keep repeating'))));
+ const labelId=/aria-labelledby="([^"]+)"/.exec(html)?.[1];
+ assert.ok(labelId);assert.ok(html.includes('<span id="'+labelId+'">Repeat</span>'));
+ const custom=renderToStaticMarkup(React.createElement(Field,{label:'Date'},React.createElement('input',{'aria-label':'Selected start date'})));
+ assert.ok(custom.includes('aria-label="Selected start date"'));assert.ok(!custom.includes('aria-labelledby='));
+});
