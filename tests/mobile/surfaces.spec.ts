@@ -39,7 +39,9 @@ test('Week hours open the same seven-day totals instead of the full month',async
  const summary=page.getByRole('button',{name:'Weekly summary and scheduled hours',exact:true});
  const hours=(await summary.innerText()).replace('h','');await summary.click();
  await expect(page.locator('.insights-period')).toHaveText('19 Oct 2026 – 25 Oct 2026');
- await expect(page.locator('.stat-grid article').filter({hasText:'Working hours'}).locator('strong')).toHaveText(Number(hours).toFixed(1));
+ await expect(page.locator('.stat-grid article').filter({hasText:'Planned duty hours'}).locator('strong')).toHaveText(Number(hours).toFixed(1));
+ await expect(page.locator('.insights-annotations')).toContainText('4.0 overtime hours');
+ await expect(page.locator('.stat-grid article').filter({hasText:'Leave days'}).locator('strong')).toHaveText('1');
  await inspectSurface(page,info,'weekly-hours');
  await page.getByRole('button',{name:'This month',exact:true}).click();
  await expect(page.locator('.insights-period')).toHaveText('1 Oct 2026 – 31 Oct 2026');
@@ -78,7 +80,7 @@ for(const theme of ['light','dark']){
    await page.getByRole('button',{name:'All settings',exact:true}).click();
   }
   await more(page);await page.getByRole('button',{name:'Insights Hours, days off and estimated pay'}).click();
-  await expect(page.getByText('Working hours',{exact:true})).toBeVisible();
+  await expect(page.getByText('Planned duty hours',{exact:true})).toBeVisible();
   await inspectSurface(page,info,'insights-'+theme);
  });
  test(theme+' search finds private sample notes, clears and explains empty results',async({page},info)=>{

@@ -14,7 +14,7 @@ Living checklist under PRODUCT_STANDARD.md. Update evidence and remaining limita
 | Area | Inspection and action | Verification |
 | --- | --- | --- |
 | Auth/loading | Temporary account failures must not silently switch into a guest calendar; bound initial account loading and provide retry. | Implemented; local checks passed; phone release gate pending |
-| Calendar and Week | Preserve the seven-day design; make the hours action open the same weekly range it summarises. | Implemented; local checks passed; phone release gate pending |
+| Calendar and Week | Preserve the seven-day design; make the hours action open the same weekly range it summarises. Label planned hours accurately and show timed overtime separately; include leave annotations in leave-date counts without rewriting duties or pay. | Implemented; local checks passed; phone release gate pending |
 | Patterns | Replace unconditional Applied labels with actual current/upcoming/finished status, date bounds, cycle position and next cycle; explain manual overrides. | Implemented; local checks passed; phone release gate pending |
 | Accounts | Deployed Google photo mapping retained; image errors use initials and reset on a changed photo URL. | Source and built-session checks passed |
 | Editing and entries | Paint/select/copy/paste/repeat/undo and separate overtime/leave/notes paths reviewed; added phone regression for a manual override surviving a pattern end date. | Local engine and edit-sync fixtures passed; phone gate pending |
@@ -23,7 +23,7 @@ Living checklist under PRODUCT_STANDARD.md. Update evidence and remaining limita
 | iPhone/accessibility | Existing Week layout visually reviewed; sheet focus and reduced-motion paths inspected. Form inputs now use explicit text labels so select options do not alter their accessible names. Added four-row month coverage alongside existing five/six-row tests. | Full browser suite and changed screenshots pending; physical device checks still required |
 | Delivery | Required checks and terminal Publish Shiftly result, then live commit/assets verification. | Pending |
 
-Local validation: 123 application tests, typecheck, production build, 8 Pages/session tests, CalDAV, edit-sync, HTTP/API/security and live-verifier fixtures passed. Added startup module recovery coverage so failed loading offers retry instead of a blank screen. CI must run the complete phone suite before merge; inspect screenshots and verify the live release afterwards.
+Local validation: 125 application tests, typecheck, production build, 8 Pages/session tests, CalDAV, edit-sync, HTTP/API/security and live-verifier fixtures passed. Added startup module recovery coverage so failed loading offers retry instead of a blank screen. CI must run the complete phone suite before merge; inspect screenshots and verify the live release afterwards.
 
 ## Continuing review
 
