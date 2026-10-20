@@ -1,4 +1,4 @@
-import {env,contextStorage,authenticatedUser} from './runtime';
+import {env,contextStorage,authenticatedUser,sessionIdentity} from './runtime';
 import * as calendar from '../../app/api/calendar/route';
 import * as account from '../../app/api/calendar/caldav/route';
 import * as feed from '../../app/api/calendar/feed/route';
@@ -22,7 +22,7 @@ export async function handleRequest(request:Request){
   if(!dav&&!isFeed&&!user)return cors(request,Response.json({error:'UNAUTHENTICATED'},{status:401}));
   const response=await contextStorage.run({user},async()=>{
    if(dav)return handleCalDAV(req);
-   if(path==='/api/session'&&request.method==='GET'&&user)return Response.json({identity:{id:user.userId,name:user.fullName,email:user.email,provider:'google'}});
+   if(path==='/api/session'&&request.method==='GET'&&user)return Response.json({identity:sessionIdentity(user)});
    if(path==='/api/calendar')return request.method==='GET'?calendar.GET(req):request.method==='POST'?calendar.POST(req):new Response(null,{status:405});
    if(path==='/api/calendar/caldav'&&request.method==='POST')return account.POST(req);
    if(path==='/api/calendar/feed')return request.method==='GET'?feed.GET(req):request.method==='POST'?feed.POST(req):new Response(null,{status:405});

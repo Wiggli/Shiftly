@@ -18,7 +18,7 @@
     "build:backend": "node scripts/build-backend.mjs",
     "test": "node --test tests/engine.cjs tests/setup.cjs tests/security.cjs tests/auth.cjs tests/sharing.cjs tests/navigation.cjs tests/simple-ui.cjs tests/standalone/database.cjs tests/standalone/auth.cjs",
     "typecheck": "tsc --noEmit",
-    "test:pages": "node --test tests/standalone/pwa.cjs",
+    "test:pages": "node --test tests/standalone/pwa.cjs tests/standalone/session.cjs",
     "test:mobile": "playwright test"
   },
   "dependencies": {
