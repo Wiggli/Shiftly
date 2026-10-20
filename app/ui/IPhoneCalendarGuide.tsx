@@ -2,7 +2,7 @@
 
 export default function IPhoneCalendarGuide(){
  return <>
-  <details className="disclosure"><summary>Set up on iPhone</summary>
+  <details className="disclosure"><summary>Manual iPhone setup</summary>
    <p className="hint">If you are on the Calendar settings screen showing Time Zone Override, Sync and Default Calendar, scroll towards the top to find Calendar Accounts. The Sync row does not connect a new account.</p>
    <ol>
     <li>Keep Shiftly’s server address, username and password ready above. Save the password in your password manager. If you closed Shiftly without saving it, use Replace password.</li>

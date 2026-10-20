@@ -4,6 +4,7 @@ import * as account from '../../app/api/calendar/caldav/route';
 import * as feed from '../../app/api/calendar/feed/route';
 import * as live from '../../app/api/live/route';
 import {handleCalDAV} from '../../lib/caldav';
+import {calendarProfile} from '../../lib/caldav-profile';
 const prefix='/functions/v1/shiftly-api',allowed=new Set([new URL(env.APP_ORIGIN).origin]);
 function cors(request:Request,response:Response){const headers=new Headers(response.headers),origin=request.headers.get('origin');if(origin&&allowed.has(origin)){headers.set('Access-Control-Allow-Origin',origin);headers.set('Vary','Origin');}headers.set('Access-Control-Allow-Methods','GET,HEAD,POST,OPTIONS,PROPFIND,PROPPATCH,REPORT,PUT,DELETE');headers.set('Access-Control-Allow-Headers','Authorization,Content-Type,apikey,Depth,If-Match,If-None-Match');headers.set('Access-Control-Expose-Headers','ETag,Location,DAV,Allow');headers.set('Cache-Control','private, no-store');headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','no-referrer');return new Response(response.body,{status:response.status,headers});}
 export async function handleRequest(request:Request){
@@ -11,6 +12,15 @@ export async function handleRequest(request:Request){
  if(request.method==='OPTIONS'&&request.headers.has('access-control-request-method'))return cors(request,new Response(null,{status:204}));
  const path=original.pathname.replace(/^\/(?:functions\/v1\/)?shiftly-api(?=\/|$)/,'')||'/';
  if(path==='/health')return cors(request,Response.json({application:'Shiftly',runtime:'Supabase',database:'Postgres',auth:'Google',version:1}));
+ if(path.startsWith('/setup/caldav/')){
+  const match=/^\/setup\/caldav\/(s[a-f0-9]{24})\.mobileconfig$/.exec(path);
+  if(!match)return cors(request,new Response('Not found',{status:404}));
+  if(!['GET','HEAD'].includes(request.method))return cors(request,new Response('Method not allowed',{status:405,headers:{Allow:'GET, HEAD'}}));
+  // This public template uses only the supplied username and trusted server
+  // origin; it performs no account lookup and never grants calendar access.
+  const profile=await calendarProfile(env.API_ORIGIN+prefix+'/api/caldav/'+match[1]+'/');
+  return cors(request,new Response(request.method==='HEAD'?null:profile,{headers:{'Content-Type':'application/x-apple-aspen-config','Content-Disposition':'attachment; filename="Shiftly.mobileconfig"'}}));
+ }
  try{
   const internal=new URL(path+original.search,original.origin),headers=new Headers(request.headers);headers.set('origin',internal.origin);
   let body:string|undefined;

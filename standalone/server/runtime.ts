@@ -2,7 +2,7 @@ import {AsyncLocalStorage} from 'node:async_hooks';
 import {Database} from './database';
 export const contextStorage=new AsyncLocalStorage<{user:any}>();
 const values={url:Deno.env.get('SUPABASE_URL')!,service:Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!};
-export const env={DB:new Database(values.url,values.service),APP_ORIGIN:Deno.env.get('SHIFTLY_APP_ORIGIN')||'https://wiggli.github.io'};
+export const env={DB:new Database(values.url,values.service),API_ORIGIN:new URL(values.url).origin,APP_ORIGIN:Deno.env.get('SHIFTLY_APP_ORIGIN')||'https://wiggli.github.io'};
 export async function getAppUser(){return contextStorage.getStore()?.user||null;}
 // Profile fields are presentation only; ownership still comes from the verified user id.
 export function googleAvatar(user:any):string|null{

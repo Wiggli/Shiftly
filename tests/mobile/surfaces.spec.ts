@@ -1,4 +1,9 @@
 import {test,expect,type Page,type TestInfo} from '@playwright/test';
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import IPhoneCalendarSetup from '../../app/ui/IPhoneCalendarSetup';
+import {calendarProfile} from '../../lib/caldav-profile';
+import {readFile} from 'node:fs/promises';
 
 async function openSample(page:Page,theme='light',roster='dates'){
  await page.goto('./?preview=demo&date=2026-10-19&layout=installed&theme='+theme+'&roster='+roster);
@@ -68,6 +73,29 @@ test('Linked patterns show cycle status, preserve manual duties and explain an e
 });
 
 for(const theme of ['light','dark']){
+ test(theme+' iPhone setup prefills Shiftly without downloading a password',async({page},info)=>{
+  await openSample(page,theme);
+  const styles=await page.locator('link[rel=stylesheet]').evaluateAll(elements=>elements.map(el=>el.outerHTML).join(''));
+  const address='https://fixture.invalid/functions/v1/shiftly-api/api/caldav/s0123456789abcdef01234567/';
+  // Render the actual stateless setup component with fictional credentials.
+  // No signed-in identity, account lookup or production mutation is involved.
+  const component=renderToStaticMarkup(React.createElement(IPhoneCalendarSetup,{address}));
+  await page.setContent('<html data-theme="'+theme+'"><head>'+styles+'</head><body><div class="app-shell"><div class="workspace"><div class="content"><main class="full-main"><section class="settings-panel">'+component+'</section></main></div></div></div></body></html>');
+  const link=page.getByRole('link',{name:'Download iPhone setup',exact:true});
+  await expect(link).toHaveAttribute('href',/\/setup\/caldav\/s0123456789abcdef01234567\.mobileconfig$/);
+  await inspectSurface(page,info,'iphone-setup-'+theme);
+  await page.getByText('Already connected? Rename your existing account',{exact:true}).click();
+  await expect(page.getByText(/change Description to Shiftly/)).toBeVisible();
+  await inspectSurface(page,info,'rename-existing-'+theme);
+  const profile=await calendarProfile(address);
+  const parsed=await page.evaluate(xml=>{const doc=new DOMParser().parseFromString(xml,'application/xml');return {valid:!doc.querySelector('parsererror'),types:Array.from(doc.querySelectorAll('key')).filter(key=>key.textContent==='PayloadType').map(key=>key.nextElementSibling?.textContent),name:Array.from(doc.querySelectorAll('key')).find(key=>key.textContent==='CalDAVAccountDescription')?.nextElementSibling?.textContent};},profile);
+  expect(parsed).toEqual({valid:true,types:['Configuration','com.apple.caldav.account'],name:'Shiftly'});
+  await page.route('https://fixture.invalid/**',route=>route.fulfill({status:200,headers:{'Content-Type':'application/x-apple-aspen-config','Content-Disposition':'attachment; filename="Shiftly.mobileconfig"'},body:profile}));
+  const downloading=page.waitForEvent('download');await link.click();const downloaded=await downloading;
+  expect(downloaded.suggestedFilename()).toBe('Shiftly.mobileconfig');
+  expect(await readFile((await downloaded.path())!,'utf8')).toBe(profile);
+  expect(profile).not.toContain('CalDAVPassword');
+ });
  test(theme+' settings and every More tool remain reachable',async({page},info)=>{
   await openSample(page,theme);await more(page);
   await expect(page.getByRole('button',{name:'Manage rosters Add another person or job'})).toBeVisible();
