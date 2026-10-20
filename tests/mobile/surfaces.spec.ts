@@ -73,7 +73,7 @@ test('Linked patterns show cycle status, preserve manual duties and explain an e
 });
 
 for(const theme of ['light','dark']){
- test(theme+' iPhone setup prefills Shiftly without downloading a password',async({page},info)=>{
+ test(theme+' iPhone setup prefills Shiftly without downloading a password',async({page,browserName},info)=>{
   await openSample(page,theme);
   const styles=await page.locator('link[rel=stylesheet]').evaluateAll(elements=>elements.map(el=>el.outerHTML).join(''));
   const address='https://fixture.invalid/functions/v1/shiftly-api/api/caldav/s0123456789abcdef01234567/';
@@ -91,9 +91,16 @@ for(const theme of ['light','dark']){
   const parsed=await page.evaluate(xml=>{const doc=new DOMParser().parseFromString(xml,'application/xml');return {valid:!doc.querySelector('parsererror'),types:Array.from(doc.querySelectorAll('key')).filter(key=>key.textContent==='PayloadType').map(key=>key.nextElementSibling?.textContent),name:Array.from(doc.querySelectorAll('key')).find(key=>key.textContent==='CalDAVAccountDescription')?.nextElementSibling?.textContent};},profile);
   expect(parsed).toEqual({valid:true,types:['Configuration','com.apple.caldav.account'],name:'Shiftly'});
   await page.route('https://fixture.invalid/**',route=>route.fulfill({status:200,headers:{'Content-Type':'application/x-apple-aspen-config','Content-Disposition':'attachment; filename="Shiftly.mobileconfig"'},body:profile}));
-  const downloading=page.waitForEvent('download');await link.click();const downloaded=await downloading;
-  expect(downloaded.suggestedFilename()).toBe('Shiftly.mobileconfig');
-  expect(await readFile((await downloaded.path())!,'utf8')).toBe(profile);
+  // WebKit routes Apple's profile MIME type to its native profile handler,
+  // which is outside Playwright and does not emit a download event. Check
+  // the actual navigation response there; Chromium also checks saved bytes.
+  const responseReady=page.waitForResponse(response=>response.url()===new URL('setup/caldav/s0123456789abcdef01234567.mobileconfig','https://fixture.invalid/functions/v1/shiftly-api/').href);
+  const downloading=browserName==='chromium'?page.waitForEvent('download'):null;
+  await link.click();const response=await responseReady;
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toBe('application/x-apple-aspen-config');
+  expect(response.headers()['content-disposition']).toBe('attachment; filename="Shiftly.mobileconfig"');
+  if(downloading){const downloaded=await downloading;expect(downloaded.suggestedFilename()).toBe('Shiftly.mobileconfig');expect(await readFile((await downloaded.path())!,'utf8')).toBe(profile);}
   expect(profile).not.toContain('CalDAVPassword');
  });
  test(theme+' settings and every More tool remain reachable',async({page},info)=>{
