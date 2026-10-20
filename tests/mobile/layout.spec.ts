@@ -74,6 +74,9 @@ for(const theme of ['light','dark']){
   expect(Math.abs(second!.x-first!.x)).toBeLessThan(1);
   expect(first!.height).toBeLessThan(130);
   await expect(rows[0]).toContainText('07:00–19:00');
+  // Neutral Week rows must not inherit white text from a dark duty colour.
+  const dateInk=await rows[0].locator('.date-label').evaluate(el=>getComputedStyle(el).color);
+  expect(dateInk).not.toBe('rgb(255, 255, 255)');
   await expect(rows[1]).toContainText('19:00–07:00');
   await expect(rows[1]).toContainText('+1 day');
   await rows[2].click();

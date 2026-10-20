@@ -566,3 +566,7 @@
  .boot p{max-width:32ch;margin-inline:auto;line-height:1.55}
  .boot .primary,.boot>a,.boot>button{min-height:48px;border-radius:12px}
 }
+@media(prefers-reduced-motion:no-preference){
+ .sheet{animation:sheet-fade-in .16s ease-out}
+ @keyframes sheet-fade-in{from{opacity:0}to{opacity:1}}
+}

@@ -9,12 +9,13 @@ async function inspectSurface(page:Page,info:TestInfo,name:string){
  const sheet=page.getByRole('dialog');
  if(await sheet.count()){
   await expect(sheet).toBeVisible();
+  await expect.poll(async()=>{const rect=await sheet.boundingBox();return !!rect&&rect.y>=-1&&rect.y+rect.height<=page.viewportSize()!.height+1;}).toBe(true);
   const box=await sheet.boundingBox();
   expect(box!.x).toBeGreaterThanOrEqual(-1);expect(box!.y).toBeGreaterThanOrEqual(-1);
   expect(box!.x+box!.width).toBeLessThanOrEqual(page.viewportSize()!.width+1);
   expect(box!.y+box!.height).toBeLessThanOrEqual(page.viewportSize()!.height+1);
   await expect(sheet.getByRole('button',{name:'Close',exact:true})).toBeVisible();
-  const title=await sheet.locator('header h2').boundingBox(),close=await sheet.getByRole('button',{name:'Close',exact:true}).boundingBox();
+  const title=await sheet.locator(':scope > header h2').boundingBox(),close=await sheet.getByRole('button',{name:'Close',exact:true}).boundingBox();
   expect(title!.x+title!.width).toBeLessThanOrEqual(close!.x+1);
   const smallInputs=await sheet.locator('input:not([type=checkbox]):not([type=radio]),textarea,select').evaluateAll(elements=>elements.filter(el=>parseFloat(getComputedStyle(el).fontSize)<16).length);
   expect(smallInputs).toBe(0);
@@ -115,4 +116,32 @@ test('pattern builder, event editor, shift editor and onboarding work through co
  await openSample(page);await more(page);await page.getByRole('button',{name:'Getting started Learn the basics'}).click();
  for(let step=1;step<=4;step++){await inspectSurface(page,info,'guide-'+step);if(step<4)await page.getByRole('button',{name:'Continue',exact:true}).click();}
  await page.getByRole('button',{name:'Open my calendar',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('Agenda, Year and edit tools remain usable from the calendar menu',async({page},info)=>{
+ for(const [view,description,selector] of [['Agenda','Duties and entries in a list','.agenda-row'],['Year','All twelve months','.mini-month']]){
+  await openSample(page,'dark','stress');await page.getByRole('button',{name:'Calendar menu',exact:true}).click();
+  await page.getByRole('button',{name:'Calendar views',exact:true}).click();
+  await page.getByRole('button',{name:view+' '+description,exact:true}).click();
+  await expect(page.locator(selector).first()).toBeVisible();await inspectSurface(page,info,'calendar-'+view);
+ }
+ await openSample(page);await page.getByRole('button',{name:'Edit',exact:true}).click();
+ await page.locator('[data-roster-date="2026-10-19"]').click();await page.locator('[data-roster-date="2026-10-20"]').click();
+ await expect(page.locator('.phone-edit-bar')).toContainText('2 selected');
+ await page.getByRole('button',{name:'More editing tools',exact:true}).click();await inspectSurface(page,info,'edit-tools');
+ await expect(page.getByRole('dialog')).toContainText('Copy');
+ await openSample(page);await page.getByRole('button',{name:'Calendar menu',exact:true}).click();
+ await page.getByRole('button',{name:'Calendar tools & files',exact:true}).click();
+ await page.locator('summary').filter({hasText:'Export or print calendar'}).click();await inspectSurface(page,info,'calendar-files');
+});
+
+test('creating a separate sample roster supports a Together comparison',async({page},info)=>{
+ await openSample(page);await more(page);await page.getByRole('button',{name:'Manage rosters Add another person or job'}).click();
+ await page.getByRole('button',{name:'Add a person or job',exact:true}).click();await page.getByLabel('Person or job name',{exact:true}).fill('Sample partner');
+ await inspectSurface(page,info,'new-roster');await page.getByRole('button',{name:'Create roster',exact:true}).click();
+ await expect(page.getByRole('dialog')).toContainText('Sample partner is ready');
+ await page.getByRole('button',{name:'Return to rosters',exact:true}).click();await page.getByRole('button',{name:'Compare rosters',exact:true}).click();
+ await inspectSurface(page,info,'compare-picker');await page.getByRole('button',{name:'Show comparison',exact:true}).click();
+ await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByText('Sample partner',{exact:true}).first()).toBeVisible();
+ await inspectSurface(page,info,'together-view');
 });
