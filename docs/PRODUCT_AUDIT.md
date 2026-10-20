@@ -13,15 +13,17 @@ Living checklist under PRODUCT_STANDARD.md. Update evidence and remaining limita
 
 | Area | Inspection and action | Verification |
 | --- | --- | --- |
-| Auth/loading | Temporary account failures must not silently switch into a guest calendar; bound initial account loading and provide retry. | In progress |
-| Calendar and Week | Preserve the seven-day design; make the hours action open the same weekly range it summarises. | In progress |
-| Patterns | Replace unconditional Applied labels with actual current/upcoming/finished status, date bounds, cycle position and next cycle; explain manual overrides. | In progress |
-| Accounts | Keep the deployed Google photo mapping; review image failure/recovery behaviour. | In progress |
-| Editing and entries | Existing paint/select/copy/paste/repeat/undo and separate overtime/leave/notes paths reviewed; add end-to-end regression for manual overrides. | In progress |
-| Apple Calendar | Inspect stable UIDs, revision/ETag behaviour, privacy and Include notes discoverability; rerun repeat/update/delete fixtures. | In progress |
-| PWA/offline | Inspect safe activation, explicit manual update results and retained local data; test transient errors. | In progress |
-| iPhone/accessibility | Inspect live phone samples, focus, contrast, light/dark and both orientations; capture changed screens. | In progress |
+| Auth/loading | Temporary account failures must not silently switch into a guest calendar; bound initial account loading and provide retry. | Implemented; local checks passed; phone release gate pending |
+| Calendar and Week | Preserve the seven-day design; make the hours action open the same weekly range it summarises. | Implemented; local checks passed; phone release gate pending |
+| Patterns | Replace unconditional Applied labels with actual current/upcoming/finished status, date bounds, cycle position and next cycle; explain manual overrides. | Implemented; local checks passed; phone release gate pending |
+| Accounts | Deployed Google photo mapping retained; image errors use initials and reset on a changed photo URL. | Source and built-session checks passed |
+| Editing and entries | Paint/select/copy/paste/repeat/undo and separate overtime/leave/notes paths reviewed; added phone regression for a manual override surviving a pattern end date. | Local engine and edit-sync fixtures passed; phone gate pending |
+| Apple Calendar | Stable UIDs, revision/ETag paths, notes privacy and visible Notes sync control inspected. | CalDAV repeat/update/delete, DST, atomic edit and note privacy fixtures passed |
+| PWA/offline | Safe activation blocks drafts/unsynced edits; manual update results cover current/new/failed/downloading states; account recovery keeps existing app mounted on transient errors. | Update, Pages/offline, account boundary and timeout tests passed |
+| iPhone/accessibility | Existing Week layout visually reviewed; sheet focus and reduced-motion paths inspected. Added four-row month coverage alongside existing five/six-row tests. | Full browser suite and changed screenshots pending; physical device checks still required |
 | Delivery | Required checks and terminal Publish Shiftly result, then live commit/assets verification. | Pending |
+
+Local validation: 122 application tests, typecheck, production build, 8 Pages/session tests, CalDAV, edit-sync, HTTP/API/security and live-verifier fixtures passed. Added startup module recovery coverage so failed loading offers retry instead of a blank screen. CI must run the complete phone suite before merge; inspect screenshots and verify the live release afterwards.
 
 ## Continuing review
 

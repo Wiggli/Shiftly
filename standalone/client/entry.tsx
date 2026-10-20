@@ -14,12 +14,16 @@ const root=createRoot(document.getElementById('root')!);
 const preview=new URLSearchParams(location.search);
 if(preview.get("preview")==="demo"&&preview.get("layout")==="installed"){for(const [edge,value] of Object.entries({top:62,bottom:34,left:0,right:0}))document.documentElement.style.setProperty("--safe-"+edge,value+"px");}
 if(preview.get("preview")==="demo"){(window as any).__SHIFTLY_STANDALONE__={base:config.base};document.addEventListener("click",event=>{if((event.target as HTMLElement).closest?.('a[href^="/auth/"]')){event.preventDefault();window.open(new URL(".",location.href).href,"_blank","noopener");}});const date=preview.get("date")||"2026-10-19";root.render(<CalendarApp identity={null} previewState={demoCalendar(date,preview.get("roster")||"dates")} previewTheme={preview.get("theme")==="dark"?"dark":"light"}/>);}
-else void start();
+else{
+ root.render(<AppLoading/>);
+ void start().catch(()=>root.render(<AppLoading status="Shiftly could not finish opening. Reconnect and try again; your saved calendar has not been changed."><button className="primary" onClick={()=>location.reload()}>Try again</button></AppLoading>));
+}
 async function start(){
 const {client,installTransport}=await import("./runtime");installTransport();
 let generation=0,opened=false;
 async function render(){
  const current=++generation;let identity=null;
+ if(!opened)root.render(<AppLoading/>);
  try{
  identity=await loadAccountIdentity({
   session:async()=>{const {data,error}=await client.auth.getSession();if(error)throw error;return data.session;},

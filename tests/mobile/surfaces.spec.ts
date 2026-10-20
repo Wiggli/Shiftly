@@ -24,6 +24,16 @@ async function inspectSurface(page:Page,info:TestInfo,name:string){
 }
 async function more(page:Page){await page.locator('.mobile-nav').getByRole('button',{name:'More',exact:true}).click();}
 
+test('A failed account module shows recovery instead of a blank app',async({page},info)=>{
+ await page.route('**/assets/runtime-*.js',route=>route.abort());
+ await page.goto('./');
+ await expect(page.getByRole('status')).toContainText('Shiftly could not finish opening');
+ await inspectSurface(page,info,'startup-recovery');
+ await page.unroute('**/assets/runtime-*.js');
+ await page.getByRole('button',{name:'Try again',exact:true}).click();
+ await expect(page.locator('.mobile-nav')).toBeVisible();
+});
+
 test('Week hours open the same seven-day totals instead of the full month',async({page},info)=>{
  await openSample(page);await page.getByRole('button',{name:'Week',exact:true}).click();
  const summary=page.getByRole('button',{name:'Weekly summary and scheduled hours',exact:true});
