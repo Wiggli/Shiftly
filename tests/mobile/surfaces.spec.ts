@@ -24,6 +24,49 @@ async function inspectSurface(page:Page,info:TestInfo,name:string){
 }
 async function more(page:Page){await page.locator('.mobile-nav').getByRole('button',{name:'More',exact:true}).click();}
 
+test('A failed account module shows recovery instead of a blank app',async({page},info)=>{
+ await page.route('**/assets/runtime-*.js',route=>route.abort());
+ await page.goto('./');
+ await expect(page.getByRole('status')).toContainText('Shiftly could not finish opening');
+ await inspectSurface(page,info,'startup-recovery');
+ await page.unroute('**/assets/runtime-*.js');
+ await page.getByRole('button',{name:'Try again',exact:true}).click();
+ await expect(page.locator('.mobile-nav')).toBeVisible();
+});
+
+test('Week hours open the same seven-day totals instead of the full month',async({page},info)=>{
+ await openSample(page);await page.getByRole('button',{name:'Week',exact:true}).click();
+ const summary=page.getByRole('button',{name:'Weekly summary and scheduled hours',exact:true});
+ const hours=(await summary.innerText()).replace('h','');await summary.click();
+ await expect(page.locator('.insights-period')).toHaveText('19 Oct 2026 – 25 Oct 2026');
+ await expect(page.locator('.stat-grid article').filter({hasText:'Planned duty hours'}).locator('strong')).toHaveText(Number(hours).toFixed(1));
+ await expect(page.locator('.insights-annotations')).toContainText('4.0 overtime hours');
+ await expect(page.locator('.stat-grid article').filter({hasText:'Leave days'}).locator('strong')).toHaveText('1');
+ await inspectSurface(page,info,'weekly-hours');
+ await page.getByRole('button',{name:'This month',exact:true}).click();
+ await expect(page.locator('.insights-period')).toHaveText('1 Oct 2026 – 31 Oct 2026');
+});
+
+test('Linked patterns show cycle status, preserve manual duties and explain an end date',async({page},info)=>{
+ await page.clock.install({time:new Date('2026-10-20T10:00:00Z')});
+ await openSample(page,'dark','rotation');
+ await page.getByRole('button',{name:'Edit',exact:true}).click();await page.getByRole('button',{name:'Paint',exact:true}).click();
+ await page.getByRole('button',{name:'Paint Off',exact:true}).click();await page.locator('[data-roster-date="2026-10-19"]').click();
+ await page.locator('.phone-edit-bar').getByRole('button',{name:'Done',exact:true}).click();
+ await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Off/);
+ await page.locator('.mobile-nav').getByRole('button',{name:'Patterns',exact:true}).click();
+ await expect(page.locator('.pattern-state')).toHaveText('Active today');
+ await expect(page.locator('.pattern-cycle-position')).toContainText('Next cycle');
+ await inspectSurface(page,info,'pattern-status');
+ await page.getByRole('button',{name:'Edit pattern',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByLabel('Repeat',{exact:true}).selectOption('until');await page.getByLabel('End date',{exact:true}).fill('2026-10-19');
+ await page.getByRole('button',{name:'Apply pattern',exact:true}).click();
+ await expect(page.locator('.pattern-state')).toHaveText('Finished');await expect(page.locator('.toast')).toHaveText('Pattern updated');await inspectSurface(page,info,'pattern-finished');
+ await page.locator('.mobile-nav').getByRole('button',{name:'Calendar',exact:true}).click();
+ await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Off/);
+ await expect(page.locator('.phone-day-peek')).toContainText('Extra evening hours');
+});
+
 for(const theme of ['light','dark']){
  test(theme+' settings and every More tool remain reachable',async({page},info)=>{
   await openSample(page,theme);await more(page);
@@ -37,7 +80,7 @@ for(const theme of ['light','dark']){
    await page.getByRole('button',{name:'All settings',exact:true}).click();
   }
   await more(page);await page.getByRole('button',{name:'Insights Hours, days off and estimated pay'}).click();
-  await expect(page.getByText('Working hours',{exact:true})).toBeVisible();
+  await expect(page.getByText('Planned duty hours',{exact:true})).toBeVisible();
   await inspectSurface(page,info,'insights-'+theme);
  });
  test(theme+' search finds private sample notes, clears and explains empty results',async({page},info)=>{

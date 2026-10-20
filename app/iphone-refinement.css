@@ -119,3 +119,10 @@
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
 }
+/* Pattern status is information, not an unconditional success badge. */
+.pattern-state{display:inline-flex;align-items:center;min-height:26px;padding:4px 9px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:650;margin:2px 0 12px;max-width:100%;overflow-wrap:anywhere}
+.pattern-state-ended,.pattern-state-covered{background:var(--surface-alt,var(--surface));color:var(--muted)}
+.pattern-date-range{line-height:1.65}
+.pattern-cycle-position{font-weight:600;color:var(--ink);font-size:13px;line-height:1.6}
+.pattern-card .pattern-extra{margin-top:12px}
+.insights-period{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 14px}

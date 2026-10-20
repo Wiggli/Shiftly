@@ -93,3 +93,17 @@ test('Quoted TZID and literal escaped backslashes survive calendar import',()=>{
 });
 
 test('Year overview aligns weekdays, leap days and Sunday-start calendars',()=>{const {miniMonthDates}=require('../lib/calendar-layout.ts');for(const [month,start,first,days] of [['2026-01',1,3,31],['2026-02',1,6,28],['2024-02',1,3,29],['2026-02',0,0,28]]){const dates=miniMonthDates(month,start);assert.equal(dates.length,42);assert.equal(dates.indexOf(month+'-01'),first);assert.equal(dates.filter(Boolean).length,days);assert.equal(new Set(dates.filter(Boolean)).size,days);assert.ok(dates.includes(month+'-'+String(days)));}});
+
+const {entrySummary}=require('../lib/entry-summary.ts');
+test('Insights include timed overtime and count annotated leave once without changing planned duties',()=>{
+ const s=base(),before=E.stats(s,'2026-11-01','2026-11-08');
+ s.events=[{id:'ot',date:'2026-11-01',title:'Overtime',emoji:'⏱️',time:'19:00',endTime:'23:00',entryType:'overtime'},{id:'leave',date:'2026-11-01',title:'Annual leave',entryType:'leave'},{id:'study',date:'2026-11-01',title:'Study leave',entryType:'leave'},{id:'other-roster',rosterId:'other',date:'2026-11-01',time:'07:00',endTime:'19:00',entryType:'overtime'}];
+ assert.deepEqual(entrySummary(s,'2026-11-01','2026-11-08'),{leaveDays:1,overtimeHours:4,overtimeEntries:1,untimedOvertime:0});
+ assert.deepEqual(E.stats(s,'2026-11-01','2026-11-08'),before);assert.equal(E.resolveShift(s,'2026-11-01').id,'day');
+ s.occurrences=[{id:'2026-11-01',date:'2026-11-01',shiftId:'leave'}];assert.equal(entrySummary(s,'2026-11-01','2026-11-01').leaveDays,1);
+});
+test('Overtime summaries respect DST, recurrence and incomplete times without inventing hours',()=>{
+ const s=base();s.events=[{id:'overnight',date:'2026-10-24',title:'Extra night',time:'19:00',endTime:'07:00',entryType:'overtime'},{id:'untimed',date:'2026-10-24',title:'Overtime',emoji:'⏱️',time:'',recurrence:'daily',until:'2026-10-25'}];
+ assert.deepEqual(entrySummary(s,'2026-10-24','2026-10-25'),{leaveDays:0,overtimeHours:13,overtimeEntries:3,untimedOvertime:2});
+ assert.deepEqual(entrySummary(s,'','2026-10-25'),{leaveDays:0,overtimeHours:0,overtimeEntries:0,untimedOvertime:0});
+});
