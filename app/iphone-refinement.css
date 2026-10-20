@@ -51,3 +51,71 @@
   .calendar-screen .workspace{height:100vh;padding-bottom:0;background:var(--bg)}
   .calendar-screen .mobile-nav{background:var(--surface);padding-bottom:max(6px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
 }
+
+/* Keep the same component rhythm throughout the phone app. */
+@media screen and (max-width:800px),screen and (max-height:540px) and (hover:none){
+ .content,.sheet-body{scrollbar-width:none}
+ .content::-webkit-scrollbar,.sheet-body::-webkit-scrollbar{display:none}
+ .full-main{padding-left:max(16px,var(--safe-left,env(safe-area-inset-left,0px)));padding-right:max(16px,var(--safe-right,env(safe-area-inset-right,0px)))}
+ .full-main>.page-heading{align-items:center;gap:12px}
+ .full-main>.page-heading h1{font-size:30px;line-height:1.15}
+ .heading-actions .primary{min-height:44px;padding:10px 13px;font-size:14px}
+ .grouped-menu{gap:0}
+ .grouped-menu>section+section{margin-top:26px}
+ .more-row{min-height:76px;padding:15px 16px;gap:13px}
+ .menu-icon{width:34px;height:34px;flex-shrink:0;border-radius:10px}
+ .menu-section-label{margin-left:16px;margin-bottom:10px}
+ .sheet{width:min(100%,640px);margin-inline:auto}
+ .sheet>header{padding:20px 16px 10px;min-height:76px}
+ .sheet-body{padding:20px max(20px,var(--safe-right,env(safe-area-inset-right,0px))) max(24px,var(--safe-bottom,env(safe-area-inset-bottom,0px))) max(20px,var(--safe-left,env(safe-area-inset-left,0px)))}
+ .sheet .hint{font-size:14px;line-height:1.55}
+ .sheet .disclosure>summary{font-size:15px;line-height:1.45;min-height:50px}
+ .sheet .field{margin-bottom:20px}
+ .sheet .field>span{display:block;margin-bottom:7px}
+ .sheet .two-col .field{margin-bottom:16px}
+ .sheet .form-actions{bottom:calc(-1 * max(24px,var(--safe-bottom,env(safe-area-inset-bottom,0px))));padding:14px 0 max(16px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
+ .sheet .form-actions>.primary{flex:1}
+ .quick-form-actions>button{min-height:48px}
+ .quick-form-actions>.primary{flex:1}
+ .quick-time-presets button,.quick-leave-presets button{min-height:48px}
+ .today-feature .event-row{padding-block:12px}
+ .today-feature>p,.today-feature>span{line-height:1.5}
+ .today-feature>span:has(svg){display:flex;gap:7px;align-items:flex-start}
+ .today-side article{border:1px solid var(--line)}
+ .today-side .event-row{padding-block:13px}
+ .pattern-status-actions button{min-height:48px;font-size:14px;line-height:1.35}
+ .pattern-status-actions>.text-button{background:var(--accent-soft);border-radius:12px;padding:10px;color:var(--accent)}
+ .roster-member{gap:10px;align-items:flex-start;flex-wrap:wrap}
+ .roster-name{min-height:48px;flex:1 1 100%;text-align:left}
+ .roster-member>.text-button{min-height:44px;line-height:1.4}
+ .switcher-rosters .settings-link{padding-block:14px}
+ .profile-actions .settings-link{min-height:56px}
+ .colour-palette button{width:44px;height:44px}
+ .phone-peek-actions button{min-height:44px;min-width:44px}
+ .phone-day-peek .phone-peek-heading>button{min-height:44px}
+ .phone-peek-notes-button{min-height:32px}
+ .phone-roster{min-height:34px}
+ .phone-sync-status{min-height:24px}
+ .phone-calendar-header .icon-button,.phone-profile-button{min-width:44px;min-height:44px}
+ .phone-month-bar .icon-button,.phone-today{min-height:44px}
+}
+@media screen and (max-width:374px){
+ .full-main>.page-heading{flex-wrap:wrap}
+ .sheet-body{padding-inline:16px}
+ .sheet>header{padding-inline:12px;grid-template-columns:60px minmax(0,1fr) 40px;gap:4px}
+ .sheet>header h2{font-size:17px}
+ .quick-time-presets{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pattern-status-actions{grid-template-columns:1fr}
+ .phone-peek-actions{gap:3px}
+}
+@media screen and (max-height:540px) and (hover:none){
+ .backdrop{padding:8px max(12px,var(--safe-right,env(safe-area-inset-right,0px))) 8px max(12px,var(--safe-left,env(safe-area-inset-left,0px)));align-items:center}
+ .sheet,.sheet.wide{max-height:100%;border-radius:20px;padding-bottom:0}
+ .sheet>header{padding-top:10px;min-height:62px}
+ .sheet>header::before{display:none}
+ .sheet-body{padding:16px 20px 20px}
+ .sheet .form-actions{bottom:-20px;padding-bottom:14px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+}
