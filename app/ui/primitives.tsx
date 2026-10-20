@@ -1,11 +1,12 @@
 'use client';
 import React,{useEffect,useContext,useRef,useState} from 'react';
 import {X,ChevronLeft,Copy,Check,Eye,EyeOff} from 'lucide-react';
+import {cellColours} from '../../lib/cell-colours';
 import {SheetBackContext} from './useSheetNavigation';
 export const now=new Date().toLocaleDateString('en-CA');
 export const fmt=(d:string,options:any={month:'long',day:'numeric'})=>new Date(d+'T12:00:00').toLocaleDateString(undefined,options);
 export const uid=()=>crypto.randomUUID();
-export function ShiftChip({shift,compact=false}:any){return <span className={'shift-chip '+(compact?'compact':'')} style={{background:shift.style==='outline'?'transparent':shift.style==='soft'?shift.color+'26':shift.color,color:shift.style==='outline'||shift.style==='soft'?shift.color:shift.textColor,border:'1px solid '+(shift.style==='outline'?shift.color:'transparent'),opacity:shift.opacity||1,fontSize:shift.fontSize?shift.fontSize+'px':undefined}}><span>{shift.emoji}</span>{compact?shift.short:shift.name}</span>;}
+export function ShiftChip({shift,compact=false}:any){return <span title={shift.name} className={'shift-chip '+(compact?'compact':'')} style={{background:shift.style==='outline'?'transparent':shift.style==='soft'?shift.color+'26':shift.color,color:shift.style==='outline'||shift.style==='soft'?shift.color:cellColours(shift)['--duty-cell-ink'],border:'1px solid '+(shift.style==='outline'?shift.color:'transparent'),opacity:shift.opacity||1,fontSize:shift.fontSize?shift.fontSize+'px':undefined}}><span aria-hidden="true">{shift.emoji}</span><span className="shift-chip-label">{compact?shift.short:shift.name}</span></span>;}
 export function Field({label,children}:any){return <label className="field"><span>{label}</span>{children}</label>;}
 export function CopyField({label,value,secret=false}:{label:string;value:string;secret?:boolean}){
  const [visible,setVisible]=useState(!secret),[status,setStatus]=useState('');

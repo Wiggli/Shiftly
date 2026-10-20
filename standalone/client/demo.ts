@@ -11,6 +11,16 @@ export function demoCalendar(date='2026-10-19',kind='dates'){
   {id:'demo-leave',date:addDays(date,3),rosterId:'main',title:'Annual leave',emoji:'🌿',time:'',notes:'Afternoon plans',private:false,entryType:'leave',reminders:[]},
   {id:'demo-plan',date:addDays(date,5),rosterId:'main',title:'Clinic appointment and review',emoji:'📅',time:'15:30',notes:'A sample appointment',private:true,entryType:'appointment',reminders:[]}
  ],members:[],invites:[],audit:[],calendars:[{id:'ui-preview',name:'Sample calendar'}]};
- if(kind==='dates'){snapshot.occurrences=Array.from({length:120},(_,i)=>{const date=addDays(first,i);return {id:date,date,shiftId:resolveShift(snapshot,date)!.id};});snapshot.patterns=[];}
+ if(['dates','stress','viewer'].includes(kind)){snapshot.occurrences=Array.from({length:120},(_,i)=>{const date=addDays(first,i);return {id:date,date,shiftId:resolveShift(snapshot,date)!.id};});snapshot.patterns=[];}
+ if(kind==='empty'){snapshot.patterns=[];snapshot.occurrences=[];snapshot.events=[];}
+ if(kind==='stress'){
+  snapshot.shifts.find(shift=>shift.id==='day')!.name='Day · Operating theatre and recovery';
+  snapshot.shifts.find(shift=>shift.id==='night')!.name='Night · Emergency theatre and labour ward';
+  snapshot.rosters![0].name='Sample nurse · Main operating theatres and recovery';
+  snapshot.calendar.name='Operating theatres and recovery · Sample calendar';
+  snapshot.events[1].notes='Remember the training folder, the afternoon appointment and the updated handover notes.\nThis longer note checks wrapping without hiding the planned duty.';
+  snapshot.events.push({...snapshot.events[0],id:'demo-long-entry',title:'A long appointment title that should wrap clearly',notes:'Details remain available when you open the selected date.'});
+ }
+ if(kind==='viewer')snapshot.role='viewer';
  return snapshot;
 }
