@@ -126,3 +126,9 @@
 .pattern-cycle-position{font-weight:600;color:var(--ink);font-size:13px;line-height:1.6}
 .pattern-card .pattern-extra{margin-top:12px}
 .insights-period{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 14px}
+
+.iphone-calendar-setup{margin:20px 0;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.iphone-calendar-setup h3{margin:0 0 12px;overflow-wrap:anywhere}
+.iphone-calendar-setup ol{padding-left:22px;line-height:1.6}
+.iphone-calendar-setup li+li{margin-top:10px}
+.iphone-calendar-setup .primary{min-height:44px;text-align:center;white-space:normal}

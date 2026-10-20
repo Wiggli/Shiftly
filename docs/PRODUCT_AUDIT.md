@@ -28,3 +28,13 @@ Local validation: 125 application tests, typecheck, production build, 8 Pages/se
 ## Continuing review
 
 Keep reviewing navigation and entry speed, pattern changes/end dates, sharing/revocation, conflict recovery, backup/restore, error states, performance and code fragility as development proceeds. Add concrete findings and evidence here rather than declaring every possible state tested. Do not add recurring monitoring.
+
+## Automatic iPhone account naming
+
+New connections can download a minimal CalDAV configuration profile from Calendar sync. It supplies the account description Shiftly, secure Supabase host, username and principal URL; it never embeds a password or session token. Existing installed accounts show one-time rename guidance because iOS does not permit the app to rewrite their local descriptions remotely. Keep one connection per roster to avoid duplicate subscriptions.
+
+The implementation follows Apple's [CalDAV payload schema](https://github.com/apple/device-management/blob/release/mdm/profiles/com.apple.caldav.account.yaml) and [manual profile installation instructions](https://support.apple.com/en-us/102400). iOS still requires review, installation and the calendar password; physical-device installation is not certified by browser tests.
+
+Validation: typecheck, production build, 125 application tests, 11 Pages/session/profile tests, CalDAV, edit-sync and API/security fixtures passed locally. Added actual-component phone coverage for light/dark setup and rename guidance, XML fields and password-free downloads in Chromium/WebKit portrait and landscape. Merge and release remain gated on the complete phone suite and live build verification.
+
+Initial phone validation passed 104 checks and exposed a test assumption: WebKit hands Apple's profile MIME type to its native handler instead of emitting Playwright's download event. The revised check verifies its actual navigation response, MIME and attachment filename; Chromium additionally validates saved file bytes. Native iOS installation remains a device check.
