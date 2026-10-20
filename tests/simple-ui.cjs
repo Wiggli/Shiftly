@@ -121,3 +121,23 @@ test('Week duty names and times distinguish overnight work from nonworking dates
  assert.ok(off.includes('Off'));assert.ok(!off.includes('week-duty-time'));
  const empty=renderToStaticMarkup(React.createElement(WeekDuty,{}));assert.ok(empty.includes('Unplanned'));
 });
+
+const {patternTimeline}=require('../lib/pattern-timeline.ts');
+const PatternCard=require('../app/ui/PatternCard.tsx').default;
+test('Pattern status follows date bounds, cycle positions and overlapping rotation priority',()=>{
+ const pattern={id:'p',name:'DNRO',items:['day','night','off','off'],start:'2026-10-19',repeat:2};
+ assert.deepEqual(patternTimeline(pattern,'2026-10-20'),{state:'active',last:'2026-10-26',cycleDay:2,nextCycle:'2026-10-23'});
+ assert.equal(patternTimeline(pattern,'2026-10-18').state,'upcoming');
+ assert.equal(patternTimeline(pattern,'2026-10-27').state,'ended');
+ assert.equal(patternTimeline(pattern,'2026-10-26').nextCycle,undefined);
+ assert.equal(patternTimeline({...pattern,until:'2026-10-21'},'2026-10-22').state,'ended');
+ assert.equal(patternTimeline(pattern,'2026-10-20',[pattern,{...pattern,id:'new'}]).state,'covered');
+});
+test('Pattern cards explain active, finished and read-only states without claiming every pattern is applied',()=>{
+ const pattern={id:'p',name:'Sample DNRO',items:['day','night','off','off'],start:'2026-10-19',repeat:2};
+ const props={pattern,snapshot:{shifts:defaults,patterns:[pattern]},date:'2026-10-20',writable:true,onEdit:noop,onDuplicate:noop,onRemove:noop};
+ const active=renderToStaticMarkup(React.createElement(PatternCard,props));
+ for(const text of ['Active today','Day 2 of 4','Next cycle','Starts','Ends','2026','individual duty changes stay in place'])assert.ok(active.includes(text),text);
+ const ended=renderToStaticMarkup(React.createElement(PatternCard,{...props,date:'2026-10-27',writable:false}));
+ assert.ok(ended.includes('Finished'));assert.ok(ended.includes('View pattern'));assert.ok(!ended.includes('Remove pattern'));assert.ok(!ended.includes('Next cycle'));
+});

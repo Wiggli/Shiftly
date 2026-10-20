@@ -10,6 +10,14 @@ async function expectPhoneFrame(page:Page){
 }
 
 for(const layout of ['installed','browser']){
+ test(layout+' four-row month uses the full phone frame',async({page},info)=>{
+  await page.goto('./?preview=demo&date=2027-02-15&layout='+layout+'&theme=dark&roster=rotation');
+  await expectPhoneFrame(page);
+  await expect(page.locator('.calendar-cell')).toHaveCount(28);
+  const calendar=await page.locator('.calendar').boundingBox(),bar=await page.locator('.mobile-nav').boundingBox();
+  expect(calendar!.y+calendar!.height).toBeLessThan(bar!.y);
+  await info.attach('four-row-month-'+layout,{body:await page.screenshot(),contentType:'image/png'});
+ });
  test(layout+' calendar, Today and Patterns fit the phone',async({page},info)=>{
   await page.goto('./?preview=demo&date=2026-10-19&layout='+layout+'&theme=light');
   await expectPhoneFrame(page);

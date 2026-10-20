@@ -3,6 +3,22 @@ require.extensions['.ts']=(module,file)=>module._compile(ts.transpileModule(fs.r
 const {test}=require('node:test'),assert=require('node:assert/strict');
 global.Deno={env:{get:name=>name==='SUPABASE_URL'?'https://fixture.invalid':'fixture-service'}};
 const {authenticatedUser,googleAvatar,sessionIdentity}=require('../../standalone/server/runtime.ts');
+const {loadAccountIdentity}=require('../../lib/account-bootstrap.ts');
+const accountSource=(overrides={})=>({session:async()=>({user:{id:'sample'}}),user:async()=>({id:'sample'}),identity:async()=>({id:'google_sample',name:'Sample'}),cached:()=>({id:'google_sample',name:'Saved sample'}),online:()=>true,...overrides});
+test('Account bootstrap distinguishes guests, verified accounts and transient failures',async()=>{
+ assert.equal(await loadAccountIdentity(accountSource({session:async()=>null,user:()=>{throw Error('must not request user for guests');}})),null);
+ assert.deepEqual(await loadAccountIdentity(accountSource()),{id:'google_sample',name:'Sample',authUserId:'sample'});
+ await assert.rejects(loadAccountIdentity(accountSource({identity:async()=>{throw Error('503');}})),/Your account could not be reached/);
+ await assert.rejects(loadAccountIdentity(accountSource({user:async()=>{throw Error('network');}})),/saved calendar is safe/);
+ await assert.rejects(loadAccountIdentity(accountSource({user:async()=>({id:'another-account'})})),/Your account could not be reached/);
+});
+test('Offline opening uses saved identity without crossing a known account boundary',async()=>{
+ const failed=async()=>{throw Error('offline');};
+ assert.equal((await loadAccountIdentity(accountSource({online:()=>false,user:failed}))).name,'Saved sample');
+ assert.equal((await loadAccountIdentity(accountSource({online:()=>false,session:failed}))).id,'google_sample');
+ await assert.rejects(loadAccountIdentity(accountSource({online:()=>false,user:failed,cached:()=>({id:'google_other',authUserId:'other'})})),/Reconnect once/);
+ await assert.rejects(loadAccountIdentity(accountSource({timeoutMs:5,session:()=>new Promise(()=>{})})),/taking longer than usual/);
+});
 test('Production authentication validates bearer tokens and Google identity before resolving ownership',async()=>{
  const original=global.fetch;let user={id:'qa-user',email:'qa@example.invalid',email_confirmed_at:'2026-10-19',identities:[{provider:'google'}]},revoked=false,calls=[];
  global.fetch=async(url,options)=>{calls.push(String(url));if(String(url).endsWith('/auth/v1/user')){assert.equal(options.headers.Authorization,'Bearer fixture-token');return Response.json(user,{status:revoked?401:200});}assert.ok(String(url).endsWith('/rest/v1/rpc/shiftly_exec'));return Response.json([{results:[]}]);};
