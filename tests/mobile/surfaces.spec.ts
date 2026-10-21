@@ -234,3 +234,40 @@ test('creating a separate sample roster supports a Together comparison',async({p
  await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByText('Sample partner',{exact:true}).first()).toBeVisible();
  await inspectSurface(page,info,'together-view');
 });
+
+for(const theme of ['light','dark'])test(theme+' onboarding requires a chosen pattern start date and previews dated shifts',async({page},info)=>{
+ await openSample(page,theme,'empty');
+ await page.getByRole('button',{name:'Set up my roster',exact:true}).click();
+ await page.getByRole('button',{name:'Continue to schedule',exact:true}).click();
+ await page.getByLabel('Starting pattern',{exact:true}).selectOption('two-day-night');
+ await expect(page.getByLabel('Pattern start date',{exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Choose start date',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'When should this pattern start?'})).toBeVisible();
+ await expect(page.getByLabel('Pattern start date',{exact:true})).toHaveValue('');
+ await expect(page.getByRole('button',{name:'Generate my roster',exact:true})).toBeDisabled();
+ await page.getByLabel('Pattern start date',{exact:true}).fill('2026-11-01');
+ await expect(page.locator('.rotation-date-preview>div')).toHaveCount(5);
+ await expect(page.locator('.rotation-date-preview>div').first()).toContainText(/1 November|November 1/);
+ await expect(page.locator('.rotation-date-preview>div').nth(2)).toContainText('Night');
+ await page.getByRole('button',{name:'Back',exact:true}).last().click();
+ await expect(page.getByLabel('Starting pattern',{exact:true})).toHaveValue('two-day-night');
+ await page.getByRole('button',{name:'Choose start date',exact:true}).click();
+ await expect(page.getByLabel('Pattern start date',{exact:true})).toHaveValue('2026-11-01');
+ await inspectSurface(page,info,'onboarding-pattern-start-'+theme);
+ await page.getByRole('button',{name:'Generate my roster',exact:true}).click();
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+ await expect(page.locator('[data-roster-date="2026-11-01"]')).toHaveAttribute('aria-label',/Day/);
+ await expect(page.locator('[data-roster-date="2026-11-03"]')).toHaveAttribute('aria-label',/Night/);
+ await expect(page.locator('[data-roster-date="2026-11-04"]')).toHaveAttribute('aria-label',/Rest/);
+ await page.locator('.mobile-nav').getByRole('button',{name:'Patterns',exact:true}).click();
+ await expect(page.locator('.pattern-list')).toContainText('2 days / night / rest / off');
+});
+
+test('irregular onboarding opens the calendar without asking for a pattern date',async({page})=>{
+ await openSample(page,'light','empty');await page.getByRole('button',{name:'Set up my roster',exact:true}).click();
+ await page.getByRole('button',{name:'Continue to schedule',exact:true}).click();
+ await page.getByLabel('How do you work?',{exact:true}).selectOption('irregular');
+ await expect(page.getByLabel('Pattern start date',{exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Open my calendar',exact:true}).click();
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+});

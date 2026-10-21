@@ -50,3 +50,10 @@ The implementation follows Apple's [CalDAV payload schema](https://github.com/ap
 Validation: typecheck, production build, 125 application tests, 11 Pages/session/profile tests, CalDAV, edit-sync and API/security fixtures passed locally. Added actual-component phone coverage for light/dark setup and rename guidance, XML fields and password-free downloads in Chromium/WebKit portrait and landscape. Merge and release remain gated on the complete phone suite and live build verification.
 
 Initial phone validation passed 104 checks and exposed a test assumption: WebKit hands Apple's profile MIME type to its native handler instead of emitting Playwright's download event. The revised check verifies its actual navigation response, MIME and attachment filename; Chromium additionally validates saved file bytes. Native iOS installation remains a device check.
+
+
+## Onboarding pattern start date, 21 October 2026
+
+Repeating and weekday schedules now have a dedicated start-date step after choosing the schedule. The date starts empty and generation stays disabled until it is valid. The step explains day 1 (including the first of consecutive Day shifts) and previews the first cycle on actual dates. Back navigation retains choices; irregular schedules skip the date step. Existing pattern persistence and individual-override behaviour are unchanged.
+
+Validation: typecheck, production PWA/backend build, 127 application tests and 12 Pages/session/profile/recovery tests passed locally. Added phone regressions for explicit date choice, dated previews, back navigation, applied shift dates, both themes and the irregular path. Local phone execution is blocked because browser binaries are absent and the browser download returns an invalid archive; the full CI phone gate and screenshot review must pass before merge/publication. Physical iPhone behaviour remains unverified.
