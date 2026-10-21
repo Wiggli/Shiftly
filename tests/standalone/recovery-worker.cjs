@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('worker generator explicitly bypasses recovery and update metadata',()=>{const s=fs.readFileSync('scripts/build-pages.mjs','utf8');assert.match(s,/recover\.html/);assert.match(s,/version\.json/);assert.match(s,/sw\.js/);});
