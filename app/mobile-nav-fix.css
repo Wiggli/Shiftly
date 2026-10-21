@@ -19,6 +19,11 @@
   }
   .mobile-nav .tab-icon{min-height:24px}
 
+  /* In browser mode the flowing non-calendar dock lands one CSS pixel short of the frame. */
+  html[data-standalone="false"] .app-shell:not(.calendar-screen) .mobile-nav{
+    bottom:-1px;
+  }
+
   /* Reserve only the dock plus the real iPhone home-indicator inset. */
   .full-main{
     padding-bottom:calc(60px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));
