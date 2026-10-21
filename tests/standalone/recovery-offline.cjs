@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery refuses destructive shell reset while offline',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/if\(!navigator\.onLine\)/);assert.match(s,/Reconnect to the internet/);});

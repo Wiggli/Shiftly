@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery endpoint is self-contained',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/<!doctype html>/i);assert.match(s,/<script>/);assert.doesNotMatch(s,/src=".*\.js/);});

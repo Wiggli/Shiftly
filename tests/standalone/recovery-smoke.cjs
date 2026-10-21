@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery bootstrap has retry and fresh-worker controls',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/Try again/);assert.match(s,/updateViaCache:'none'/);assert.match(s,/recovery='\+Date\.now\(\)/);});

@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery cannot hang indefinitely waiting for Safari',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/setTimeout\(finish,8000\)/);assert.match(s,/setTimeout\(finish,12000\)/);});

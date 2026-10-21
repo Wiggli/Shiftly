@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery root is fixed to deployed Shiftly scope',()=>assert.match(fs.readFileSync('public/recover.html','utf8'),/const base='\/Shiftly\/'/));

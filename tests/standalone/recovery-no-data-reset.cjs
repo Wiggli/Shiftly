@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery has no database reset APIs',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.equal(/indexedDB\.|supabase|localStorage\./.test(s),false);});

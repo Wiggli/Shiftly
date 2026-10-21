@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('legacy escape hatch does not depend on current React bundle',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.equal(s.includes('/assets/'),false);assert.equal(s.includes('__SHIFTLY_STANDALONE__'),false);});

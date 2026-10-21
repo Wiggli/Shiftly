@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery only selects a worker inside Shiftly scope',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/regs\.find\(r=>new URL\(r\.scope\)\.pathname\.startsWith\(base\)\)/);});

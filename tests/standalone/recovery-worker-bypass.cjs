@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('generated worker bypasses recovery, version and worker script requests',()=>{const s=fs.readFileSync('scripts/build-pages.mjs','utf8');assert.match(s,/recover\.html.*version\.json.*sw\.js/);});
