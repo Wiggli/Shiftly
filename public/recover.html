@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Repairing Shiftly</title>
+<style>html{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;background:#f2f2f7;color:#111}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px;box-sizing:border-box}.card{max-width:420px;background:#fff;border-radius:22px;padding:24px;box-shadow:0 10px 35px #0001}.spinner{width:28px;height:28px;border:3px solid #ddd;border-top-color:#111;border-radius:50%;animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}button{font:inherit;font-weight:600;border:0;border-radius:14px;padding:12px 16px;background:#007aff;color:#fff}p{line-height:1.45;color:#555}</style>
+</head>
+<body><main class="card"><div class="spinner" id="spinner"></div><h1>Repairing Shiftly</h1><p id="status">Checking the installed app and preparing the latest version…</p><button id="retry" hidden>Try again</button></main>
+<script>
+const status=document.getElementById('status'),retry=document.getElementById('retry'),spinner=document.getElementById('spinner');
+const base='/Shiftly/';
+function message(text,failed=false){status.textContent=text;retry.hidden=!failed;spinner.hidden=failed;}
+async function recover(){
+ retry.hidden=true;spinner.hidden=false;message('Checking the installed app and preparing the latest version…');
+ if(!navigator.onLine){message('Reconnect to the internet, then try again.',true);return;}
+ if(!('serviceWorker' in navigator)){location.replace(base+'?recovered='+Date.now());return;}
+ let finished=false;
+ const finish=()=>{if(finished)return;finished=true;location.replace(base+'?recovered='+Date.now());};
+ navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});
+ try{
+  const regs=await navigator.serviceWorker.getRegistrations();
+  const reg=regs.find(r=>new URL(r.scope).pathname.startsWith(base))||await navigator.serviceWorker.register(base+'sw.js?recovery='+Date.now(),{scope:base,updateViaCache:'none'});
+  await reg.update();
+  const activate=worker=>{if(!worker)return false;message('Installing the latest Shiftly version…');worker.postMessage({type:'ACTIVATE_UPDATE'});return true;};
+  if(activate(reg.waiting)){setTimeout(finish,8000);return;}
+  const worker=reg.installing;
+  if(worker){
+   const changed=()=>{if(worker.state==='installed'){worker.removeEventListener('statechange',changed);if(!activate(reg.waiting))finish();}else if(worker.state==='redundant'){worker.removeEventListener('statechange',changed);finish();}};
+   worker.addEventListener('statechange',changed);changed();setTimeout(finish,12000);return;
+  }
+  // If Safari reports no installing/waiting worker, unregister only the app shell worker.
+  // IndexedDB/localStorage roster data are deliberately untouched.
+  message('Resetting the Shiftly app shell…');
+  await reg.unregister();
+  await navigator.serviceWorker.register(base+'sw.js?recovery='+Date.now(),{scope:base,updateViaCache:'none'});
+  setTimeout(finish,1000);
+ }catch(error){console.error(error);message('Shiftly could not refresh its app shell. Keep your roster data in place and try again.',true);}
+}
+retry.addEventListener('click',recover);recover();
+</script></body></html>
