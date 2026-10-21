@@ -199,6 +199,11 @@
   .calendar-screen .calendar .calendar-cell.today:not(.selected) .date-label{font-weight:800}
 }
 
+/* Compact landscape keeps the native 44px touch target even when the tab content sits inline. */
+@media screen and (min-width:500px) and (max-width:1100px) and (max-height:500px){
+ .app-shell .mobile-nav button{min-height:44px}
+}
+
 @media(prefers-reduced-motion:reduce){
  .calendar-screen .phone-day-peek{transition:none!important}
 }
