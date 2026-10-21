@@ -25,6 +25,17 @@ Living checklist under PRODUCT_STANDARD.md. Update evidence and remaining limita
 
 Local validation: 125 application tests, typecheck, production build, 8 Pages/session tests, CalDAV, edit-sync, HTTP/API/security and live-verifier fixtures passed. Added startup module recovery coverage so failed loading offers retry instead of a blank screen. The complete 100-check phone suite passed in [Publish Shiftly run 39391237544](https://github.com/Wiggli/Shiftly/actions/runs/39391237544), and its portrait/landscape screenshots were inspected. Visual review then corrected the misleading ready message when ending an existing pattern; the same regression now requires Pattern updated. Subsequent changes remain subject to the complete release gate. [PR #2](https://github.com/Wiggli/Shiftly/pull/2) records the final merge and publication evidence; verify the successful main publish result and live version before calling the release complete.
 
+## 21 October 2026: adaptive iPhone calendar density pass
+
+- Added explicit calendar typography roles on phone for month title, weekday label, date number, planned duty and secondary annotations, with deliberately different density for four-, five- and six-row months rather than uniformly shrinking the calendar.
+- Five-row months now use the available vertical space more generously, while six-row months reduce cell padding, duty size and inspector height enough to protect the complete-month-on-one-screen requirement. Long duties retain ellipsis rules and receive a bounded compact size in six-row months.
+- The selected-date preview now behaves more like an adaptive inspector: quiet dates remain shorter, while dates containing overtime, leave, notes or other annotations can use more vertical space. The existing quick OT, Leave and Note actions remain immediately available.
+- Reduced calendar tab-bar chrome while retaining 44px minimum calendar tab targets and safe-area padding. Selection now adds underline/weight treatment as a non-colour cue in addition to the existing outline.
+- Added `tests/mobile/adaptive-calendar.spec.ts`, covering October 2026 as a five-row month and August 2026 as a six-row month on every configured Chromium/WebKit iPhone orientation, plus quiet versus busy selected-date inspector behaviour, no page scrolling, bottom-nav containment and minimum tab target height. Screenshots are attached by the test for visual inspection.
+- This pass is intentionally presentation-only and does not alter Supabase records, authentication, shift assignment semantics, patterns, offline mutation handling, Apple Calendar identities or real roster data.
+
+Verification status: source changes are committed on `product/iphone-calendar-density-pass`. Full `pnpm build`, `pnpm typecheck`, application suites, `pnpm test:mobile`, generated screenshot inspection, PR checks and live publication verification are still required before this pass can be called released. Physical iPhone safe-area, keyboard, Safari chrome and VoiceOver remain device checks even after browser automation passes.
+
 ## Continuing review
 
 Keep reviewing navigation and entry speed, pattern changes/end dates, sharing/revocation, conflict recovery, backup/restore, error states, performance and code fragility as development proceeds. Add concrete findings and evidence here rather than declaring every possible state tested. Do not add recurring monitoring.
