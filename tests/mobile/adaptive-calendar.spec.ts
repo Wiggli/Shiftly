@@ -66,6 +66,26 @@ test('selected-date inspector adapts without pushing navigation away',async({pag
  expect(busy.frameBottom).toBeLessThanOrEqual(busy.viewportHeight+1);
  const duty=page.locator('.phone-peek-duty > span');
  await expect(duty).toBeVisible();
- expect(await duty.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
+ const dutyLayout=await duty.evaluate(el=>{
+  const rect=el.getBoundingClientRect();
+  const style=getComputedStyle(el);
+  return {
+   overflows:el.scrollWidth>el.clientWidth,
+   overflow:style.overflow,
+   textOverflow:style.textOverflow,
+   whiteSpace:style.whiteSpace,
+   left:rect.left,
+   right:rect.right,
+   viewportWidth:innerWidth
+  };
+ });
+ expect(dutyLayout.left).toBeGreaterThanOrEqual(-1);
+ expect(dutyLayout.right).toBeLessThanOrEqual(dutyLayout.viewportWidth+1);
+ if(page.viewportSize()!.height>=601){
+  expect(dutyLayout.overflows).toBe(true);
+  expect(dutyLayout.overflow).toBe('hidden');
+  expect(dutyLayout.textOverflow).toBe('ellipsis');
+  expect(dutyLayout.whiteSpace).toBe('nowrap');
+ }
  await attach(page,info,'adaptive-busy-date');
 });
