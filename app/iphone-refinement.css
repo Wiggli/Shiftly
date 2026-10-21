@@ -132,3 +132,73 @@
 .iphone-calendar-setup ol{padding-left:22px;line-height:1.6}
 .iphone-calendar-setup li+li{margin-top:10px}
 .iphone-calendar-setup .primary{min-height:44px;text-align:center;white-space:normal}
+
+/* Night Roster-level layout discipline, kept visually lighter for Shiftly. */
+@media screen and (max-width:800px) and (min-height:601px){
+  .calendar-screen{
+    --calendar-month-title-size:clamp(24px,6.25vw,28px);
+    --calendar-weekday-size:11px;
+    --calendar-date-size:12px;
+    --calendar-duty-size:24px;
+    --calendar-secondary-size:11px;
+  }
+  .calendar-screen .phone-month-bar h1{font-size:var(--calendar-month-title-size);line-height:1.08}
+  .calendar-screen .weekday-row span{font-size:var(--calendar-weekday-size);line-height:1}
+  .calendar-screen .date-num{font-size:var(--calendar-date-size)}
+  .calendar-screen .calendar .calendar-cell .cell-shift{font-size:var(--calendar-duty-size);line-height:1.12}
+  .calendar-screen .cell-entry,.calendar-screen .has-note-shift .cell-entry{font-size:var(--calendar-secondary-size)}
+
+  /* Five-row months are intentionally more relaxed. */
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(29)):not(:has(.month-grid>.calendar-cell:nth-child(36))){
+    --calendar-date-size:12.5px;
+    --calendar-duty-size:25px;
+    --calendar-secondary-size:11.5px;
+  }
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(29)):not(:has(.month-grid>.calendar-cell:nth-child(36))) .calendar-cell{padding:6px 4px}
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(29)):not(:has(.month-grid>.calendar-cell:nth-child(36))) .phone-day-peek{flex-basis:92px;height:92px}
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(29)):not(:has(.month-grid>.calendar-cell:nth-child(36))) .phone-day-peek:has(.phone-peek-notes){flex-basis:106px;height:106px}
+
+  /* Six-row months deliberately become denser without dropping below readable type. */
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(36)){
+    --calendar-date-size:11.5px;
+    --calendar-duty-size:20px;
+    --calendar-secondary-size:10.5px;
+  }
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(36)) .calendar-cell{padding:4px 3px}
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(36)) .calendar .calendar-cell .cell-shift{margin:4px 0 2px}
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(36)) .calendar .calendar-cell .cell-shift.long-duty>strong{font-size:16.5px}
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(36)) .cell-entries{max-height:28px;margin-block:1px}
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(36)) .phone-day-peek{flex-basis:82px;height:82px;margin-block:5px}
+  .calendar-screen .calendar-main:has(.month-grid>.calendar-cell:nth-child(36)) .phone-day-peek:has(.phone-peek-notes){flex-basis:94px;height:94px}
+
+  /* Four-row months are rare and should not look artificially compressed. */
+  .calendar-screen .calendar-main:not(:has(.month-grid>.calendar-cell:nth-child(29))){
+    --calendar-date-size:13px;
+    --calendar-duty-size:27px;
+    --calendar-secondary-size:12px;
+  }
+  .calendar-screen .calendar-main:not(:has(.month-grid>.calendar-cell:nth-child(29))) .calendar-cell{padding:7px 5px}
+  .calendar-screen .calendar-main:not(:has(.month-grid>.calendar-cell:nth-child(29))) .phone-day-peek{flex-basis:106px;height:106px}
+
+  /* The inspector is compact for quiet dates and expands only for real annotations. */
+  .calendar-screen .phone-day-peek{transition:flex-basis .16s ease,height .16s ease,margin .16s ease}
+  .calendar-screen .phone-day-peek:has(.phone-peek-hint){padding-block:6px}
+  .calendar-screen .phone-day-peek:has(.phone-peek-notes) .phone-peek-notes-button{min-height:34px}
+  .calendar-screen .phone-peek-duty{min-width:0;max-width:100%}
+  .calendar-screen .phone-peek-duty>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* Reclaim vertical space from chrome while retaining safe-area padding and 44px taps. */
+  .calendar-screen .mobile-nav{padding-top:2px;padding-bottom:max(3px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
+  .calendar-screen .mobile-nav button{min-height:44px;padding-block:1px}
+  .calendar-screen .mobile-nav .tab-icon{min-height:26px}
+  .app-shell:not(.calendar-screen) .mobile-nav button{min-height:48px}
+
+  /* Selection and today remain readable without relying on colour alone. */
+  .calendar-screen .calendar .calendar-cell.selected{outline:1px solid color-mix(in srgb,var(--duty-cell-ink,var(--accent)) 72%,transparent);outline-offset:-3px}
+  .calendar-screen .calendar .calendar-cell.selected .date-label{font-weight:800;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+  .calendar-screen .calendar .calendar-cell.today:not(.selected) .date-label{font-weight:800}
+}
+
+@media(prefers-reduced-motion:reduce){
+ .calendar-screen .phone-day-peek{transition:none!important}
+}
