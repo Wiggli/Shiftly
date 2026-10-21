@@ -21,7 +21,7 @@
 
   /* Browser-mode flow can land on a fractional device pixel after switching tabs. */
   html[data-standalone="false"] .app-shell:not(.calendar-screen) .mobile-nav{
-    transform:translateY(.5px);
+    transform:translateY(.45px);
   }
 
   /* Reserve only the dock plus the real iPhone home-indicator inset. */
