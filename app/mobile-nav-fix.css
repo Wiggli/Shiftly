@@ -5,7 +5,7 @@
     height:calc(50px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));
     min-height:calc(50px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));
     padding:3px 10px max(3px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));
-    bottom:-1px;
+    bottom:0;
     align-items:start;
     background:var(--surface);
   }
