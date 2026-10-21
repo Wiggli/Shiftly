@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery preservation contract',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.ok(s.includes('reg.unregister()'));assert.ok(!/deleteDatabase|localStorage\.removeItem|localStorage\.clear/.test(s));});
