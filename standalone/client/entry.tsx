@@ -10,6 +10,7 @@ import '../../app/apple-ui.css';
 import '../../app/calendar-screen.css';
 import '../../app/week-polish.css';
 import '../../app/iphone-refinement.css';
+import '../../app/mobile-nav-fix.css';
 const root=createRoot(document.getElementById('root')!);
 const preview=new URLSearchParams(location.search);
 if(preview.get("preview")==="demo"&&preview.get("layout")==="installed"){for(const [edge,value] of Object.entries({top:62,bottom:34,left:0,right:0}))document.documentElement.style.setProperty("--safe-"+edge,value+"px");}
