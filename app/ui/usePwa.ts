@@ -26,7 +26,32 @@ export function usePwa(preview=false){
  async function install(){if(!prompt)return false;try{await prompt.prompt();const result=await prompt.userChoice;setPrompt(null);return result.outcome==='accepted';}catch{setError('Use your browser’s Install app or Add to Home Screen menu instead.');return false;}}
  function dismiss(){setDismissed(true);try{localStorage.setItem('shiftly-install-dismissed',String(Date.now()));}catch{}}
  async function protect(){try{const value=await navigator.storage?.persist?.();setPersistent(!!value);if(!value)setError('Your browser manages storage automatically. Keep a backup of important rosters.');}catch{setError('Your browser manages storage automatically. Keep a backup of important rosters.');}}
- async function applyUpdate(){if(!online||refreshRequested.current)return;setUpdating(true);setError('');refreshRequested.current=true;const waiting=registration.current?.waiting;if(waiting){waiting.postMessage({type:'ACTIVATE_UPDATE'});timer.current=setTimeout(()=>{refreshRequested.current=false;setUpdating(false);setError('The update is still preparing. Close other Shiftly windows, then try again.');},10000);}else location.reload();}
+ async function applyUpdate(){
+  if(!online||refreshRequested.current)return;
+  setUpdating(true);setError('');setUpdateMessage('Preparing the latest version…');refreshRequested.current=true;
+  const fail=(message:string)=>{refreshRequested.current=false;setUpdating(false);setError(message);};
+  try{
+   const reg=registration.current;
+   if(!reg){location.reload();return;}
+   await reg.update();
+   const activate=()=>{const waiting=reg.waiting;if(!waiting)return false;setUpdateMessage('Installing the latest version…');waiting.postMessage({type:'ACTIVATE_UPDATE'});return true;};
+   if(activate()){
+    timer.current=setTimeout(()=>fail('The update is still preparing. Close other Shiftly windows, then try again.'),15000);return;
+   }
+   const worker=reg.installing;
+   if(!worker){fail('The latest version has not finished publishing yet. Wait a moment, then try again.');return;}
+   const stateChanged=()=>{
+    if(worker.state==='installed'){
+     worker.removeEventListener('statechange',stateChanged);
+     if(!activate())fail('The update downloaded but could not be activated. Close other Shiftly windows, then try again.');
+    }else if(worker.state==='redundant'){
+     worker.removeEventListener('statechange',stateChanged);fail('The update could not be prepared. Please try again.');
+    }
+   };
+   worker.addEventListener('statechange',stateChanged);stateChanged();
+   timer.current=setTimeout(()=>{worker.removeEventListener('statechange',stateChanged);fail('The update is still preparing. Keep Shiftly open, then try again.');},20000);
+  }catch{fail('The update could not be prepared. Check your connection, then try again.');}
+ }
  async function checkUpdate(){
   if(checkInProgress.current)return;
   checkInProgress.current=true;setChecking(true);setError('');setUpdateMessage('Checking the published version…');
