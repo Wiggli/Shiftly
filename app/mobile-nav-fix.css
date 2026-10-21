@@ -1,7 +1,7 @@
 @media screen and (max-width:800px){
-  /* Keep one compact dock footprint across Calendar, Today, Patterns and More. */
-  .mobile-nav,
-  .calendar-screen .mobile-nav{
+  /* The reported jump happens in the installed iPhone PWA. Keep browser mode unchanged. */
+  html[data-standalone="true"] .mobile-nav,
+  html[data-standalone="true"] .calendar-screen .mobile-nav{
     height:calc(50px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));
     min-height:calc(50px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));
     padding:3px 10px max(3px,var(--safe-bottom,env(safe-area-inset-bottom,0px)));
@@ -9,23 +9,18 @@
     align-items:start;
     background:var(--surface);
   }
-  .mobile-nav button,
-  .app-shell:not(.calendar-screen) .mobile-nav button,
-  .calendar-screen .mobile-nav button{
+  html[data-standalone="true"] .mobile-nav button,
+  html[data-standalone="true"] .app-shell:not(.calendar-screen) .mobile-nav button,
+  html[data-standalone="true"] .calendar-screen .mobile-nav button{
     height:44px;
     min-height:44px;
     padding-block:0;
     align-self:start;
   }
-  .mobile-nav .tab-icon{min-height:24px}
+  html[data-standalone="true"] .mobile-nav .tab-icon{min-height:24px}
 
-  /* Browser-mode flow can land on a fractional device pixel after switching tabs. */
-  html[data-standalone="false"] .app-shell:not(.calendar-screen) .mobile-nav{
-    transform:translateY(.25px);
-  }
-
-  /* Reserve only the dock plus the real iPhone home-indicator inset. */
-  .full-main{
+  /* Reserve only the compact dock plus the actual home-indicator safe area. */
+  html[data-standalone="true"] .full-main{
     padding-bottom:calc(60px + var(--safe-bottom,env(safe-area-inset-bottom,0px)));
   }
 }
