@@ -19,9 +19,9 @@
   }
   .mobile-nav .tab-icon{min-height:24px}
 
-  /* In browser mode the flowing non-calendar dock lands one CSS pixel short of the frame. */
+  /* Browser-mode flow can land on a fractional device pixel after switching tabs. */
   html[data-standalone="false"] .app-shell:not(.calendar-screen) .mobile-nav{
-    bottom:-1px;
+    transform:translateY(.5px);
   }
 
   /* Reserve only the dock plus the real iPhone home-indicator inset. */
