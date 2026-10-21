@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery handoff uses cache-busting root navigation',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/\?recovered='\+Date\.now\(\)/);});
