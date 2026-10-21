@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery reset boundary is service worker only',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/reg\.unregister/);assert.doesNotMatch(s,/indexedDB|localStorage|sessionStorage/);});
