@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery is limited to Shiftly service worker scope',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/pathname\.startsWith\(base\)/);assert.match(s,/scope:base/);});
