@@ -66,6 +66,6 @@ test('selected-date inspector adapts without pushing navigation away',async({pag
  expect(busy.frameBottom).toBeLessThanOrEqual(busy.viewportHeight+1);
  const duty=page.locator('.phone-peek-duty > span');
  await expect(duty).toBeVisible();
- expect(await duty.evaluate(el=>el.scrollWidth>=el.clientWidth)).toBe(true);
+ expect(await duty.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
  await attach(page,info,'adaptive-busy-date');
 });
