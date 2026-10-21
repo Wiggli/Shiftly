@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('build publishes stable recovery bootstrap',()=>{const s=fs.readFileSync('scripts/build-pages.mjs','utf8');assert.ok(s.includes("await cp('public/recover.html','standalone-dist/recover.html')"));});
