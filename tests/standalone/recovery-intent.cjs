@@ -1,0 +1,1 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');test('recovery copy makes clear that only app shell is refreshed',()=>{const s=fs.readFileSync('public/recover.html','utf8');assert.match(s,/Resetting the Shiftly app shell/);});
