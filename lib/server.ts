@@ -12,7 +12,8 @@ export function failure(error:any){
  const known=!!codes[raw]||expected.test(raw)||error?.name==='ZodError';
  const message=error?.name==='ZodError'?'Check the record fields':known?raw:'The request could not be completed. Please try again.';
  if(!known)console.warn('Shiftly request failed', {code:raw==='DATABASE_UNAVAILABLE'?'database_unavailable':'internal_error'});
- return Response.json({error:message},{status:codes[raw]||(known?400:503),headers:{'Cache-Control':'private, no-store'}});
+ const labels:Record<string,string>={UNAUTHENTICATED:'Sign in again to open your schedules.',FORBIDDEN:'You do not have access to this schedule or permission to change it.',NOT_FOUND:'This schedule is no longer available.',CONFLICT:'This schedule changed elsewhere. Review your unsent edits before trying again.'};
+ return Response.json({error:labels[raw]||message.replace(/\brosters\b/g,'schedules').replace(/\broster\b/g,'schedule')},{status:codes[raw]||(known?400:503),headers:{'Cache-Control':'private, no-store'}});
 }
 export async function initial(db:any,user:any){let c=await db.prepare('SELECT * FROM calendars WHERE owner=? ORDER BY rowid LIMIT 1').bind(user.userId).first();if(!c){const id='primary_'+user.userId;await db.batch([db.prepare('INSERT OR IGNORE INTO calendars(id,owner,name,timezone,owner_name) VALUES(?,?,?,?,?)').bind(id,user.userId,'My calendar','Europe/Malta',ownerName(user.fullName)||null),...defaults.map(s=>db.prepare('INSERT OR IGNORE INTO calendar_records(id,calendar_id,kind,author,data) VALUES(?,?,?,?,?)').bind(id+'_'+s.id,id,'shift',user.userId,JSON.stringify(s)))]);c=await db.prepare('SELECT * FROM calendars WHERE id=?').bind(id).first();}return c;}
 

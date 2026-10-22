@@ -2,7 +2,7 @@
 export const accessLabel=(role:string)=>role==='owner'?'Owner':role==='editor'?'Can edit':'View only';
 export function ownerName(value:any){const name=typeof value==='string'?value.trim().slice(0,100):'';return name&&!name.includes('@')?name:'';}
 export function scheduleIdentity(calendar:any,roster:any,role:string){
- const own=role==='owner',name=ownerName(calendar?.owner_name||calendar?.ownerName),first=name.split(/\s+/)[0];
+ const own=role==='owner',name=ownerName(calendar?.owner_name||calendar?.ownerName),first=name.replace(/['’]+$/,'');
  const generic=/^(?:(?:my|personal|primary|default)\s+)?(?:calendar|roster|schedule)$/i.test(roster?.name?.trim()||'');
  const ownerTitle=first?first+(/s$/i.test(first)?'’':'’s')+' Schedule':'Shared Schedule';
  const title=own?(generic?'My Schedule':roster?.name||'My Schedule'):ownerTitle;

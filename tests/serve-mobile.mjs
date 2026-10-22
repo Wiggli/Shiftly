@@ -15,8 +15,11 @@ const server=createServer(async(req,res)=>{try{
  if(url.pathname.startsWith('/Shiftly/__test__/')){const path=url.pathname.slice('/Shiftly/__test__/'.length)||'index.html';if(path.includes('..'))throw Error('Invalid path');const body=await readFile(join(temporary,'dist',path));res.writeHead(200,{'Content-Type':mime[extname(path)]||'application/octet-stream','Cache-Control':'no-store'});res.end(body);return;}
  const chunks=[];for await(const chunk of req)chunks.push(chunk);
  const port=url.pathname.startsWith('/api/')?process.env.TEST_API_PORT:4174;
- const response=await fetch('http://127.0.0.1:'+port+url.pathname+url.search,{method:req.method,headers:req.headers,body:chunks.length?Buffer.concat(chunks):undefined});
- res.writeHead(response.status,Object.fromEntries(response.headers));
+ const headers=new Headers(req.headers);headers.delete('host');headers.delete('connection');headers.set('accept-encoding','identity');
+ const response=await fetch('http://127.0.0.1:'+port+url.pathname+url.search,{method:req.method,headers,body:chunks.length?Buffer.concat(chunks):undefined});
+ // Fetch decodes compressed bodies; forwarding the encoding or byte length would corrupt the response.
+ const outgoing=new Headers(response.headers);for(const key of ['content-encoding','content-length','transfer-encoding','connection','keep-alive'])outgoing.delete(key);
+ res.writeHead(response.status,Object.fromEntries(outgoing));
  if(response.body){const reader=response.body.getReader();res.on('close',()=>reader.cancel().catch(()=>{}));for(;;){const {done,value}=await reader.read();if(done)break;res.write(value);}}res.end();
  }catch{if(!res.headersSent)res.writeHead(503);res.end();}});
 server.listen(4173,'127.0.0.1');

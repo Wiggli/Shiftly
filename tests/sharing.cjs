@@ -28,11 +28,11 @@ test('Radio choices cannot inherit full-width text field sizing and long sharing
 
 test('Owner-aware naming never calls a received default roster My Schedule',()=>{
  const {scheduleIdentity,scheduleChoices}=require('../lib/schedule-identity.ts');
- assert.equal(scheduleIdentity({owner_name:'Andre Silva'},{id:'main',name:'My Roster'},'viewer').title,'Andre’s Schedule');
+ assert.equal(scheduleIdentity({owner_name:'Andre Silva'},{id:'main',name:'My Roster'},'viewer').title,'Andre Silva’s Schedule');
  assert.equal(scheduleIdentity({owner_name:'Andre Silva'},{id:'main',name:'My Roster'},'owner').title,'My Schedule');
  assert.equal(scheduleIdentity({owner_name:'owner@example.com'},{name:'My Roster'},'viewer').title,'Shared Schedule');
  const choices=scheduleChoices([{id:'family',owner_name:'Maria Perez',role:'editor',rosters:[{id:'a',name:'Agency'},{id:'b',name:'Hospital'}]}]);
- assert.deepEqual(choices.map(c=>c.title),['Maria’s Schedule','Maria’s Schedule']);assert.deepEqual(choices.map(c=>c.detail),['Agency','Hospital']);assert.equal(choices[0].permission,'Can edit');
+ assert.deepEqual(choices.map(c=>c.title),['Maria Perez’s Schedule','Maria Perez’s Schedule']);assert.deepEqual(choices.map(c=>c.detail),['Agency','Hospital']);assert.equal(choices[0].permission,'Can edit');
 });
 
 test('Authenticated live transport parses chunked grant messages and stops after revocation',async()=>{
@@ -54,4 +54,15 @@ test('A guest or preview schedule is personal even when its legacy catalog has n
  const state={calendar:{id:'guest',name:'My calendar'},role:'owner',calendars:[{id:'guest',name:'My calendar'}]};
  const html=renderToStaticMarkup(React.createElement(Switcher,{s:state,catalog:state.calendars,rosters:[{id:'main',name:'My roster'}],active:'main',onClose:()=>{}}));
  assert.ok(html.includes('My Schedule'));assert.ok(html.includes('Your schedule'));assert.ok(html.includes('No schedules have been shared with you yet.'));assert.ok(!html.includes('Shared by Schedule owner'));
+});
+
+test('An editor is told when another author’s notes are private',()=>{
+ const Editor=require('../app/ui/EventEditor.tsx').default;
+ const html=renderToStaticMarkup(React.createElement(Editor,{value:{id:'shared-entry',date:'2026-11-01',title:'Overtime',emoji:'⏱️',time:'',notes:'',notesPrivate:true,private:false,author:'andre',reminders:[]},identity:{id:'maria'},writable:true,shared:true,onClose:()=>{}}));
+ assert.ok(html.includes('These notes are private to their author'));assert.ok(html.includes('Only the author'));assert.ok(!html.includes('Only me'));
+});
+test('A viewer can inspect a repeating schedule without opening editable fields',()=>{
+ const Details=require('../app/ui/PatternDetails.tsx').default;
+ const html=renderToStaticMarkup(React.createElement(Details,{pattern:{name:'Usual work',items:['day','night','off'],start:'2026-11-01',repeat:0},s:{shifts:defaults},onClose:()=>{}}));
+ assert.ok(html.includes('Repeats continuously'));assert.ok(html.includes('View only'));assert.ok(!/<(?:input|textarea|select)\b/.test(html));assert.ok(!html.includes('Show my shifts'));
 });
