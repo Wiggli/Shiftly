@@ -1,0 +1,88 @@
+import {test,expect,type Page} from '@playwright/test';
+test('Shared schedules keep ownership, permissions, live records and revocation clear across accounts',async({browser,page,request},info)=>{
+ test.setTimeout(90000);
+ const stamp=crypto.randomUUID(),andre={id:'andre-'+stamp,name:'Andre'},maria={id:'maria-'+stamp,name:'Maria'},john={id:'john-'+stamp,name:'John'};
+ const headers=(u:any)=>({'x-test-user-id':u.id,'x-test-user-email':u.id+'@example.invalid','x-test-user-name':u.name});
+ async function api(u:any,body?:any,path='/api/calendar'){const response=body?await request.post(path,{headers:headers(u),data:body}):await request.get(path,{headers:headers(u)});expect(response.ok()).toBe(true);return response.json();}
+ const initial=await api(andre),id=initial.calendar.id;
+ const snapshot=(u:any)=>api(u,undefined,'/api/calendar?id='+id);
+ async function edit(shiftId:string){const current=await snapshot(andre);await api(andre,{calendarId:id,action:'mutate',revision:current.calendar.revision,operationId:crypto.randomUUID(),changes:[{kind:'occurrence',id:'2026-10-19',data:{id:'2026-10-19',date:'2026-10-19',shiftId}}]});}
+ await edit('day');
+ const invite=await api(andre,{action:'invite',calendarId:id,email:maria.id+'@example.invalid',role:'viewer',rosterId:'main'});
+ const open=(u:any,extra='')=>'./__test__/?user='+u.id+'&name='+u.name+'&date=2026-10-19'+extra;
+ await page.goto(open(maria,'&invite='+invite.token));
+ await expect(page.getByRole('heading',{name:'Shared with you',exact:true})).toBeVisible();
+ await expect(page.getByRole('dialog')).toContainText('Andre’s Schedule');await expect(page.getByRole('dialog')).not.toContainText('My Roster');
+ await page.getByRole('button',{name:'Accept invitation',exact:true}).click();
+ await expect(page.getByRole('dialog')).toContainText('It is now under Shared with me');
+ await page.getByRole('button',{name:'View Andre’s Schedule',exact:true}).click();
+ const name=page.locator('.phone-roster');
+ await expect(name).toHaveText('Andre’s Schedule');await expect(page.locator('.phone-sync-status')).toContainText('View only');
+ await expect(page.getByRole('button',{name:'Edit',exact:true})).toHaveCount(0);
+ await name.click();await expect(page.getByRole('dialog')).toContainText('Shared with me');await expect(page.getByRole('dialog')).toContainText('My Schedule');
+ const avatar=await page.locator('.schedule-choice>.avatar').first().boundingBox();expect(avatar!.width).toBeLessThanOrEqual(44);expect(Math.abs(avatar!.width-avatar!.height)).toBeLessThanOrEqual(1);
+ await info.attach('shared-schedule-switcher',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+ await page.getByRole('button',{name:'Close',exact:true}).click();
+ await edit('night');await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Night/,{timeout:15000});
+ let state=await snapshot(andre);const member=state.members.find((m:any)=>m.email===maria.id+'@example.invalid');
+ const ownerContext=await browser.newContext({viewport:page.viewportSize()!,isMobile:true,hasTouch:true,serviceWorkers:'block'}),ownerPage=await ownerContext.newPage();
+ await ownerPage.goto(new URL(open(andre).replace('./','/Shiftly/'),page.url()).href);await ownerPage.getByRole('button',{name:'Calendar menu',exact:true}).click();await ownerPage.getByRole('button',{name:'Share schedule',exact:true}).click();
+ await expect(ownerPage.getByRole('heading',{name:'Shared with',exact:true})).toBeVisible();
+ await ownerPage.getByLabel('Permission for '+maria.id+'@example.invalid',{exact:true}).scrollIntoViewIfNeeded();
+ await info.attach('owner-sharing-access',{body:await ownerPage.screenshot({animations:'disabled'}),contentType:'image/png'});
+ await ownerPage.getByLabel('Permission for '+maria.id+'@example.invalid',{exact:true}).selectOption('editor');
+ await expect.poll(async()=> (await snapshot(andre)).members.find((m:any)=>m.id===member.id).role).toBe('editor');
+ await expect(page.locator('.phone-sync-status')).toContainText('Can edit',{timeout:15000});
+ await page.getByRole('button',{name:'Open selected date details',exact:true}).click();
+ await expect(page.locator('.schedule-target')).toContainText('Andre’s Schedule');await expect(page.locator('.schedule-target')).toContainText('Can edit');
+ await info.attach('shared-schedule-editing',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+ await page.locator('.daily-duty-picker').getByRole('button').filter({has:page.getByText('Day',{exact:true})}).click();
+ await expect.poll(async()=> (await snapshot(andre)).occurrences[0].shiftId).toBe('day');
+ await page.getByRole('button',{name:'Close',exact:true}).click();
+ const johnInvite=await api(andre,{action:'invite',calendarId:id,email:john.id+'@example.invalid',role:'viewer',rosterId:'main'});await api(john,{action:'accept',token:johnInvite.token});
+ const other=await browser.newContext({viewport:page.viewportSize()!,isMobile:true,hasTouch:true,serviceWorkers:'block'});
+ const johnPage=await other.newPage();await johnPage.goto(new URL(open(john).replace('./','/Shiftly/'),page.url()).href);
+ await johnPage.locator('.phone-roster').click();await johnPage.getByRole('dialog').getByRole('button').filter({hasText:'Andre’s Schedule'}).click();
+ await expect(johnPage.locator('.phone-roster')).toHaveText('Andre’s Schedule');
+ // An already downloaded shared schedule remains usable offline, then refreshes on reconnect.
+ await page.context().setOffline(true);await edit('night');
+ await page.context().setOffline(false);await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Night/,{timeout:15000});
+ await expect(johnPage.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Night/,{timeout:15000});
+ await page.reload();await expect(name).toHaveText('Andre’s Schedule');
+ await page.getByRole('button',{name:'Add',exact:true}).click();await expect(page.locator('.schedule-target')).toContainText('Andre’s Schedule');
+ await ownerPage.getByLabel('Permission for '+maria.id+'@example.invalid',{exact:true}).selectOption('viewer');
+ await expect(page.locator('.phone-sync-status')).toContainText('View only',{timeout:15000});await expect(page.getByRole('dialog')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Edit',exact:true})).toHaveCount(0);
+ await info.attach('shared-schedule-view-only',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+ ownerPage.once('dialog',dialog=>dialog.accept());await ownerPage.locator('.member-access').filter({hasText:maria.id+'@example.invalid'}).getByRole('button',{name:'Remove access',exact:true}).click();
+ await expect(name).toHaveText('My Schedule',{timeout:20000});
+ const cached=await page.evaluate(async(key)=>new Promise(resolve=>{const open=indexedDB.open('shiftly-v1');open.onsuccess=()=>{const db=open.result,tx=db.transaction('cache'),req=tx.objectStore('cache').get(key);req.onsuccess=()=>{resolve(req.result);db.close();};};}),maria.id+'_'+id);
+ expect(cached).toBeFalsy();
+ await name.click();await expect(page.getByRole('dialog')).toContainText('No schedules have been shared with you yet');
+ await expect(johnPage.locator('.phone-roster')).toHaveText('Andre’s Schedule');await other.close();await ownerContext.close();
+});
+
+test('Offline edits cannot replay after a live permission downgrade',async({page,request},info)=>{
+ test.setTimeout(60000);
+ const stamp=crypto.randomUUID(),owner='offline-owner-'+stamp,editor='offline-editor-'+stamp;
+ const headers=(id:string)=>({'x-test-user-id':id,'x-test-user-email':id+'@example.invalid','x-test-user-name':id===owner?'Andre':'Maria'});
+ async function api(id:string,body?:any,path='/api/calendar'){const r=body?await request.post(path,{headers:headers(id),data:body}):await request.get(path,{headers:headers(id)});expect(r.ok()).toBe(true);return r.json();}
+ let state=await api(owner);const calendarId=state.calendar.id;
+ await api(owner,{action:'mutate',calendarId,revision:state.calendar.revision,operationId:crypto.randomUUID(),changes:[{kind:'occurrence',id:'2026-10-19',data:{id:'2026-10-19',date:'2026-10-19',shiftId:'day'}}]});
+ const invite=await api(owner,{action:'invite',calendarId,email:editor+'@example.invalid',role:'editor',rosterId:'main'});await api(editor,{action:'accept',token:invite.token});
+ await page.goto('./__test__/?user='+editor+'&name=Maria&date=2026-10-19');await page.locator('.phone-roster').click();await page.getByRole('dialog').getByRole('button').filter({hasText:'Andre’s Schedule'}).click();
+ await expect(page.locator('.phone-sync-status')).toContainText('Can edit');
+ await page.context().setOffline(true);await page.getByRole('button',{name:'Open selected date details',exact:true}).click();
+ await page.locator('.daily-duty-picker').getByRole('button').filter({hasText:'Night'}).click();
+ await expect(page.locator('.daily-duty-picker').getByRole('button').filter({hasText:'Night'})).toHaveAttribute('aria-pressed','true');
+ state=await api(owner,undefined,'/api/calendar?id='+calendarId);const member=state.members.find((m:any)=>m.email===editor+'@example.invalid');await api(owner,{action:'memberRole',calendarId,id:member.id,role:'viewer'});
+ await page.context().setOffline(false);await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await expect(page.locator('.phone-sync-status')).toContainText('View only',{timeout:20000});await expect(page.getByRole('dialog',{name:'Duty & entries',exact:true})).toHaveCount(0);await expect(page.getByRole('dialog',{name:'Review unsent changes',exact:true})).toBeVisible();
+ await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Day/);
+ expect((await api(owner,undefined,'/api/calendar?id='+calendarId)).occurrences[0].shiftId).toBe('day');
+ const saved=await page.evaluate(async(key)=>new Promise<any>(resolve=>{const open=indexedDB.open('shiftly-v1');open.onsuccess=()=>{const db=open.result,req=db.transaction('cache').objectStore('cache').get(key);req.onsuccess=()=>{resolve(req.result);db.close();};};}),editor+'_'+calendarId);
+ expect(saved.queue).toHaveLength(0);expect(saved.snapshot.role).toBe('viewer');expect(saved.rejectedDraft.occurrences[0].shiftId).toBe('night');
+ await info.attach('offline-permission-review',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'Back up my changes & load latest',exact:true}).click();await download;await expect(page.getByRole('dialog',{name:'Review unsent changes',exact:true})).toHaveCount(0);
+});

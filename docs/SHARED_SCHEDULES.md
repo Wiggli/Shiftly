@@ -1,0 +1,27 @@
+# Shared schedules
+
+A schedule is the work data. Calendar, Week, Today and Schedule are views of that same data. The private calendar container remains an advanced schedule space so existing multi-person households, jobs and historical identifiers are preserved.
+
+The switcher separates **My schedules** and **Shared with me**. Default names such as My Roster render as My Schedule for the owner and an owner-aware title for recipients. A custom schedule name remains secondary to the owner's identity. Missing owner metadata renders Shared Schedule rather than attributing it to the recipient. Owner names come from verified account profile presentation metadata; they never authorize access.
+
+## Access and storage
+
+Owners manage invitations, grant changes, revocation, schedule identity and archive/restore. Editors change duties, shift definitions available to their scope, repeating schedules and entries. Viewers can only read. Legacy full-space grants retain their scope but do not confer ownership. Invitations remain email-bound, expiring and single-use; changing a member's grant invalidates outstanding invitations for that recipient. An invitation identifier is retained through Google sign-in in the same browser storage used by OAuth, restored after authentication, then removed from pending storage. Old or malformed identifiers are discarded, and the server still checks the invited email and expiry. Sending an invitation uses the system share sheet or clipboard and does not send email automatically.
+
+`calendar_members` references the original `calendars` row. No schedule is copied on acceptance. Scoped grants filter schedules, patterns, overrides, entries and custom shift definitions. Exact built-in defaults are also available so an editor can choose Day or Night without creating types. Modified or unrelated custom definitions stay filtered unless used in the authorized schedule. Private entries and other authors' private notes remain protected.
+
+Production uses a private Postgres schema with RLS enabled and no anon/authenticated table grants. Only the service-role RPC is executable by the backend. The Edge handler validates the Supabase user with Auth before resolving a principal and checks current membership on reads and writes. No client role, name or guessed ID grants access. The shared mutation transaction uses a revision compare-and-swap; permission changes and revocations increment that same revision. Idempotency keys prevent retry duplication. Concurrent stale edits return a conflict for review rather than overwriting silently.
+
+## Live updates and offline state
+
+The authenticated stream checks membership and sends revision, role and scope every 2.5 seconds; it renews its connection after each bounded stream. The catalog refreshes on foreground, online and page restore and every 15 seconds while visible, including when the active schedule has unsent edits. Permission changes refresh the authorized snapshot and close stale editing sheets. Revocation closes the stream, removes the downloaded snapshot and pending work, and opens the user's own schedule. Catalog reconciliation also removes revoked unselected downloads and clears downloads with changed scope or role.
+
+Offline edits follow the existing operation queue. Conflicting or no-longer-authorized operations are never silently replayed. A same-scope permission change can preserve a sanitized local draft for the existing backup-and-review flow; a narrowed scope discards the broader draft. Data that has already been downloaded cannot be remotely erased while a device is disconnected. Backend revocation is immediate; client controls and downloaded data reconcile as soon as connectivity returns. Transient database failures close/retry a stream rather than treating an outage as revocation.
+
+## Deployment and validation
+
+Apply `supabase/migrations/202610220001_owner_presentation.sql` before the new Edge bundle. It adds nullable owner presentation metadata and backfills only known authenticated principals, leaving schedule records and grants intact. Existing accounts also refresh their own display name on authenticated requests. Keep `shiftly-api` platform `verify_jwt=false`, because the handler validates bearer sessions itself and also serves the existing CalDAV/password and subscription endpoints. Enabling platform JWT enforcement would break those integrations.
+
+`pnpm test:sharing` runs a disposable SQLite API fixture with Andre, Maria and John as separate simulated principals. It checks owner metadata, invitation receipt, catalog isolation, view/edit changes, live grants and revocation, original-record propagation, deletions, pattern updates, stale revision conflicts, and owner-only management. Existing API, CalDAV, edit-sync, auth and privacy suites remain release gates.
+
+`tests/mobile/sharing.spec.ts` uses independent browser contexts against the same disposable backend and the production app, hook and authenticated stream. It covers acceptance, owner-aware switching, recipient edits, two receivers, offline reconnection, restart, downgrade with an open sheet, revocation and downloaded-cache removal in Chromium/WebKit and both iPhone orientations. The owner’s access controls and unsent offline edits after downgrade are exercised directly. Its harness is built outside the Pages artifact and cannot authenticate against production. The general phone suite also covers empty, dark, long-text and read-only surfaces. Physical iPhone Safari, safe areas, keyboard and VoiceOver remain device checks.

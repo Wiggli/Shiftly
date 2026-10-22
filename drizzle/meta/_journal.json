@@ -22,6 +22,13 @@
       "when": 1791681927968,
       "tag": "0002_lethal_venus",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792666797223,
+      "tag": "0003_owner_presentation",
+      "breakpoints": true
     }
   ]
 }

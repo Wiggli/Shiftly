@@ -14,7 +14,7 @@ const server=createServer(async(incoming,outgoing)=>{
   const headers=new Headers(incoming.headers as any);headers.set('origin',root);
   const req=new Request(root+incoming.url,{method:incoming.method,headers,body:chunks.length?Buffer.concat(chunks):undefined});
   const path=new URL(req.url).pathname,id=req.headers.get('x-test-user-id'),email=req.headers.get('x-test-user-email');
-  const result=await contextStorage.run(id?{userId:id,email,provider:'google'}:null,async()=>{
+  const result=await contextStorage.run(id?{userId:id,email,fullName:req.headers.get('x-test-user-name')||'',provider:'google'}:null,async()=>{
    if(path==='/api/calendar')return req.method==='POST'?calendar.POST(req):calendar.GET(req);
    if(path==='/api/calendar/caldav')return account.POST(req);
    if(path==='/api/calendar/feed')return req.method==='POST'?feed.POST(req):feed.GET(req);

@@ -105,7 +105,7 @@ for(const theme of ['light','dark']){
  });
  test(theme+' settings and every More tool remain reachable',async({page},info)=>{
   await openSample(page,theme);await more(page);
-  await expect(page.getByRole('button',{name:'Manage rosters Add another person or job'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Manage schedules Add another person or job'})).toBeVisible();
   await inspectSurface(page,info,'more-'+theme);
   await page.getByRole('button',{name:'Settings Appearance and shift types'}).click();
   for(const [name,heading] of [['Appearance Theme and calendar layout','Appearance'],['Shift types Create, edit and restore shifts','Shift types'],['Calendar sync Apple, Google, Outlook & more','Calendar sync'],['Backup & files Import, export and keep a copy','Backup & files']]){
@@ -146,7 +146,7 @@ for(const theme of ['light','dark']){
  test(theme+' account, sharing, app help and QR stay within their sheets',async({page},info)=>{
   await openSample(page,theme);await page.getByRole('button',{name:'Account and sign in',exact:true}).click();
   await inspectSurface(page,info,'account-'+theme);
-  await openSample(page,theme);await more(page);await page.getByRole('button',{name:'Sharing Choose who can see or edit your roster'}).click();
+  await openSample(page,theme);await more(page);await page.getByRole('button',{name:'Sharing Choose who can see or edit your schedule'}).click();
   await expect(page.getByRole('dialog')).toContainText('Sign in with Google');await inspectSurface(page,info,'sharing-'+theme);
   await openSample(page,theme);await more(page);await page.getByRole('button',{name:'App & help Install, update or read the guide'}).click();
   await inspectSurface(page,info,'app-help-'+theme);
@@ -163,7 +163,7 @@ for(const theme of ['light','dark']){
   await page.getByRole('button',{name:'Open selected date details',exact:true}).click();
   await inspectSurface(page,info,'long-day-'+theme);
   await expect(page.getByRole('dialog')).toContainText('updated handover notes');
-  await openSample(page,theme,'stress');await more(page);await page.getByRole('button',{name:'Manage rosters Add another person or job'}).click();
+  await openSample(page,theme,'stress');await more(page);await page.getByRole('button',{name:'Manage schedules Add another person or job'}).click();
   await page.getByRole('button',{name:'Name, colour & delete',exact:true}).click();
   await inspectSurface(page,info,'long-roster-editor-'+theme);
  });
@@ -225,11 +225,11 @@ test('Agenda, Year and edit tools remain usable from the calendar menu',async({p
 });
 
 test('creating a separate sample roster supports a Together comparison',async({page},info)=>{
- await openSample(page);await more(page);await page.getByRole('button',{name:'Manage rosters Add another person or job'}).click();
+ await openSample(page);await more(page);await page.getByRole('button',{name:'Manage schedules Add another person or job'}).click();
  await page.getByRole('button',{name:'Add a person or job',exact:true}).click();await page.getByLabel('Person or job name',{exact:true}).fill('Sample partner');
- await inspectSurface(page,info,'new-roster');await page.getByRole('button',{name:'Create roster',exact:true}).click();
+ await inspectSurface(page,info,'new-roster');await page.getByRole('button',{name:'Create schedule',exact:true}).click();
  await expect(page.getByRole('dialog')).toContainText('Sample partner is ready');
- await page.getByRole('button',{name:'Return to rosters',exact:true}).click();await page.getByRole('button',{name:'Compare rosters',exact:true}).click();
+ await page.getByRole('button',{name:'Return to schedules',exact:true}).click();await page.getByRole('button',{name:'Compare schedules',exact:true}).click();
  await inspectSurface(page,info,'compare-picker');await page.getByRole('button',{name:'Show comparison',exact:true}).click();
  await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByText('Sample partner',{exact:true}).first()).toBeVisible();
  await inspectSurface(page,info,'together-view');

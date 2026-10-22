@@ -1,0 +1,6 @@
+export class AuthenticatedStream{
+  onmessage:((event:MessageEvent)=>void)|null=null;onerror:((event:Event)=>void)|null=null;private controller=new AbortController();private closed=false;
+  constructor(private path:string,private fetchStream:(path:string,init:RequestInit)=>Promise<Response>){void this.connect();}
+  async connect(){while(!this.closed){try{const response=await this.fetchStream(this.path,{signal:this.controller.signal});if([403,404].includes(response.status)){this.onmessage?.(new MessageEvent('message',{data:JSON.stringify({revoked:true})}));this.close();break;}if(!response.ok||!response.body)throw Error('Stream unavailable');const reader=response.body.pipeThrough(new TextDecoderStream()).getReader();let buffer='';try{for(;;){const {done,value}=await reader.read();if(done)break;buffer+=value;let end;while((end=buffer.indexOf('\n\n'))>=0){const message=buffer.slice(0,end);buffer=buffer.slice(end+2);const data=message.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trimStart()).join('\n');if(data)this.onmessage?.(new MessageEvent('message',{data}));}}}finally{reader.releaseLock();}}catch{if(!this.closed)this.onerror?.(new Event('error'));}if(!this.closed)await new Promise(resolve=>setTimeout(resolve,3000));}}
+  close(){this.closed=true;this.controller.abort();}
+ }

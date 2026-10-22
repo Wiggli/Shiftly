@@ -4,6 +4,7 @@ import CalendarApp from '../../app/ui/CalendarApp';
 import {demoCalendar} from './demo';
 import config from '../config.json';
 import AppLoading from '../../app/ui/AppLoading';
+import {restoreInvitation} from '../../lib/invitation-navigation';
 import {loadAccountIdentity} from '../../lib/account-bootstrap';
 import '../../app/globals.css';
 import '../../app/apple-ui.css';
@@ -38,7 +39,7 @@ async function render(){
   if(current===generation&&!opened)root.render(<AppLoading status={error instanceof Error?error.message:'Your account could not be reached.'}><button className="primary" onClick={()=>void render()}>Try again</button></AppLoading>);
   return;
  }
- if(current===generation){opened=true;root.render(<CalendarApp key={identity?.id||'guest'} identity={identity}/>);}
+ if(current===generation){if(identity){try{const restored=restoreInvitation(new URL(location.href),localStorage);if(restored!==location.href)history.replaceState(history.state,'',restored);}catch{}}opened=true;root.render(<CalendarApp key={identity?.id||'guest'} identity={identity}/>);}
 }
 void render();client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')localStorage.removeItem('shiftly-last-identity');setTimeout(()=>void render(),0);});
 

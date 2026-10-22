@@ -2,7 +2,7 @@
 create schema if not exists shiftly_private;
 revoke all on schema shiftly_private from public, anon, authenticated;
 grant usage on schema shiftly_private to service_role;
-create table shiftly_private.calendars(id text primary key,owner text not null,name text not null,timezone text not null,settings text not null default '{}',revision bigint not null default 0,rowid bigint generated always as identity);
+create table shiftly_private.calendars(id text primary key,owner text not null,owner_name text,name text not null,timezone text not null,settings text not null default '{}',revision bigint not null default 0,rowid bigint generated always as identity);
 create table shiftly_private.calendar_members(id text primary key,calendar_id text not null references shiftly_private.calendars(id) on delete cascade,"user" text not null,email text not null,role text not null check(role in ('viewer','editor')),roster_id text,rowid bigint generated always as identity);
 create index member_access on shiftly_private.calendar_members(calendar_id,"user");
 create table shiftly_private.calendar_records(id text primary key,calendar_id text not null references shiftly_private.calendars(id) on delete cascade,kind text not null,date text,author text not null,private integer not null default 0,data text not null,rowid bigint generated always as identity);
