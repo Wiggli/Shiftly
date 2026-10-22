@@ -1,5 +1,9 @@
 # Everyday simplicity and advanced workflows
 
+Current calendar-first setup and terminology: see [SIMPLE_SCHEDULE.md](SIMPLE_SCHEDULE.md).
+The historical notes below describe earlier releases; Patterns is now shown as
+Schedule and setup no longer asks users to name a roster.
+
 The four primary destinations remain Calendar, Today, Patterns and More.
 Patterns use two steps: sequence, then start/repetition. Controls for removing
 or moving a pattern day appear only after selecting that day. Existing

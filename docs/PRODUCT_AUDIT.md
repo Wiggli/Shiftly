@@ -50,3 +50,47 @@ The implementation follows Apple's [CalDAV payload schema](https://github.com/ap
 Validation: typecheck, production build, 125 application tests, 11 Pages/session/profile tests, CalDAV, edit-sync and API/security fixtures passed locally. Added actual-component phone coverage for light/dark setup and rename guidance, XML fields and password-free downloads in Chromium/WebKit portrait and landscape. Merge and release remain gated on the complete phone suite and live build verification.
 
 Initial phone validation passed 104 checks and exposed a test assumption: WebKit hands Apple's profile MIME type to its native handler instead of emitting Playwright's download event. The revised check verifies its actual navigation response, MIME and attachment filename; Chromium additionally validates saved file bytes. Native iOS installation remains a device check.
+
+## 22 October 2026: calendar-first simplicity
+
+Audited setup, guide, calendar phone toolbar and selected date preview, Schedule,
+sequence editor, custom shifts, More, day actions, roster management and sync
+entry points. The concept mapping and retained capabilities are documented in
+SIMPLE_SCHEDULE.md. No account/database migration or auth/sync rewrite is used.
+
+- Calendar opens directly without a mandatory tutorial; an empty phone calendar
+  shows No schedule yet with Set up my schedule, within the fitted calendar frame.
+- Setup asks how the user works, then their sequence/weekly days, then a start
+  date. Existing roster identity is inferred. Common shifts, optional custom
+  definitions and time editing do not require separate management screens.
+- Calendar Add consistently offers Shift, Overtime, Leave and Note, with advanced
+  creation secondary. Patterns is presented as Schedule in navigation; existing
+  data and advanced bulk, pattern and sharing tools remain available.
+- Day changes explicitly affect one day. Schedule edits default to future-only
+  splitting; editing the historical source is a separate explicit option.
+- Stop repeating preserves historical generated duties, individual edits and
+  annotations rather than deleting their underlying pattern record.
+
+Verification in progress: local application, typecheck, production PWA/backend
+build and Pages tests; CI phone validation and screenshot inspection are required
+before publication. Local test browsers could not be downloaded in this runtime,
+and its separate browser cannot reach the local preview server. Do not describe
+these environment limitations as passed phone checks. Physical iPhone keyboard,
+Safari chrome, safe areas and VoiceOver remain device checks.
+
+Phone evidence: [CI run 39759406269](https://github.com/Wiggli/Shiftly/actions/runs/39759406269)
+passed all backend/build/PWA/security gates and 140/148 phone checks, including
+all new setup, custom shift, future edit, individual edit, small-phone and
+history-preserving stop cases. The eight failed checks repeated two findings
+across engines/orientations: an old empty-sequence warning did not clear when a
+day was added, and an existing test selected two different More options labels.
+The warning now clears on correcting the sequence; the test now scopes its
+selection to the active schedule sheet. Portrait/landscape artifacts were
+inspected for Calendar, empty setup, sequence/date steps, completed DDNN OO,
+small phones, neighbouring More/settings and light/dark surfaces. This review
+also made the six-day sequence fit one row on the main phone size and reused
+the sticky form action area so Continue stays visible in taller setup forms.
+
+Final CI, merge and live-release evidence is maintained in
+[PR #9](https://github.com/Wiggli/Shiftly/pull/9). Passing browser tests does not
+certify physical iPhone safe areas, keyboard behaviour, Safari chrome or VoiceOver.

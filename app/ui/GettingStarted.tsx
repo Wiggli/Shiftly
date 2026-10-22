@@ -1,23 +1,65 @@
 'use client';
 import {useState} from 'react';
-import {ChevronRight,Check,Plus} from 'lucide-react';
-import {Sheet,Field,ShiftChip,uid} from './primitives';
+import {ChevronRight,Plus,Copy,Trash2} from 'lucide-react';
+import {Sheet,Field,ShiftChip,uid,fmt} from './primitives';
 import ShiftEditor from './ShiftEditor';
-import CreatorCredit from './CreatorCredit';
-import PatternEditor from './PatternEditor';
 import {shiftChoices} from '../../lib/shift-choices';
-import {planRotation,familiarRhythms,WorkStyle} from '../../lib/setup';
-export default function GettingStarted({s,roster,date,onShift,onApply,onClose}:any){
- const choices=shiftChoices(s);
- const [step,setStep]=useState(1),[name,setName]=useState(roster.name),[style,setStyle]=useState<WorkStyle>('rotating'),[template,setTemplate]=useState('two-two'),[start,setStart]=useState(date),[repeat,setRepeat]=useState(100),[repeatMode,setRepeatMode]=useState('forever'),[editing,setEditing]=useState<any>(undefined),[custom,setCustom]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
- async function apply(pattern:any,newShifts:any[]=[]){setBusy(true);setError('');try{if(!name.trim())throw Error('Give your roster a name.');await onApply({...roster,name:name.trim()},pattern,newShifts);return true;}catch(e:any){setError(e.message);return false;}finally{setBusy(false);}}
- if(editing!==undefined)return <ShiftEditor value={editing} writable onBack={()=>setEditing(undefined)} onClose={()=>setEditing(undefined)} onSave={async(shift:any)=>{if(!await onShift(shift))return false;setEditing(undefined);return true;}}/>;
- if(custom)return <PatternEditor s={s} date={start} onBack={()=>setCustom(false)} onShiftSave={onShift} onClose={()=>setCustom(false)} onSave={async(pattern:any)=>{return await apply(pattern);}}/>;
- let plan:any=null,preview:any=null;try{plan=planRotation(style,template,choices,start,repeatMode==='forever'?1:repeat);preview=plan.pattern;}catch{}
- return <Sheet title="Set up your roster" onClose={onClose} onBack={step===2?()=>setStep(1):undefined} backDisabled={busy}><div className="setup-progress" aria-label={'Step '+step+' of 2'}><span className={step===1?'active':''}>1 · Your shifts</span><ChevronRight size={17}/><span className={step===2?'active':''}>2 · Your schedule</span></div>
- {step===1?<><p>Start with the shifts you actually work. The examples below are ready to edit, and you can create another shift whenever you need one.</p><p className="hint">You’re setting up one roster inside {s.calendar?.name||'your calendar'}. Give it your name or a job name so it is easy to recognise when comparing or sharing.</p><Field label="Roster name (person or job)"><input maxLength={60} value={name} onChange={e=>setName(e.target.value)} placeholder="Andre’s roster"/></Field><div className="setup-shifts">{choices.map((sh:any)=><button className="settings-shift" key={sh.id} onClick={()=>setEditing(sh)}><ShiftChip shift={sh}/><span>{sh.start?sh.start+'–'+sh.end:'No working hours'}</span><ChevronRight size={17}/></button>)}</div><button className="text-button" onClick={()=>setEditing(null)}><Plus size={16}/>Create another shift</button><button className="primary full" disabled={!name.trim()} onClick={()=>setStep(2)}>Continue to schedule<ChevronRight size={17}/></button></>:<form onSubmit={e=>{e.preventDefault();try{const result=planRotation(style,template,choices,start,repeatMode==='forever'?1:repeat);void apply(result.pattern?{...result.pattern,repeat:repeatMode==='forever'?0:repeat}:null,result.shiftsToCreate);}catch(e:any){setError(e.message);}}}><Field label="How do you work?"><select value={style} onChange={e=>{setStyle(e.target.value as WorkStyle);setError('');}}><option value="rotating">A repeating rotation</option><option value="fixed">Weekdays, Monday to Friday</option><option value="irregular">An irregular roster, entered day by day</option></select></Field>
- {style==='rotating'&&<Field label="Starting pattern"><select value={template} onChange={e=>setTemplate(e.target.value)}>{familiarRhythms.filter(r=>r.style==='rotating').map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></Field>}
- {style!=='irregular'?<><div className="two-col"><Field label="Start date (day 1 of the sequence)"><input type="date" required value={start} onChange={e=>setStart(e.target.value)}/></Field><Field label="Repeat"><select value={repeatMode} onChange={e=>setRepeatMode(e.target.value)}><option value="forever">Keep repeating</option><option value="times">A number of times</option></select></Field></div>{repeatMode==='times'&&<Field label="Number of repetitions"><input type="number" required min="1" max="100000" value={repeat} onChange={e=>setRepeat(+e.target.value)}/></Field>}{style==='rotating'&&<p className="hint">{familiarRhythms.find(r=>r.id===template)?.description}</p>}{preview&&<div className="setup-preview"><div className="pattern-sequence">{preview.items.map((id:string,i:number)=><ShiftChip compact key={i} shift={plan.shifts.find((sh:any)=>sh.id===id)}/>)}</div>{plan.shiftsToCreate.length>0&&<p className="hint">{plan.shiftsToCreate.map((sh:any)=>sh.name).join(' and ')} will be added when you generate your roster.</p>}<p>{repeatMode==='forever'?'This sequence will keep repeating from your chosen date.':(preview.items.length*repeat).toLocaleString()+' days will be planned.'} Individual edits and personal events stay in place.</p></div>}<button type="button" className="quiet-button full" onClick={()=>setCustom(true)}>Build a custom pattern instead</button></>:<p className="hint">Tap a date to choose its shift, or use Edit → Paint to fill several days quickly.</p>}
- {error&&<p role="alert" className="danger">{error}</p>}<div className="form-actions"><button type="button" className="quiet-button" disabled={busy} onClick={()=>setStep(1)}>Back</button><button className="primary" disabled={busy}><Check size={17}/>{busy?'Saving…':style==='irregular'?'Open my calendar':'Generate my roster'}</button></div></form>}
- <button className="text-button full" disabled={busy} onClick={onClose}>Set up later</button><p className="hint">After setup, use Sharing to invite someone, or Manage rosters to add another person or job. You can change these choices later.</p>{step===1&&<CreatorCredit compact/>}</Sheet>;
+import {defaults,addDays,isDate,Shift} from '../../lib/engine';
+import {planRotation,familiarRhythms} from '../../lib/setup';
+
+// Setup drafts stay local until the complete schedule is saved atomically.
+export default function GettingStarted({s,roster,date,onApply,onClose}:any){
+ const [step,setStep]=useState(1),[style,setStyle]=useState('rotating'),[start,setStart]=useState(date),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const [replacements,setReplacements]=useState<Record<string,string>>({});
+ const [drafts,setDrafts]=useState<Shift[]>([]),[editing,setEditing]=useState<Shift|null|undefined>(undefined),[selected,setSelected]=useState<number|null>(null);
+ const saved=shiftChoices(s).filter(sh=>sh.category!=='Leave');
+ const base=[...saved.filter(sh=>!replacements[sh.id])];
+ for(const source of [...defaults.filter(sh=>sh.category!=='Leave'),{...defaults[0],id:'evening',name:'Evening',short:'E',emoji:'🌆',start:'15:00',end:'23:00',color:'#9b72bf'}]){
+  if([...base,...drafts].some(sh=>sh.name.toLowerCase()===source.name.toLowerCase()))continue;
+  let id='setup-'+source.id;while(s.shifts.some((sh:Shift)=>sh.id===id)||base.some(sh=>sh.id===id))id+='-new';
+  base.push({...source,id});
+ }
+ const shifts=[...base.filter(sh=>!replacements[sh.id]).map(sh=>drafts.find(d=>d.id===sh.id)||sh),...drafts.filter(sh=>!base.some(b=>b.id===sh.id))];
+ const day=shifts.find(sh=>sh.name.toLowerCase()==='day')||shifts.find(sh=>sh.category==='Work')!;
+ const night=shifts.find(sh=>sh.name.toLowerCase()==='night')||day,off=shifts.find(sh=>sh.name.toLowerCase()==='off')!;
+ const [items,setItems]=useState<string[]>([day.id,day.id,night.id,night.id,off.id,off.id]);
+ const [week,setWeek]=useState<string[]>([day.id,day.id,day.id,day.id,day.id,off.id,off.id]);
+ const sequence=style==='fixed'?week:items;
+ function update(next:string[]){setError('');style==='fixed'?setWeek(next):setItems(next);}
+ async function apply(){
+  if(busy)return;setError('');
+  if(style!=='manual'&&(!sequence.length||!isDate(start))){setError('Choose your shifts and a valid start date.');return;}
+  setBusy(true);
+  try{
+   const weekday=(new Date(start+'T12:00:00Z').getUTCDay()+6)%7;
+   const ids=style==='fixed'?[...week.slice(weekday),...week.slice(0,weekday)]:items;
+   const used=new Set(style==='manual'?[]:ids);
+   const pending=shifts.filter(sh=>(used.has(sh.id)||drafts.some(d=>d.id===sh.id))&&(!s.shifts.some((saved:Shift)=>saved.id===sh.id)||drafts.some(d=>d.id===sh.id)));
+   const ok=await onApply(roster,style==='manual'?null:{id:uid(),name:style==='fixed'?'My weekly schedule':'My repeating schedule',items:ids,start,repeat:0},pending);
+   if(ok===false)setError('Your schedule could not be saved. Your choices are still here.');
+  }catch(e:any){setError(e.message);}finally{setBusy(false);}
+ }
+ if(editing!==undefined)return <ShiftEditor value={editing} writable allowManagement={false} onBack={()=>setEditing(undefined)} onClose={()=>setEditing(undefined)} onSave={async(input:Shift)=>{
+  const source=editing?.id;
+  const shift=source&&s.shifts.some((sh:Shift)=>sh.id===source)?{...input,id:uid(),archived:false}:input;
+  if(source&&shift.id!==source){setReplacements(old=>({...old,[source]:shift.id}));setItems(old=>old.map(id=>id===source?shift.id:id));setWeek(old=>old.map(id=>id===source?shift.id:id));}
+  setDrafts(old=>[...old.filter(sh=>sh.id!==shift.id),shift]);setEditing(undefined);return true;
+ }}/>;
+ return <Sheet title={step===1?'Set up my schedule':step===2?'Choose my shifts':'When should it start?'} onClose={onClose} onBack={step>1?()=>{setStep(step-1);setSelected(null);setError('');}:undefined} backDisabled={busy}>
+ <p className="step-caption">Step {step} of 3</p>
+ <form onSubmit={e=>{e.preventDefault();if(step===1&&style==='manual'){void apply();return;}if(step<3){if(step===2&&!sequence.length){setError('Add at least one day.');return;}setStep(step+1);setSelected(null);setError('');}else void apply();}}>
+ <fieldset className="shift-editor-fields" disabled={busy}>
+ {step===1?<><h2>How do you normally work?</h2><div className="setup-work-choices">{[['rotating','Regular repeating pattern','The same sequence of shifts and days off.'],['fixed','Same shifts every week','Choose your shifts for Monday to Sunday.'],['manual','I’ll add shifts myself','For irregular schedules, or to start with an empty calendar.']].map(([id,label,help])=><button key={id} type="button" aria-pressed={style===id} onClick={()=>setStyle(id)}><strong>{label}</strong><span>{help}</span></button>)}</div></>:step===2?<>
+ <h2>{style==='fixed'?'What does your week look like?':'What does your pattern look like?'}</h2><p className="hint">{style==='fixed'?'Tap a weekday to change its shift.':'Tap a day to change it, or choose a shift below to add another day.'}</p>
+ {style==='rotating'&&<Field label="Start with an example"><select defaultValue="six" onChange={e=>{setSelected(null);setError('');if(e.target.value==='six')setItems([day.id,day.id,night.id,night.id,off.id,off.id]);else if(e.target.value==='custom')setItems([]);else{const plan=planRotation('rotating',e.target.value,[...shifts,...s.shifts.filter((sh:Shift)=>sh.archived)],start,1);setDrafts(old=>[...old,...plan.shiftsToCreate]);setItems(plan.pattern!.items);}}}><option value="six">Day / Day / Night / Night / Off / Off</option>{familiarRhythms.filter(r=>r.style==='rotating').map(r=><option key={r.id} value={r.id}>{r.name}</option>)}<option value="custom">Build my own</option></select></Field>}
+ <div className="builder-sequence compact-sequence setup-sequence" data-weekly={style==='fixed'}>{sequence.map((id,i)=><button type="button" className={'sequence-day '+(selected===i?'selected-day':'')} key={i} aria-pressed={selected===i} aria-label={'Change '+(style==='fixed'?['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][i]:'day '+(i+1))} onClick={()=>setSelected(selected===i?null:i)}><small>{style==='fixed'?['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]:'Day '+(i+1)}</small><ShiftChip shift={shifts.find(sh=>sh.id===id)} compact/></button>)}</div>
+ {selected!==null&&<div className="selected-day-tools"><strong>{style==='fixed'?'Choose its shift':'Day '+(selected+1)}</strong>{style!=='fixed'&&<><button type="button" aria-label="Duplicate day" disabled={items.length>=366} onClick={()=>{const next=[...items];next.splice(selected+1,0,items[selected]);setItems(next);setSelected(null);}}><Copy size={16}/>Duplicate</button><button type="button" aria-label="Remove day" onClick={()=>{setItems(items.filter((_,i)=>i!==selected));setSelected(null);}}><Trash2 size={16}/>Remove</button></>}</div>}
+ <div className="shift-palette" role="group" aria-label="Available shifts">{shifts.filter(sh=>!sh.archived).map(sh=><button type="button" key={sh.id} disabled={selected===null&&(style==='fixed'||sequence.length>=366)} onClick={()=>{if(selected===null)update([...sequence,sh.id]);else update(sequence.map((id,i)=>i===selected?sh.id:id));setSelected(null);}}><ShiftChip shift={sh}/></button>)}</div>
+ {style==='rotating'&&<div className="day-tools"><button type="button" disabled={items.length>=366} onClick={()=>{setError('');setItems([...items,off.id]);setSelected(items.length);}}><Plus size={16}/>Add day</button><button type="button" onClick={()=>{setItems([]);setSelected(null);}}>Clear pattern</button></div>}
+ <details className="disclosure"><summary>Change shift times or add a custom shift</summary><p className="hint">These shifts are ready to use. Changes are saved with your schedule.</p>{shifts.filter(sh=>!sh.archived).map(sh=><button key={sh.id} type="button" className="settings-shift" onClick={()=>setEditing(sh)}><ShiftChip shift={sh}/><span>{sh.start?sh.start+'–'+sh.end:'Day off'}</span><ChevronRight size={16}/></button>)}<button type="button" className="text-button" onClick={()=>setEditing(null)}>Create a custom shift</button></details>
+ </>:<><p>{style==='fixed'?'Choose when to begin using this weekly schedule.':<>Choose the date for <strong>Day 1: {shifts.find(sh=>sh.id===items[0])?.name}</strong>.</>}</p><Field label="Start date"><input type="date" required value={start} onChange={e=>setStart(e.target.value)}/></Field><p className="hint">Your shifts will keep repeating automatically. You can change any day later.</p><div className="rotation-date-preview">{isDate(start)&&(style==='fixed'?Array.from({length:7},(_,i)=>week[((new Date(start+'T12:00:00Z').getUTCDay()+6)%7+i)%7]):items).slice(0,14).map((id,i)=><div key={i}><small>{fmt(addDays(start,i))}</small><ShiftChip compact shift={shifts.find(sh=>sh.id===id)}/></div>)}</div><p className="hint">Existing individual shifts, leave, overtime and notes will stay in place.</p></>}
+ {error&&<p role="alert" className="danger">{error}</p>}
+ </fieldset><div className="form-actions setup-actions"><button className="primary full" disabled={busy}>{busy?'Saving…':step===3?'Show my shifts':style==='manual'&&step===1?'Open my calendar':'Continue'}<ChevronRight size={17}/></button></div></form>
+ <button className="text-button full" disabled={busy} onClick={onClose}>Set up later</button>
+ </Sheet>;
 }
