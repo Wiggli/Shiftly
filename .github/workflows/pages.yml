@@ -45,6 +45,9 @@ jobs:
       - run: pnpm test:pages
       - name: Test live release verifier
         run: node --test tests/standalone/release.cjs
+      - name: Use reliable Ubuntu mirror for browser dependencies
+        run: |
+          sudo find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i -E 's#https?://azure\.archive\.ubuntu\.com/ubuntu#https://archive.ubuntu.com/ubuntu#g' {} +
       - name: Install mobile test browsers
         run: pnpm exec playwright install --with-deps chromium webkit
       - name: Check iPhone layouts before publishing
