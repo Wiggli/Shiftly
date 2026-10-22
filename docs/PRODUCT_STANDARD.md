@@ -4,6 +4,21 @@ Andre's permanent development mandate, adopted 20 October 2026.
 
 Shiftly should feel finished: a fast, simple, dependable iPhone shift calendar that a nurse can understand in two seconds and update in a few taps. The calendar is the centre of the product. This standard applies to current and future work and supplements AGENTS.md.
 
+## Self-explanatory without onboarding
+
+A user who skips every guide must still understand Calendar, Set up my schedule,
+Add, editing a day, and where to change their normal schedule. Never repair a
+confusing basic flow by requiring another tutorial. Ordinary setup asks how the
+user works, their shifts/sequence and its starting date, with common shifts and
+continuous repetition ready by default. Infer roster/container identity instead
+of requiring names or assignments. Use one visually dominant next action in
+empty/setup states and keep advanced management behind explicit options.
+
+Everyday language is Calendar, Schedule, Shift, Overtime, Leave and Note.
+Stored rosters, patterns, templates and recurrence machinery remain compatible
+and available where needed, without becoming prerequisites for ordinary use.
+Preserve historical duties when stopping or changing future repeating schedules.
+
 ## Ownership and priorities
 
 Act as product owner, designer, frontend engineer and QA engineer. Inspect screens, components, interactions and states systematically; repair adjacent issues as they emerge instead of waiting for Andre to report them. Routine reversible improvements are authorised. Escalate only decisions that materially change the product or risk user data. Preserve accounts, user information, authentication, Supabase, roster data, shift definitions, patterns, overtime, leave, notes, offline edits and Apple Calendar integration. Avoid rebuilding or broad stylistic refactors.

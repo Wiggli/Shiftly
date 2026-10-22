@@ -281,3 +281,4 @@
 .calendar-screen .phone-day-peek.schedule-empty-peek{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .calendar-screen .phone-calendar-toolbar .phone-add-button{background:var(--accent);color:#fff;padding-inline:10px;border-radius:12px}
 @media(max-width:380px){.calendar-screen .phone-calendar-toolbar .phone-summary{display:none}}
+.calendar-screen .calendar-main:has(.schedule-empty-peek) .phone-calendar-toolbar .phone-add-button{background:var(--control-bg);color:var(--accent)}
