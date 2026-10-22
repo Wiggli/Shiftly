@@ -33,7 +33,7 @@ for(const layout of ['installed','browser']){
    await expect(page.getByRole('heading',{name:tab,exact:true})).toBeVisible();
    await info.attach(tab.toLowerCase(),{body:await page.screenshot(),contentType:'image/png'});
   }
-  await expect(page.getByRole('heading',{name:'Your roster is already planned',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Your shifts are on the calendar',exact:true})).toBeVisible();
   await page.locator('summary').filter({hasText:'Use a preset pattern'}).click();
   const last=page.locator('.templates>button').last();
   await page.locator('.content').evaluate(el=>{el.scrollTop=el.scrollHeight;});

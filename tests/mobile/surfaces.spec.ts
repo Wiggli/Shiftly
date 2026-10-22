@@ -66,7 +66,7 @@ test('Linked patterns show cycle status, preserve manual duties and explain an e
  await page.getByRole('button',{name:'Edit schedule',exact:true}).click();await page.getByText('More options',{exact:true}).click();await page.getByRole('button',{name:'Edit the original schedule',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByLabel('Repeat',{exact:true}).selectOption('until');await page.getByLabel('End date',{exact:true}).fill('2026-10-19');
  await page.getByRole('button',{name:'Save schedule',exact:true}).click();
- await expect(page.locator('.pattern-state')).toHaveText('Finished');await expect(page.locator('.toast')).toHaveText('Pattern updated');await inspectSurface(page,info,'pattern-finished');
+ await expect(page.locator('.pattern-state')).toHaveText('Finished');await expect(page.locator('.toast')).toHaveText('Schedule updated');await inspectSurface(page,info,'pattern-finished');
  await page.locator('.mobile-nav').getByRole('button',{name:'Calendar',exact:true}).click();
  await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Off/);
  await expect(page.locator('.phone-day-peek')).toContainText('Extra evening hours');

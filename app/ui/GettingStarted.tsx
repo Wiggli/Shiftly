@@ -13,9 +13,9 @@ export default function GettingStarted({s,roster,date,onApply,onClose}:any){
  const [replacements,setReplacements]=useState<Record<string,string>>({});
  const [drafts,setDrafts]=useState<Shift[]>([]),[editing,setEditing]=useState<Shift|null|undefined>(undefined),[selected,setSelected]=useState<number|null>(null);
  const saved=shiftChoices(s).filter(sh=>sh.category!=='Leave');
- const base=[...saved];
+ const base=[...saved.filter(sh=>!replacements[sh.id])];
  for(const source of [...defaults.filter(sh=>sh.category!=='Leave'),{...defaults[0],id:'evening',name:'Evening',short:'E',emoji:'🌆',start:'15:00',end:'23:00',color:'#9b72bf'}]){
-  if(base.some(sh=>sh.name.toLowerCase()===source.name.toLowerCase()))continue;
+  if([...base,...drafts].some(sh=>sh.name.toLowerCase()===source.name.toLowerCase()))continue;
   let id='setup-'+source.id;while(s.shifts.some((sh:Shift)=>sh.id===id)||base.some(sh=>sh.id===id))id+='-new';
   base.push({...source,id});
  }
@@ -34,7 +34,7 @@ export default function GettingStarted({s,roster,date,onApply,onClose}:any){
    const weekday=(new Date(start+'T12:00:00Z').getUTCDay()+6)%7;
    const ids=style==='fixed'?[...week.slice(weekday),...week.slice(0,weekday)]:items;
    const used=new Set(style==='manual'?[]:ids);
-   const pending=shifts.filter(sh=>used.has(sh.id)&&(!s.shifts.some((saved:Shift)=>saved.id===sh.id)||drafts.some(d=>d.id===sh.id)));
+   const pending=shifts.filter(sh=>(used.has(sh.id)||drafts.some(d=>d.id===sh.id))&&(!s.shifts.some((saved:Shift)=>saved.id===sh.id)||drafts.some(d=>d.id===sh.id)));
    const ok=await onApply(roster,style==='manual'?null:{id:uid(),name:style==='fixed'?'My weekly schedule':'My repeating schedule',items:ids,start,repeat:0},pending);
    if(ok===false)setError('Your schedule could not be saved. Your choices are still here.');
   }catch(e:any){setError(e.message);}finally{setBusy(false);}

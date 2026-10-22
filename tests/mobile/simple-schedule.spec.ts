@@ -44,3 +44,28 @@ test('Stopping a repeating schedule preserves historical shifts',async({page},in
  await expect(page.locator('[data-roster-date="2026-10-20"]')).toHaveAttribute('aria-label',old!);await expect(page.locator('[data-roster-date="2026-10-23"]')).not.toHaveAttribute('aria-label',/Day|Night|Off/);
  await info.attach('history-preserved',{body:await page.screenshot(),contentType:'image/png'});
 });
+
+for(const width of [320,390])test('Setup remains usable on a '+width+'px iPhone layout',async({page},info)=>{
+ await page.setViewportSize({width,height:width===320?568:844});await empty(page);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await page.getByRole('button',{name:'Set up my schedule',exact:true}).first().click();
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('button',{name:'Continue',exact:true}).scrollIntoViewIfNeeded();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Show my shifts',exact:true}).scrollIntoViewIfNeeded();
+ await info.attach('small-setup-'+width,{body:await page.screenshot(),contentType:'image/png'});
+ await page.getByRole('button',{name:'Show my shifts',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('Changing the normal schedule affects future days while a single-day edit stays local',async({page},info)=>{
+ await page.clock.install({time:new Date('2026-10-22T10:00:00Z')});await page.goto('./?preview=demo&date=2026-10-22&layout=installed&roster=rotation');
+ const previous=await page.locator('[data-roster-date="2026-10-19"]').getAttribute('aria-label');
+ await page.locator('.mobile-nav').getByRole('button',{name:'Schedule',exact:true}).click();await page.getByRole('button',{name:'Edit schedule',exact:true}).click();await page.getByRole('button',{name:'Change from today onwards',exact:true}).click();
+ await page.locator('.sequence-day').first().click();await page.locator('.shift-palette').first().getByRole('button').filter({hasText:'Off'}).click();
+ await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Save schedule',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+ await page.locator('.mobile-nav').getByRole('button',{name:'Calendar',exact:true}).click();await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',previous!);await expect(page.locator('[data-roster-date="2026-10-22"]')).toHaveAttribute('aria-label',/Off/);
+ const next=await page.locator('[data-roster-date="2026-10-23"]').getAttribute('aria-label');
+ await page.getByRole('button',{name:'Add',exact:true}).filter({visible:true}).click();await page.getByRole('button',{name:'Shift',exact:true}).click();await expect(page.getByRole('dialog')).toContainText('Changes apply to this day only');await page.locator('.shift-palette').getByRole('button').filter({hasText:'Night'}).click();
+ await expect(page.locator('[data-roster-date="2026-10-22"]')).toHaveAttribute('aria-label',/Night/);await expect(page.locator('[data-roster-date="2026-10-23"]')).toHaveAttribute('aria-label',next!);
+ await info.attach('future-and-one-day-edits',{body:await page.screenshot(),contentType:'image/png'});
+});

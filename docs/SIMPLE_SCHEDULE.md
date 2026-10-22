@@ -63,3 +63,11 @@ reusable shifts, sequence duplication/removal, Add entry choices and safe stoppi
 The existing suite covers adjacent screens, separate leave/overtime/notes,
 calendar views, PWA/offline, auth and calendar sync. Never use real roster data for
 these checks. Physical iPhone safe areas, keyboard and VoiceOver need device QA.
+
+## Interaction references
+
+The [Work Shift Calendar store listing](https://play.google.com/store/apps/details?id=com.lrhsoft.shiftercalendar)
+emphasises selecting dates and acting on them directly; [MyShiftPlanner](https://myshiftplanner.com/)
+leads with everyday outcomes such as tracking shifts, calculating pay and sharing
+a calendar. These support calendar-first interaction and ordinary language,
+without adopting either product’s appearance or assets.
