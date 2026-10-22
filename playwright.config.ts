@@ -12,5 +12,5 @@ export default defineConfig({
   {name:browserName+'-iphone-portrait',use:{browserName:browserName as 'chromium'|'webkit',viewport:{width:440,height:956}}},
   {name:browserName+'-iphone-landscape',use:{browserName:browserName as 'chromium'|'webkit',viewport:{width:956,height:440}}}
  ]),
- webServer:{command:'pnpm start --host 127.0.0.1 --port 4173 --strictPort',url:'http://127.0.0.1:4173/Shiftly/',reuseExistingServer:!process.env.CI}
+ webServer:{command:'node tests/run-caldav.mjs tests/serve-mobile.mjs',url:'http://127.0.0.1:4173/Shiftly/',reuseExistingServer:!process.env.CI}
 });

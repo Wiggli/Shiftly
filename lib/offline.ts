@@ -2,3 +2,11 @@ function db(){return new Promise<IDBDatabase>((resolve,reject)=>{const request=i
 export async function cacheSet(key:string,value:any){const payload=structuredClone(value),database=await db();await new Promise<void>((resolve,reject)=>{const tx=database.transaction('cache','readwrite');tx.objectStore('cache').put(payload,key);tx.oncomplete=()=>{database.close();resolve();};const failed=()=>{database.close();reject(tx.error||new Error('The browser could not save this roster. Download a backup.'));};tx.onerror=failed;tx.onabort=failed;});}
 export async function cacheGet(key:string){const database=await db();return new Promise<any>((resolve,reject)=>{const tx=database.transaction('cache'),request=tx.objectStore('cache').get(key);let value:any;request.onsuccess=()=>{value=request.result;};tx.oncomplete=()=>{database.close();resolve(value);};const failed=()=>{database.close();reject(tx.error||new Error('The saved roster could not be read.'));};tx.onerror=failed;tx.onabort=failed;});}
 export async function cacheRemoveAccount(accountId:string){const database=await db();await new Promise<void>((resolve,reject)=>{const tx=database.transaction('cache','readwrite'),cursor=tx.objectStore('cache').openCursor();cursor.onsuccess=()=>{const row=cursor.result;if(row){if(typeof row.key==='string'&&row.key.startsWith(accountId+'_'))row.delete();row.continue();}};tx.oncomplete=()=>{database.close();resolve();};const failed=()=>{database.close();reject(tx.error||new Error('Local account data could not be removed.'));};tx.onerror=failed;tx.onabort=failed;});}
+
+// Only verified catalog responses can prune an account's downloaded schedules.
+export async function cachePruneSchedules(accountId:string,allowed:string[]){
+ const database=await db(),prefix=accountId+'_',keys=new Set(allowed.map(id=>prefix+id));
+ await new Promise<void>((resolve,reject)=>{const tx=database.transaction('cache','readwrite'),cursor=tx.objectStore('cache').openCursor();cursor.onsuccess=()=>{const row=cursor.result;if(!row)return;const key=String(row.key);if(key.startsWith(prefix)&&key!==prefix+'catalog'){
+  if(key===prefix+'last'){if(!keys.has(row.value))row.delete();}else if(!keys.has(key))row.delete();
+ }row.continue();};tx.oncomplete=()=>{database.close();resolve();};tx.onerror=tx.onabort=()=>{database.close();reject(tx.error);};});
+}

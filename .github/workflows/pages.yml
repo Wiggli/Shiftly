@@ -38,6 +38,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:caldav
+      - run: pnpm test:sharing
       - run: pnpm test:edit-sync
       - run: node tests/run-api.mjs
       - run: pnpm build

@@ -11,6 +11,7 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "test:caldav": "node tests/run-caldav.mjs",
+    "test:sharing": "node tests/run-caldav.mjs tests/sharing-live.mjs",
     "test:edit-sync": "node tests/run-caldav.mjs tests/edit-sync.cjs",
     "build:pages": "node scripts/build-pages.mjs",
     "build:backend": "node scripts/build-backend.mjs",

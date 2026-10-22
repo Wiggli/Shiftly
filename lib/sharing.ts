@@ -1,4 +1,5 @@
 import {calendarRosters} from './rosters';
+import {defaults} from './engine';
 
 export function sharingRoster(snapshot:any,id:string){
  const roster=calendarRosters(snapshot).find(r=>r.id===id&&!r.archived);
@@ -11,7 +12,7 @@ export function scopeSnapshot(snapshot:any,scope:string|null){
  const patterns=snapshot.patterns.filter((p:any)=>(p.rosterId||'main')===scope);
  const occurrences=snapshot.occurrences.filter((p:any)=>(p.rosterId||'main')===scope);
  const used=new Set([...patterns.flatMap((p:any)=>p.items),...occurrences.map((p:any)=>p.shiftId)]);
- const shifts=snapshot.shifts.filter((p:any)=>p.rosterId===scope||used.has(p.id));
+ const shifts=snapshot.shifts.filter((p:any)=>p.rosterId===scope||used.has(p.id)||!p.rosterId&&defaults.some(d=>d.id===p.id&&Object.keys(d).every(key=>(d as any)[key]===p[key])));
  const settings={...snapshot.calendar.settings};delete settings.overlayCalendar;
  if(settings.shiftOrder)settings.shiftOrder=settings.shiftOrder.filter((id:string)=>shifts.some((p:any)=>p.id===id));
  return {...snapshot,audit:(snapshot.audit||[]).map((a:any)=>({...a,summary:'Shared schedule updated'})),rosterScope:scope,calendar:{...snapshot.calendar,rosterScope:scope,settings},rosters:[roster],patterns,occurrences,shifts,events:snapshot.events.filter((p:any)=>(p.rosterId||'main')===scope)};

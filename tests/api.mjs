@@ -120,7 +120,7 @@ assert.equal((await req(stranger,'',{action:'invitationInfo',token:scopedToken})
 const info=await req(scopedUser,'',{action:'invitationInfo',token:scopedToken});assert.equal(info.status,200);assert.equal(info.data.rosterName,'Wife');assert.equal(info.data.wholeCalendar,false);
 assert.equal((await req(scopedUser,'',{action:'accept',token:scopedToken})).status,200);
 let scoped=(await req(scopedUser,'?id='+familyId)).data;
-assert.equal(scoped.rosterScope,'wife');assert.deepEqual(scoped.rosters.map(r=>r.id),['wife']);assert.equal(scoped.shifts.some(s=>s.id==='day'),false);assert.ok(!JSON.stringify(scoped).includes('UNSHARED SECRET'));assert.ok(!JSON.stringify(scoped).includes('DO NOT LEAK'));assert.equal(scoped.occurrences.some(o=>(o.rosterId||'main')==='main'),false);
+assert.equal(scoped.rosterScope,'wife');assert.deepEqual(scoped.rosters.map(r=>r.id),['wife']);assert.equal(scoped.shifts.some(s=>s.id==='day'),true);assert.ok(!JSON.stringify(scoped).includes('UNSHARED SECRET'));assert.ok(!JSON.stringify(scoped).includes('DO NOT LEAK'));assert.equal(scoped.occurrences.some(o=>(o.rosterId||'main')==='main'),false);
 async function scopedWrite(changes){const state=(await req(scopedUser,'?id='+familyId)).data;return req(scopedUser,'',{action:'mutate',calendarId:familyId,revision:state.calendar.revision,operationId:crypto.randomUUID(),changes});}
 assert.equal((await scopedWrite([{kind:'event',id:'outside-secret',remove:true}])).status,403);
 assert.equal((await scopedWrite([{kind:'event',id:'outside-secret',data:{id:'outside-secret',rosterId:'wife',date:'2026-11-11',title:'Moved',emoji:'X',time:'',notes:'',private:false,reminders:[]}}])).status,403);

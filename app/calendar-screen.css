@@ -288,3 +288,7 @@
 .setup-sequence .shift-chip.compact{padding-inline:3px;font-size:12px;gap:3px;max-width:100%}
 @media(max-width:380px){.setup-sequence.compact-sequence[data-weekly=true]{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .sheet .form-actions.setup-actions{bottom:0;margin-bottom:0;padding:12px 0 max(16px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}
+
+.schedule-target{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:10px 12px;margin:0 0 16px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--ink);font-size:14px}
+.schedule-target span{color:var(--muted);font-size:13px}.schedule-choice>span:nth-child(2){min-width:0;flex:1;display:grid;gap:4px}.schedule-choice strong,.schedule-choice small{overflow-wrap:anywhere}.schedule-choice small{font-size:13px;color:var(--muted)}
+.shared-schedule-bar{border-left:3px solid var(--accent)}
