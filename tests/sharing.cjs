@@ -34,3 +34,24 @@ test('Owner-aware naming never calls a received default roster My Schedule',()=>
  const choices=scheduleChoices([{id:'family',owner_name:'Maria Perez',role:'editor',rosters:[{id:'a',name:'Agency'},{id:'b',name:'Hospital'}]}]);
  assert.deepEqual(choices.map(c=>c.title),['Maria’s Schedule','Maria’s Schedule']);assert.deepEqual(choices.map(c=>c.detail),['Agency','Hospital']);assert.equal(choices[0].permission,'Can edit');
 });
+
+test('Authenticated live transport parses chunked grant messages and stops after revocation',async()=>{
+ const {AuthenticatedStream}=require('../lib/authenticated-stream.ts');let calls=0;const messages=[];
+ await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Stream did not deliver')),1000);
+  const stream=new AuthenticatedStream('/api/live',async()=>{calls++;const encoder=new TextEncoder();return new Response(new ReadableStream({start(controller){for(const chunk of ['data: {"revision":3,','"role":"editor"}\n\n','data: {"revoked":true}\n\n'])controller.enqueue(encoder.encode(chunk));controller.close();}}));});
+  stream.onmessage=event=>{const data=JSON.parse(event.data);messages.push(data);if(data.revoked){stream.close();clearTimeout(timer);resolve();}};
+ });
+ assert.equal(calls,1);assert.deepEqual(messages,[{revision:3,role:'editor'},{revoked:true}]);
+});
+test('A forbidden live reconnect signals revocation instead of retrying forever',async()=>{
+ const {AuthenticatedStream}=require('../lib/authenticated-stream.ts');let calls=0;
+ const message=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Missing revocation')),1000);const stream=new AuthenticatedStream('/api/live',async()=>{calls++;return new Response('',{status:403});});stream.onmessage=event=>{clearTimeout(timer);resolve(JSON.parse(event.data));};});
+ assert.deepEqual(message,{revoked:true});assert.equal(calls,1);
+});
+
+test('A guest or preview schedule is personal even when its legacy catalog has no role',()=>{
+ const Switcher=require('../app/ui/ScheduleSwitcher.tsx').default;
+ const state={calendar:{id:'guest',name:'My calendar'},role:'owner',calendars:[{id:'guest',name:'My calendar'}]};
+ const html=renderToStaticMarkup(React.createElement(Switcher,{s:state,catalog:state.calendars,rosters:[{id:'main',name:'My roster'}],active:'main',onClose:()=>{}}));
+ assert.ok(html.includes('My Schedule'));assert.ok(html.includes('Your schedule'));assert.ok(html.includes('No schedules have been shared with you yet.'));assert.ok(!html.includes('Shared by Schedule owner'));
+});

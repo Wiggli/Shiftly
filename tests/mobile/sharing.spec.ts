@@ -24,7 +24,13 @@ test('Shared schedules keep ownership, permissions, live records and revocation 
  await page.getByRole('button',{name:'Close',exact:true}).click();
  await edit('night');await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Night/,{timeout:15000});
  let state=await snapshot(andre);const member=state.members.find((m:any)=>m.email===maria.id+'@example.invalid');
- await api(andre,{action:'memberRole',calendarId:id,id:member.id,role:'editor'});
+ const ownerContext=await browser.newContext({viewport:page.viewportSize()!,isMobile:true,hasTouch:true,serviceWorkers:'block'}),ownerPage=await ownerContext.newPage();
+ await ownerPage.goto(new URL(open(andre).replace('./','/Shiftly/'),page.url()).href);await ownerPage.getByRole('button',{name:'Calendar menu',exact:true}).click();await ownerPage.getByRole('button',{name:'Share schedule',exact:true}).click();
+ await expect(ownerPage.getByRole('heading',{name:'Shared with',exact:true})).toBeVisible();
+ await ownerPage.getByLabel('Permission for '+maria.id+'@example.invalid',{exact:true}).scrollIntoViewIfNeeded();
+ await info.attach('owner-sharing-access',{body:await ownerPage.screenshot(),contentType:'image/png'});
+ await ownerPage.getByLabel('Permission for '+maria.id+'@example.invalid',{exact:true}).selectOption('editor');
+ await expect.poll(async()=> (await snapshot(andre)).members.find((m:any)=>m.id===member.id).role).toBe('editor');
  await expect(page.locator('.phone-sync-status')).toContainText('Can edit',{timeout:15000});
  await page.getByRole('button',{name:'Open selected date details',exact:true}).click();
  await expect(page.locator('.schedule-target')).toContainText('Andre’s Schedule');await expect(page.locator('.schedule-target')).toContainText('Can edit');
@@ -44,14 +50,37 @@ test('Shared schedules keep ownership, permissions, live records and revocation 
  await expect(johnPage.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Night/,{timeout:15000});
  await page.reload();await expect(name).toHaveText('Andre’s Schedule');
  await page.getByRole('button',{name:'Add',exact:true}).click();await expect(page.locator('.schedule-target')).toContainText('Andre’s Schedule');
- await api(andre,{action:'memberRole',calendarId:id,id:member.id,role:'viewer'});
+ await ownerPage.getByLabel('Permission for '+maria.id+'@example.invalid',{exact:true}).selectOption('viewer');
  await expect(page.locator('.phone-sync-status')).toContainText('View only',{timeout:15000});await expect(page.getByRole('dialog')).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Edit',exact:true})).toHaveCount(0);
  await info.attach('shared-schedule-view-only',{body:await page.screenshot(),contentType:'image/png'});
- await api(andre,{action:'revoke',calendarId:id,id:member.id});
+ ownerPage.once('dialog',dialog=>dialog.accept());await ownerPage.getByRole('button',{name:'Remove access',exact:true}).click();
  await expect(name).toHaveText('My Schedule',{timeout:20000});
  const cached=await page.evaluate(async(key)=>new Promise(resolve=>{const open=indexedDB.open('shiftly-v1');open.onsuccess=()=>{const db=open.result,tx=db.transaction('cache'),req=tx.objectStore('cache').get(key);req.onsuccess=()=>{resolve(req.result);db.close();};};}),maria.id+'_'+id);
  expect(cached).toBeFalsy();
  await name.click();await expect(page.getByRole('dialog')).toContainText('No schedules have been shared with you yet');
- await expect(johnPage.locator('.phone-roster')).toHaveText('Andre’s Schedule');await other.close();
+ await expect(johnPage.locator('.phone-roster')).toHaveText('Andre’s Schedule');await other.close();await ownerContext.close();
+});
+
+test('Offline edits cannot replay after a live permission downgrade',async({page,request},info)=>{
+ test.setTimeout(60000);
+ const stamp=crypto.randomUUID(),owner='offline-owner-'+stamp,editor='offline-editor-'+stamp;
+ const headers=(id:string)=>({'x-test-user-id':id,'x-test-user-email':id+'@example.invalid','x-test-user-name':id===owner?'Andre':'Maria'});
+ async function api(id:string,body?:any,path='/api/calendar'){const r=body?await request.post(path,{headers:headers(id),data:body}):await request.get(path,{headers:headers(id)});expect(r.ok()).toBe(true);return r.json();}
+ let state=await api(owner);const calendarId=state.calendar.id;
+ await api(owner,{action:'mutate',calendarId,revision:state.calendar.revision,operationId:crypto.randomUUID(),changes:[{kind:'occurrence',id:'2026-10-19',data:{id:'2026-10-19',date:'2026-10-19',shiftId:'day'}}]});
+ const invite=await api(owner,{action:'invite',calendarId,email:editor+'@example.invalid',role:'editor',rosterId:'main'});await api(editor,{action:'accept',token:invite.token});
+ await page.goto('./__test__/?user='+editor+'&name=Maria&date=2026-10-19');await page.locator('.phone-roster').click();await page.getByRole('dialog').getByRole('button').filter({hasText:'Andre’s Schedule'}).click();
+ await expect(page.locator('.phone-sync-status')).toContainText('Can edit');
+ await page.context().setOffline(true);await page.getByRole('button',{name:'Open selected date details',exact:true}).click();
+ await page.locator('.daily-duty-picker').getByRole('button').filter({hasText:'Night'}).click();
+ await expect(page.locator('.daily-duty-picker').getByRole('button').filter({hasText:'Night'})).toHaveAttribute('aria-pressed','true');
+ state=await api(owner,undefined,'/api/calendar?id='+calendarId);const member=state.members.find((m:any)=>m.email===editor+'@example.invalid');await api(owner,{action:'memberRole',calendarId,id:member.id,role:'viewer'});
+ await page.context().setOffline(false);await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await expect(page.locator('.phone-sync-status')).toContainText('View only',{timeout:20000});await expect(page.getByRole('dialog')).toHaveCount(0);
+ await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Day/);
+ expect((await api(owner,undefined,'/api/calendar?id='+calendarId)).occurrences[0].shiftId).toBe('day');
+ const saved=await page.evaluate(async(key)=>new Promise<any>(resolve=>{const open=indexedDB.open('shiftly-v1');open.onsuccess=()=>{const db=open.result,req=db.transaction('cache').objectStore('cache').get(key);req.onsuccess=()=>{resolve(req.result);db.close();};};}),editor+'_'+calendarId);
+ expect(saved.queue).toHaveLength(0);expect(saved.snapshot.role).toBe('viewer');expect(saved.rejectedDraft.occurrences[0].shiftId).toBe('night');
+ await info.attach('offline-permission-review',{body:await page.screenshot(),contentType:'image/png'});
 });
