@@ -66,3 +66,12 @@ test('A viewer can inspect a repeating schedule without opening editable fields'
  const html=renderToStaticMarkup(React.createElement(Details,{pattern:{name:'Usual work',items:['day','night','off'],start:'2026-11-01',repeat:0},s:{shifts:defaults},onClose:()=>{}}));
  assert.ok(html.includes('Repeats continuously'));assert.ok(html.includes('View only'));assert.ok(!/<(?:input|textarea|select)\b/.test(html));assert.ok(!html.includes('Show my shifts'));
 });
+
+test('Google sign-in retains the intended invitation without restoring expired or arbitrary URLs',()=>{
+ const {rememberInvitation,restoreInvitation}=require('../lib/invitation-navigation.ts');const values=new Map(),storage={getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};
+ const token='c1b6a134-a621-41fd-a02f-3cfc15b2b12a',second='13c45e62-3714-4b0b-a6fa-d64134f46658',root='https://wiggli.github.io/Shiftly/';
+ rememberInvitation(new URL(root+'?invite='+token),storage,1000);assert.equal(restoreInvitation(new URL(root),storage,2000),root+'?invite='+token);assert.equal(values.size,0);
+ rememberInvitation(new URL(root+'?invite='+token),storage,1000);assert.equal(restoreInvitation(new URL(root+'?invite='+second),storage,2000),root+'?invite='+second);
+ rememberInvitation(new URL(root+'?invite='+token),storage,1000);assert.equal(restoreInvitation(new URL(root),storage,1000+7*86400000),root);
+ rememberInvitation(new URL(root+'?invite=https://untrusted.invalid'),storage,1000);assert.equal(values.size,0);
+});
