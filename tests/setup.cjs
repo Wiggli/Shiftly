@@ -13,3 +13,20 @@ test('Rest before Off never makes Day Night Rest Rest',()=>{const shifts=[defaul
 test('Screenshot rhythm repeats the twelve-day sequence across months and years',()=>{const plan=planRotation('rotating','dnro-extra',defaults,'2026-11-11',100),s={...snapshot(plan.pattern),shifts:plan.shifts};assert.deepEqual(plan.pattern.items,['day','day','night','template-rest','off','day','night','template-rest','off','day','night','template-rest']);assert.equal(plan.pattern.items.length*plan.pattern.repeat,1200);for(const date of ['2026-11-11','2026-11-23','2026-12-05','2026-12-17','2026-12-29']){assert.equal(resolveShift(s,date).id,'day');assert.equal(resolveShift(s,addDays(date,1)).id,'day');assert.equal(resolveShift(s,addDays(date,2)).id,'night');}assert.equal(resolveShift(s,addDays(plan.pattern.start,1199)).id,'template-rest');assert.equal(resolveShift(s,addDays(plan.pattern.start,1200)),undefined);});
 test('Planning missing definitions is reversible and avoids archived ID collisions',()=>{const shifts=[defaults[0],defaults[1],{...defaults[2],id:'template-rest',archived:true}],before=JSON.stringify(shifts);const plan=planRotation('rotating','day-night',shifts,'2028-02-28',100);assert.equal(JSON.stringify(shifts),before);assert.equal(plan.shiftsToCreate.length,2);assert.deepEqual(plan.pattern.items,['day','night','template-rest-1','template-off']);for(const id of plan.pattern.items)assert.ok(plan.shifts.some(s=>s.id===id&&!s.archived));});
 test('Every familiar rhythm produces the advertised length and a valid sequence',()=>{for(const rhythm of familiarRhythms){const plan=planRotation(rhythm.style,rhythm.id,defaults,'2026-11-02',1);assert.equal(plan.pattern.items.length,rhythm.items.length);assert.ok(plan.pattern.items.every(id=>plan.shifts.some(s=>s.id===id)));}assert.throws(()=>setupRotation('rotating','unknown',defaults,'2026-11-01',1),/familiar rhythm/);});
+
+const {stopScheduleChanges,scheduleFromDate}=require('../lib/simple-schedule.ts');
+test('Stopping a schedule retains all historical duties and unrelated annotations',()=>{
+ const p={id:'p',name:'Work',items:['day','day','night','night','off','off'],start:'2026-10-01',repeat:0};
+ const before=snapshot(p);before.events=[{id:'leave',date:'2026-10-23',title:'Leave'}];before.occurrences=[{id:'manual',date:'2026-10-23',shiftId:'night'}];
+ const change=stopScheduleChanges(p,'2026-10-22')[0];assert.equal(change.remove,undefined);assert.equal(change.data.until,'2026-10-21');
+ const after={...before,patterns:[change.data]};
+ for(let i=0;i<21;i++){const d=addDays(p.start,i);assert.equal(resolveShift(after,d)?.id,resolveShift(before,d)?.id);}
+ assert.equal(resolveShift(after,'2026-10-22'),undefined);assert.equal(resolveShift(after,'2026-10-23').id,'night');assert.deepEqual(after.events,before.events);
+ assert.equal(stopScheduleChanges({...p,start:'2026-11-01'},'2026-10-22')[0].remove,true);
+ assert.deepEqual(stopScheduleChanges({...p,until:'2026-10-10'},'2026-10-22'),[]);
+});
+test('Changing future repeating days keeps the current sequence position and finite end',()=>{
+ const p={id:'p',name:'Work',items:['day','night','off'],start:'2026-10-01',repeat:10};
+ const next=scheduleFromDate(p,'2026-10-05','new');assert.deepEqual(next.items,['night','off','day']);assert.equal(next.start,'2026-10-05');assert.equal(next.until,'2026-10-30');assert.equal(next.splitFromPatternId,'p');assert.equal(p.start,'2026-10-01');
+ assert.throws(()=>scheduleFromDate(p,'2026-11-01','new'),/finished/);
+});

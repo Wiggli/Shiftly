@@ -59,13 +59,13 @@ test('Linked patterns show cycle status, preserve manual duties and explain an e
  await page.getByRole('button',{name:'Paint Off',exact:true}).click();await page.locator('[data-roster-date="2026-10-19"]').click();
  await page.locator('.phone-edit-bar').getByRole('button',{name:'Done',exact:true}).click();
  await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Off/);
- await page.locator('.mobile-nav').getByRole('button',{name:'Patterns',exact:true}).click();
+ await page.locator('.mobile-nav').getByRole('button',{name:'Schedule',exact:true}).click();
  await expect(page.locator('.pattern-state')).toHaveText('Active today');
  await expect(page.locator('.pattern-cycle-position')).toContainText('Next cycle');
  await inspectSurface(page,info,'pattern-status');
- await page.getByRole('button',{name:'Edit pattern',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('button',{name:'Edit schedule',exact:true}).click();await page.getByText('More options',{exact:true}).click();await page.getByRole('button',{name:'Edit the original schedule',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByLabel('Repeat',{exact:true}).selectOption('until');await page.getByLabel('End date',{exact:true}).fill('2026-10-19');
- await page.getByRole('button',{name:'Apply pattern',exact:true}).click();
+ await page.getByRole('button',{name:'Save schedule',exact:true}).click();
  await expect(page.locator('.pattern-state')).toHaveText('Finished');await expect(page.locator('.toast')).toHaveText('Pattern updated');await inspectSurface(page,info,'pattern-finished');
  await page.locator('.mobile-nav').getByRole('button',{name:'Calendar',exact:true}).click();
  await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Off/);
@@ -172,22 +172,22 @@ for(const theme of ['light','dark']){
 test('empty and read-only calendars keep navigation and safe actions clear',async({page},info)=>{
  await openSample(page,'light','empty');await page.locator('.mobile-nav').getByRole('button',{name:'Today',exact:true}).click();
  await expect(page.getByRole('heading',{name:'No shift planned today'})).toBeVisible();await inspectSurface(page,info,'empty-today');
- await page.locator('.mobile-nav').getByRole('button',{name:'Patterns',exact:true}).click();
- await expect(page.getByRole('heading',{name:'Start a repeating rotation'})).toBeVisible();await inspectSurface(page,info,'empty-patterns');
+ await page.locator('.mobile-nav').getByRole('button',{name:'Schedule',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Set up your work schedule'})).toBeVisible();await inspectSurface(page,info,'empty-patterns');
  await openSample(page,'dark','viewer');await expect(page.getByRole('button',{name:'Edit',exact:true})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Add note',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'Open selected date details',exact:true}).click();await inspectSurface(page,info,'read-only-day');
 });
 
 test('pattern builder, event editor, shift editor and onboarding work through complete steps',async({page},info)=>{
- await openSample(page);await page.locator('.mobile-nav').getByRole('button',{name:'Patterns',exact:true}).click();
- await page.getByRole('button',{name:'New pattern',exact:true}).click();await page.getByRole('button',{name:'Build my own pattern',exact:true}).click();
+ await openSample(page);await page.locator('.mobile-nav').getByRole('button',{name:'Schedule',exact:true}).click();
+ await page.getByRole('button',{name:'Add repeating schedule',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByLabel('Start with an example').selectOption('custom');
  await page.getByRole('button',{name:'Continue',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Add at least one day');
  for(const name of ['Day','Night','Rest','Off'])await page.locator('.shift-palette').first().getByRole('button').filter({hasText:name}).first().click();
  await expect(page.locator('.sequence-day')).toHaveCount(4);await expect(page.getByRole('alert')).toHaveCount(0);await inspectSurface(page,info,'pattern-sequence');
- await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByLabel('Pattern name').fill('Sample four-day rotation');
- await inspectSurface(page,info,'pattern-dates');await page.getByRole('button',{name:'Apply pattern',exact:true}).click();
- await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByText('Sample four-day rotation',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await inspectSurface(page,info,'pattern-dates');await page.getByRole('button',{name:'Show my shifts',exact:true}).click();
+ await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.locator('.toast')).toContainText('Your schedule is ready');
  await openSample(page);await page.getByRole('button',{name:'Add overtime',exact:true}).click();await page.getByRole('button',{name:'More options',exact:true}).click();
  await inspectSurface(page,info,'event-editor');await page.locator('summary').filter({hasText:'More options · privacy'}).click();await inspectSurface(page,info,'event-options');
  await openSample(page);await more(page);await page.getByRole('button',{name:'Settings Appearance and shift types'}).click();

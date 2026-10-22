@@ -27,7 +27,7 @@ for(const layout of ['installed','browser']){
   const calendar=await page.locator('.calendar').boundingBox(),nav=await page.locator('.mobile-nav').boundingBox();
   expect(calendar!.y+calendar!.height).toBeLessThan(nav!.y);
   await info.attach('six-week-calendar',{body:await page.screenshot(),contentType:'image/png'});
-  for(const tab of ['Today','Patterns']){
+  for(const tab of ['Today','Schedule']){
    await page.locator('.mobile-nav').getByRole('button',{name:tab,exact:true}).click();
    await expectPhoneFrame(page);
    await expect(page.getByRole('heading',{name:tab,exact:true})).toBeVisible();
