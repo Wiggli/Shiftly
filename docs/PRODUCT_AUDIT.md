@@ -77,3 +77,20 @@ before publication. Local test browsers could not be downloaded in this runtime,
 and its separate browser cannot reach the local preview server. Do not describe
 these environment limitations as passed phone checks. Physical iPhone keyboard,
 Safari chrome, safe areas and VoiceOver remain device checks.
+
+Phone evidence: [CI run 39759406269](https://github.com/Wiggli/Shiftly/actions/runs/39759406269)
+passed all backend/build/PWA/security gates and 140/148 phone checks, including
+all new setup, custom shift, future edit, individual edit, small-phone and
+history-preserving stop cases. The eight failed checks repeated two findings
+across engines/orientations: an old empty-sequence warning did not clear when a
+day was added, and an existing test selected two different More options labels.
+The warning now clears on correcting the sequence; the test now scopes its
+selection to the active schedule sheet. Portrait/landscape artifacts were
+inspected for Calendar, empty setup, sequence/date steps, completed DDNN OO,
+small phones, neighbouring More/settings and light/dark surfaces. This review
+also made the six-day sequence fit one row on the main phone size and reused
+the sticky form action area so Continue stays visible in taller setup forms.
+
+Final CI, merge and live-release evidence is maintained in
+[PR #9](https://github.com/Wiggli/Shiftly/pull/9). Passing browser tests does not
+certify physical iPhone safe areas, keyboard behaviour, Safari chrome or VoiceOver.

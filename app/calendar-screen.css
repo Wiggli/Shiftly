@@ -282,3 +282,9 @@
 .calendar-screen .phone-calendar-toolbar .phone-add-button{background:var(--accent);color:#fff;padding-inline:10px;border-radius:12px}
 @media(max-width:380px){.calendar-screen .phone-calendar-toolbar .phone-summary{display:none}}
 .calendar-screen .calendar-main:has(.schedule-empty-peek) .phone-calendar-toolbar .phone-add-button{background:var(--control-bg);color:var(--accent)}
+.setup-sequence.compact-sequence{display:grid;grid-template-columns:repeat(auto-fit,minmax(54px,1fr));align-items:stretch}
+.setup-sequence.compact-sequence[data-weekly=true]{grid-template-columns:repeat(7,minmax(0,1fr))}
+.setup-sequence.compact-sequence .sequence-day{min-width:0;width:auto;padding-inline:3px}
+.setup-sequence .shift-chip.compact{padding-inline:3px;font-size:12px;gap:3px;max-width:100%}
+@media(max-width:380px){.setup-sequence.compact-sequence[data-weekly=true]{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sheet .form-actions.setup-actions{bottom:0;margin-bottom:0;padding:12px 0 max(16px,var(--safe-bottom,env(safe-area-inset-bottom,0px)))}

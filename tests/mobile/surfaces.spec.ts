@@ -63,7 +63,7 @@ test('Linked patterns show cycle status, preserve manual duties and explain an e
  await expect(page.locator('.pattern-state')).toHaveText('Active today');
  await expect(page.locator('.pattern-cycle-position')).toContainText('Next cycle');
  await inspectSurface(page,info,'pattern-status');
- await page.getByRole('button',{name:'Edit schedule',exact:true}).click();await page.getByText('More options',{exact:true}).click();await page.getByRole('button',{name:'Edit the original schedule',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('button',{name:'Edit schedule',exact:true}).click();await page.getByRole('dialog',{name:'Change my schedule'}).getByText('More options',{exact:true}).click();await page.getByRole('button',{name:'Edit the original schedule',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByLabel('Repeat',{exact:true}).selectOption('until');await page.getByLabel('End date',{exact:true}).fill('2026-10-19');
  await page.getByRole('button',{name:'Save schedule',exact:true}).click();
  await expect(page.locator('.pattern-state')).toHaveText('Finished');await expect(page.locator('.toast')).toHaveText('Schedule updated');await inspectSurface(page,info,'pattern-finished');

@@ -4,7 +4,7 @@ async function empty(page:any){await page.clock.install({time:new Date('2026-10-
 for(const kind of ['rotating','fixed','manual'])test('Skipping the tutorial still supports '+kind+' setup',async({page},info)=>{
  await empty(page);await info.attach('empty-calendar',{body:await page.screenshot(),contentType:'image/png'});
  await page.getByRole('button',{name:'Set up my schedule',exact:true}).first().click();
- await expect(page.getByLabel('Roster name')).toHaveCount(0);
+ await expect(page.getByLabel('Roster name')).toHaveCount(0);await info.attach('choose-work-style',{body:await page.screenshot(),contentType:'image/png'});
  if(kind==='manual'){
   await page.getByRole('button',{name:'I’ll add shifts myself',exact:false}).click();await page.getByRole('button',{name:'Open my calendar',exact:true}).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);await page.getByRole('button',{name:'Add',exact:true}).filter({visible:true}).click();
@@ -14,6 +14,7 @@ for(const kind of ['rotating','fixed','manual'])test('Skipping the tutorial stil
  }else{
   if(kind==='fixed')await page.getByRole('button',{name:'Same shifts every week',exact:false}).click();
   await page.getByRole('button',{name:'Continue',exact:true}).click();await expect(page.locator('.sequence-day')).toHaveCount(kind==='fixed'?7:6);
+  await expect(page.getByRole('button',{name:'Continue',exact:true})).toBeInViewport({ratio:1});
   await info.attach('choose-shifts',{body:await page.screenshot(),contentType:'image/png'});
   await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByLabel('Start date',{exact:true}).fill('2026-10-22');
   await info.attach('start-date',{body:await page.screenshot(),contentType:'image/png'});await page.getByRole('button',{name:'Show my shifts',exact:true}).click();
