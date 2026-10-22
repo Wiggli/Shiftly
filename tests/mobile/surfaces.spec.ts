@@ -146,7 +146,7 @@ for(const theme of ['light','dark']){
  test(theme+' account, sharing, app help and QR stay within their sheets',async({page},info)=>{
   await openSample(page,theme);await page.getByRole('button',{name:'Account and sign in',exact:true}).click();
   await inspectSurface(page,info,'account-'+theme);
-  await openSample(page,theme);await more(page);await page.getByRole('button',{name:'Sharing Choose who can see or edit your roster'}).click();
+  await openSample(page,theme);await more(page);await page.getByRole('button',{name:'Sharing Choose who can see or edit your schedule'}).click();
   await expect(page.getByRole('dialog')).toContainText('Sign in with Google');await inspectSurface(page,info,'sharing-'+theme);
   await openSample(page,theme);await more(page);await page.getByRole('button',{name:'App & help Install, update or read the guide'}).click();
   await inspectSurface(page,info,'app-help-'+theme);
