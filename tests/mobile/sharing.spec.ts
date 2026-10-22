@@ -20,6 +20,7 @@ test('Shared schedules keep ownership, permissions, live records and revocation 
  await expect(name).toHaveText('Andre’s Schedule');await expect(page.locator('.phone-sync-status')).toContainText('View only');
  await expect(page.getByRole('button',{name:'Edit',exact:true})).toHaveCount(0);
  await name.click();await expect(page.getByRole('dialog')).toContainText('Shared with me');await expect(page.getByRole('dialog')).toContainText('My Schedule');
+ const avatar=await page.locator('.schedule-choice>.avatar').first().boundingBox();expect(avatar!.width).toBeLessThanOrEqual(44);expect(Math.abs(avatar!.width-avatar!.height)).toBeLessThanOrEqual(1);
  await info.attach('shared-schedule-switcher',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
  await page.getByRole('button',{name:'Close',exact:true}).click();
  await edit('night');await expect(page.locator('[data-roster-date="2026-10-19"]')).toHaveAttribute('aria-label',/Night/,{timeout:15000});
@@ -83,4 +84,5 @@ test('Offline edits cannot replay after a live permission downgrade',async({page
  const saved=await page.evaluate(async(key)=>new Promise<any>(resolve=>{const open=indexedDB.open('shiftly-v1');open.onsuccess=()=>{const db=open.result,req=db.transaction('cache').objectStore('cache').get(key);req.onsuccess=()=>{resolve(req.result);db.close();};};}),editor+'_'+calendarId);
  expect(saved.queue).toHaveLength(0);expect(saved.snapshot.role).toBe('viewer');expect(saved.rejectedDraft.occurrences[0].shiftId).toBe('night');
  await info.attach('offline-permission-review',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'Back up my changes & load latest',exact:true}).click();await download;await expect(page.getByRole('dialog',{name:'Review unsent changes',exact:true})).toHaveCount(0);
 });
