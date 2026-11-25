@@ -7,8 +7,9 @@ import ShiftEditor from './ShiftEditor';
 import {patternOverrides} from '../../lib/roster-edit';
 import {Sheet,Field,ShiftChip,fmt,uid} from './primitives';
 export default function PatternEditor({value,s,date,onClose,onBack,onSave,onShiftSave}:any){
- const [p,setP]=useState<Pattern>(value||{id:uid(),name:'My repeating schedule',items:[],start:date,repeat:0});
- const [step,setStep]=useState(value?.reviewSelection?2:1),[mode,setMode]=useState(value?.until?'until':!value||value?.repeat===0?'forever':'times'),[error,setError]=useState(''),[replace,setReplace]=useState(false),[busy,setBusy]=useState(false),[drag,setDrag]=useState(-1);
+ const {reviewSelection,...initialPattern}=value||{};
+ const [p,setP]=useState<Pattern>(value?initialPattern:{id:uid(),name:'My repeating schedule',items:[],start:date,repeat:0});
+ const [step,setStep]=useState(reviewSelection?2:1),[mode,setMode]=useState(value?.until?'until':!value||value?.repeat===0?'forever':'times'),[error,setError]=useState(''),[replace,setReplace]=useState(false),[busy,setBusy]=useState(false),[drag,setDrag]=useState(-1);
  const [editingShift,setEditingShift]=useState<Shift|null|undefined>(undefined),[selectedDay,setSelectedDay]=useState<number|null>(null);
  const available=shiftChoices(s),writable=s.role!=='viewer';
  function pick(id:string){setError('');if(selectedDay!==null){const items=[...p.items];items[selectedDay]=id;setP({...p,items});setSelectedDay(null);}else if(p.items.length<366)setP({...p,items:[...p.items,id]});}
