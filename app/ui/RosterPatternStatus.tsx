@@ -11,7 +11,7 @@ export default function RosterPatternStatus({snapshot,writable,onCreate,onUseDat
   <h2>{dates.size?'Your shifts are on the calendar':writable?'Set up your work schedule':'No repeating schedule'}</h2>
   <p>{dates.size?`${dates.size} shifts were added individually. You can keep adding days, or set up your usual schedule.`:writable?'Choose how you normally work and Shiftly will fill the calendar for you.':'The owner has not added a repeating schedule. Check the calendar for individual shifts.'}</p>
   {dates.size>0&&<p className="pattern-explanation">A repeating schedule fills your usual shifts automatically. Individual day changes stay in place.</p>}
-  {writable&&<div className="pattern-status-actions">{dates.size>0&&<button className="quiet-button" onClick={onUseDates}>Use existing dates</button>}<button className={dates.size?'text-button':'quiet-button'} onClick={onCreate}>{dates.size?'Set up my schedule':'Set up my schedule'}</button></div>}
-  {writable&&dates.size>0&&<small>Select one complete cycle, then choose Repeat in the editing tools.</small>}
+  {writable&&<div className="pattern-status-actions">{dates.size>0&&<button className="quiet-button" onClick={onUseDates}>Continue existing roster</button>}<button className={dates.size?'text-button':'quiet-button'} onClick={onCreate}>{dates.size?'Set up my schedule':'Set up my schedule'}</button></div>}
+  {writable&&dates.size>0&&<small>Check the suggested cycle or select your last complete cycle, then tap Repeat.</small>}
  </article>;
 }

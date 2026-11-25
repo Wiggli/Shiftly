@@ -99,7 +99,7 @@ test('Patterns distinguishes dated duties from an empty roster without guessing 
  const Status=require('../app/ui/RosterPatternStatus.tsx').default;
  const snapshot={shifts:defaults,patterns:[],occurrences:[{date:'2026-10-01',shiftId:'day'},{date:'2026-10-02',shiftId:'night'},{date:'2026-10-03',shiftId:'off',deleted:true},{date:'2026-10-04',shiftId:'missing'}]};
  const html=renderToStaticMarkup(React.createElement(Status,{snapshot,writable:true,onCreate:noop,onUseDates:noop}));
- assert.ok(html.includes('Your shifts are on the calendar'));assert.ok(html.includes('2 shifts were added individually'));assert.ok(html.includes('Use existing dates'));assert.ok(!html.includes('No repeating patterns yet'));
+ assert.ok(html.includes('Your shifts are on the calendar'));assert.ok(html.includes('2 shifts were added individually'));assert.ok(html.includes('Continue existing roster'));assert.ok(!html.includes('No repeating patterns yet'));
  const viewer=renderToStaticMarkup(React.createElement(Status,{snapshot,writable:false,onCreate:noop,onUseDates:noop}));assert.ok(!viewer.includes('<button'));
  const empty=renderToStaticMarkup(React.createElement(Status,{snapshot:{...snapshot,occurrences:[]},writable:true,onCreate:noop,onUseDates:noop}));assert.ok(empty.includes('Set up your work schedule'));
  const linked=renderToStaticMarkup(React.createElement(Status,{snapshot:{...snapshot,patterns:[{id:'p'}]},writable:true,onCreate:noop,onUseDates:noop}));assert.equal(linked,'');
