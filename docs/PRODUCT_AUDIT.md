@@ -102,3 +102,9 @@ certify physical iPhone safe areas, keyboard behaviour, Safari chrome or VoiceOv
 - Whole-space editors no longer gain schedule archive/identity or restore-backup rights. New owner metadata is additive; existing IDs, members, schedule records, private notes and Apple Calendar paths are preserved. See SHARED_SCHEDULES.md for the authorization and migration model.
 - Live messages include role/scope and explicit revocation. Catalog reconciliation runs even with pending edits, prunes revoked or narrowed downloads, and returns recipients to their own schedule after revocation. Permission changes preserve an authorized backup draft where appropriate rather than replaying a stale grant. Offline devices reconcile when they reconnect; remote erasure while disconnected cannot be guaranteed.
 - Added disposable three-account API and multi-context browser coverage. Local validation passed: 136 application checks, typecheck, production/offline build, three-user sharing, API/privacy, CalDAV, edit-sync and 12 Pages/session checks. Publication requires the full CI phone suite, screenshot inspection and matching live release verification. Physical device validation remains outstanding.
+
+
+## Existing roster continuation
+- Expose Repeat on the phone selection bar; Copy remains in editing tools.
+- Jump to the latest planned date, suggest a cycle only when two consecutive complete cycles agree, and review before saving. Default to the end of the third calendar month from the start date.
+- Build, mobile layout, sync and release checks pending; no production roster changes made.
